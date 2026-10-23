@@ -8,12 +8,12 @@
 <title>Organic Atlas — 化合物</title>
 <link rel="preconnect" href="https://pubchem.ncbi.nlm.nih.gov">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="stylesheet" href="styles.css?v=20261024-3d-isomers4">
+<link rel="stylesheet" href="styles.css?v=20261024-unknown-search1">
 <script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js" defer></script>
-<script src="chemistry-data.js?v=20261024-3d-isomers4" defer></script>
-<script src="script.js?v=20261024-3d-isomers5" defer></script>
+<script src="chemistry-data.js?v=20261024-unknown-search1" defer></script>
+<script src="script.js?v=20261024-unknown-search1" defer></script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"}}</script>
-<script type="module" src="molecule3d.js?v=20261024-3d-isomers4"></script>
+<script type="module" src="molecule3d.js?v=20261024-unknown-search1"></script>
 </head>
 <body>
 <header class="site-header">
@@ -25,14 +25,16 @@
 </header>
 
 <main class="page-shell">
-  <form class="search-bar" id="search-form" role="search">
-    <svg class="search-icon" viewBox="0 0 24 24" width="21" height="21" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-    <label class="visually-hidden" for="compound-search">化合物名で検索</label>
-    <input id="compound-search" name="compound" list="compound-options" autocomplete="off" spellcheck="false" placeholder="化合物名を入力  /  Search a compound">
-    <datalist id="compound-options"></datalist>
-    <button class="clear-search" type="button" id="clear-search" aria-label="検索欄をクリア">×</button>
-    <button class="search-submit" id="search-button" type="submit" aria-label="検索"><span>検索</span><span aria-hidden="true">↵</span></button>
-  </form>
+  <div class="search-container" id="search-container">
+    <form class="search-bar" id="search-form" role="search" autocomplete="off">
+      <svg class="search-icon" viewBox="0 0 24 24" width="21" height="21" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <label class="visually-hidden" for="compound-search">化合物名・化学キーワードで検索</label>
+      <input id="compound-search" name="compound" autocomplete="off" spellcheck="false" aria-autocomplete="list" aria-controls="compound-suggestions-list" aria-expanded="false" placeholder="化合物名・キーワードを入力 / Search">
+      <button class="clear-search" type="button" id="clear-search" aria-label="検索欄をクリア">×</button>
+      <button class="search-submit" id="search-button" type="submit" aria-label="検索"><span>検索</span><span aria-hidden="true">↵</span></button>
+    </form>
+    <div class="compound-suggestions" id="compound-suggestions-list" role="listbox" aria-label="化合物候補" hidden></div>
+  </div>
   <div class="search-meta">
     <span class="search-status" id="search-status" aria-live="polite"></span>
     <span class="local-index">LOCAL INDEX <b id="local-count">15</b></span>
@@ -52,6 +54,7 @@
         <div class="identity-rule"></div>
         <div class="facts-grid" id="compound-facts"></div>
         <a class="pubchem-link" id="pubchem-link" href="https://pubchem.ncbi.nlm.nih.gov/" target="_blank" rel="noopener noreferrer">PubChem <span aria-hidden="true">↗</span></a>
+        <div class="registration-note" id="registration-note" hidden><strong>Organic Atlas 未登録</strong><span>この化合物はPubChemから取得した情報です。登録済みの反応経路には含めていません。</span></div>
       </div>
     </div>
     <section class="isomer-section" id="isomer-section" hidden aria-labelledby="isomer-heading">
@@ -126,5 +129,16 @@
     <button class="reaction-details-button" type="button" id="reaction-detail-done">閉じる</button>
   </div>
 </dialog>
+<footer class="site-update-footer" aria-label="更新日時と更新履歴">
+  <div class="site-update-heading"><strong>更新情報</strong><span>最終更新：2026-10-24</span></div>
+  <details class="site-update-history">
+    <summary>更新履歴</summary>
+    <ul>
+      <li><time datetime="2026-10-24">2026-10-24</time> 未登録化合物の候補検索・構造表示、3D結合表示の改善</li>
+      <li><time datetime="2026-10-24">2026-10-24</time> 3D分子模型と異性体比較機能を追加</li>
+      <li><time datetime="2026-10-24">2026-10-24</time> 芳香族化合物・脂肪酸・油脂のデータを拡張</li>
+    </ul>
+  </details>
+</footer>
 </body>
 </html>
