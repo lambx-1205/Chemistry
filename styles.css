@@ -387,3 +387,17 @@ a{color:inherit}
   .reaction-detail-explanation { grid-column: auto; }
   .reaction-dialog-footer { padding: 12px 15px 16px; align-items: flex-end; }
 }
+
+
+/* Match the compound-list thumbnail layout for previous/next reaction compounds. */
+.reaction-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important;}
+.reaction-card{min-height:0!important;padding:0 0 14px!important;overflow:hidden;}
+.reaction-card-top{padding:12px 13px 0;}
+.reaction-card .reaction-structure{height:128px!important;min-height:128px!important;margin:9px 0 0!important;padding:8px!important;border-radius:0!important;border-bottom:1px solid #eff1ec!important;background:#fafbf8!important;}
+.reaction-card .small-structure{width:100%!important;height:100%!important;min-height:0!important;}
+.reaction-card .reaction-compound-name,.reaction-card .reaction-compound-formula,.reaction-card .reaction-route,.reaction-card .reaction-condition,.reaction-card .reaction-card-actions{margin-left:12px;margin-right:12px;}
+.reaction-card .reaction-compound-name{margin-top:11px;font-size:14px;}
+.reaction-card .reaction-route{margin-top:12px;padding-top:10px;}
+.reaction-card .reaction-condition{padding-top:10px;}
+.reaction-card .reaction-card-actions{margin-top:12px;}
+@media(max-width:620px){.reaction-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;}.reaction-card .reaction-structure{height:110px!important;min-height:110px!important;padding:5px!important;}.reaction-card .reaction-compound-name{font-size:12px;}.reaction-card .reaction-card-top{padding:10px 9px 0;}.reaction-card .reaction-compound-name,.reaction-card .reaction-compound-formula,.reaction-card .reaction-route,.reaction-card .reaction-condition,.reaction-card .reaction-card-actions{margin-left:9px;margin-right:9px;}}
