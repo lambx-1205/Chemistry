@@ -194,13 +194,13 @@ function renderSDF(sdf, host, initialMode = "spacefill") {
         const normalBase = Math.abs(direction.y) < 0.86 ? new THREE.Vector3(0, 1, 0) : new THREE.Vector3(1, 0, 0);
         const perpendicular = new THREE.Vector3().crossVectors(direction, normalBase).normalize();
         const order = Math.max(1, Math.min(3, bond.order || 1));
-        const spread = 0.105;
+        const spread = 0.14;
         for (let k = 0; k < order; k++) {
           const offset = (k - (order - 1) / 2) * spread;
           const start = a.clone().addScaledVector(perpendicular, offset);
           const end = b.clone().addScaledVector(perpendicular, offset);
           const midpoint = start.clone().add(end).multiplyScalar(0.5);
-          const cylinder = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.075, length, 12), bondMaterial);
+          const cylinder = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, length, 12), bondMaterial);
           cylinder.position.copy(midpoint);
           cylinder.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), end.clone().sub(start).normalize());
           modelRoot.add(cylinder);
