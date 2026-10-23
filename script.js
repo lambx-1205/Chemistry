@@ -78,31 +78,71 @@ function fillSuggestions(){
  });
  suggestions.innerHTML=values.map(function(v){return '<option value="'+esc(v)+'"></option>';}).join("");
 }
+var rdkitInstance=null;
+var rdkitInitPromise=null;
+function getRDKit(){
+ if(rdkitInstance)return Promise.resolve(rdkitInstance);
+ if(!window.initRDKitModule)return Promise.reject(new Error("RDKitのライブラリを読み込めません"));
+ if(!rdkitInitPromise){
+  rdkitInitPromise=window.initRDKitModule({
+   locateFile:function(file){return "https://unpkg.com/@rdkit/rdkit/dist/"+file;}
+  }).then(function(module){
+   rdkitInstance=module;
+   return module;
+  }).catch(function(error){
+   rdkitInitPromise=null;
+   throw error;
+  });
+ }
+ return rdkitInitPromise;
+}
 function drawStructure(target,smilesValue,width,height,key){
  if(!target)return;
- target.innerHTML="";
- target.dataset.structureKey=key||"";
+ var renderKey=key||"";
+ target.dataset.structureKey=renderKey;
+ target.innerHTML='<span class="structure-loading">構造式を描画中…</span>';
  if(!smilesValue){
-  target.innerHTML='<text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" fill="#8a958c" font-size="11">構造式なし</text>';
+  target.innerHTML='<span class="structure-error">構造式データなし</span>';
   return;
  }
- if(!window.SmilesDrawer){
-  target.innerHTML='<text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" fill="#8a958c" font-size="10">構造式ライブラリを読み込めません</text>';
-  return;
- }
- try{
-  var drawer=new SmilesDrawer.SmiDrawer({
-   width:width,height:height,padding:Math.max(4,Math.round(width*.025)),
-   bondLength:width>200?24:18,bondThickness:1.4,bondSpacing:3,
-   fontSizeLarge:9,fontSizeSmall:5,compactDrawing:true,
-   explicitHydrogens:false,terminalCarbons:false
-  });
-  drawer.draw(smilesValue,target,"light",function(){},function(){
-   target.innerHTML='<text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" fill="#8a958c" font-size="10">構造式を表示できません</text>';
-  });
- }catch(err){
-  target.innerHTML='<text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" fill="#8a958c" font-size="10">構造式を表示できません</text>';
- }
+ getRDKit().then(function(RDKit){
+  if(!target.isConnected||target.dataset.structureKey!==renderKey)return;
+  var mol=null;
+  try{
+   mol=RDKit.get_mol(smilesValue);
+   if(!mol)throw new Error("SMILESを解釈できません");
+   var details={
+    width:width,
+    height:height,
+    padding:8,
+    bondLineWidth:1.6,
+    explicitMethyl:true,
+    clearBackground:true,
+    centreMoleculesBeforeDrawing:true
+   };
+   var markup=mol.get_svg(JSON.stringify(details));
+   if(!markup)throw new Error("SVGの生成に失敗しました");
+   if(target.dataset.structureKey!==renderKey)return;
+   target.innerHTML=markup;
+   var svg=target.querySelector("svg");
+   if(svg){
+    svg.setAttribute("role","img");
+    svg.setAttribute("aria-label",target.getAttribute("aria-label")||"化学構造式");
+    svg.setAttribute("preserveAspectRatio","xMidYMid meet");
+    svg.style.width="100%";
+    svg.style.height="100%";
+    svg.style.display="block";
+   }
+  }catch(error){
+   if(target.dataset.structureKey===renderKey)target.innerHTML='<span class="structure-error">構造式を生成できません</span>';
+   console.warn("RDKit structure rendering failed:",error&&error.message?error.message:error);
+  }finally{
+   if(mol&&typeof mol.delete==="function")mol.delete();
+  }
+ }).catch(function(error){
+  if(target.dataset.structureKey===renderKey)target.innerHTML='<span class="structure-error">構造式ライブラリを読み込めません</span>';
+  console.error("RDKit failed to initialize:",error&&error.message?error.message:error);
+ });
 }
 function renderSearchResults(){
  var optionCount=compounds.length;
@@ -144,7 +184,7 @@ function renderOneStep(c){
   if(!target)return "";
   return '<button class="reaction-card" type="button" data-compound="'+esc(target.id)+'">'+
    '<span class="reaction-card-top"><span class="reaction-kind">'+esc(e.name)+'</span><span class="reaction-arrow" aria-hidden="true">↗</span></span>'+
-   '<span class="reaction-structure"><svg class="small-structure" data-small-structure="'+esc(target.id)+'" viewBox="0 0 220 108" role="img" aria-label="'+esc(target.name)+'の構造式"></svg></span>'+
+   '<span class="reaction-structure"><span class="small-structure" data-small-structure="'+esc(target.id)+'" role="img" aria-label="'+esc(target.name)+'の構造式"></span></span>'+
    '<span class="reaction-compound-name">'+esc(target.name)+'</span>'+
    '<span class="reaction-compound-formula">'+formulaHtml(target.pubchemFormula||target.formula)+'</span>'+
    '<span class="reaction-condition">'+esc(e.condition||"")+'</span>'+
