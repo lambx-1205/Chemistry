@@ -401,3 +401,61 @@ a{color:inherit}
 .reaction-card .reaction-condition{padding-top:10px;}
 .reaction-card .reaction-card-actions{margin-top:12px;}
 @media(max-width:620px){.reaction-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;}.reaction-card .reaction-structure{height:110px!important;min-height:110px!important;padding:5px!important;}.reaction-card .reaction-compound-name{font-size:12px;}.reaction-card .reaction-card-top{padding:10px 9px 0;}.reaction-card .reaction-compound-name,.reaction-card .reaction-compound-formula,.reaction-card .reaction-route,.reaction-card .reaction-condition,.reaction-card .reaction-card-actions{margin-left:9px;margin-right:9px;}}
+
+
+
+/* 3D molecule dialog */
+.structure-foot-actions{display:flex;align-items:center;gap:10px;}
+.molecule-3d-trigger{display:inline-flex;align-items:center;gap:6px;border:1px solid #d9e4d8;border-radius:8px;padding:7px 10px;background:#eef5ec;color:#315f46;font-size:10px;font-weight:800;white-space:nowrap;}
+.molecule-3d-trigger:hover{background:#e1eddf;border-color:#b9cfb7;}
+.molecule-3d-trigger:disabled{opacity:.5;cursor:not-allowed;}
+.molecule3d-dialog{width:min(850px,calc(100% - 24px));max-width:850px;max-height:92vh;overflow:auto;padding:0;border:1px solid #26313c;border-radius:19px;background:#0b1016;color:#f4f6f8;box-shadow:0 28px 100px rgba(0,0,0,.4);}
+.molecule3d-dialog::backdrop{background:rgba(10,15,20,.7);backdrop-filter:blur(5px);}
+.molecule3d-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:21px 23px 14px;border-bottom:1px solid #202a34;}
+.molecule3d-header .section-eyebrow{color:#8495a5;}
+.molecule3d-header h2{margin:4px 0 0;font-size:22px;line-height:1.3;letter-spacing:-.4px;}
+.molecule3d-toolbar{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:13px 20px 8px;}
+.molecule3d-mode{padding:7px 10px;border:1px solid #2c3945;border-radius:8px;background:#151d26;color:#b9c5d0;font-size:10px;font-weight:800;}
+.molecule3d-mode.is-active{background:#e6f0e4;border-color:#e6f0e4;color:#274c35;}
+.molecule3d-help{margin-left:auto;color:#8493a2;font-size:10px;}
+.molecule3d-stage{height:min(58vh,520px);min-height:310px;margin:6px 14px 0;overflow:hidden;border:1px solid #222c36;border-radius:13px;background:#05080c;}
+.molecule3d-stage canvas{display:block;width:100%;height:100%;outline:none;}
+.molecule3d-fallback{display:block;width:calc(100% - 28px);height:auto;max-height:min(58vh,520px);object-fit:contain;margin:6px 14px 0;border:1px solid #222c36;border-radius:13px;background:#05080c;}
+.molecule3d-status{min-height:22px;margin:11px 22px 5px;color:#a5b2bf;font-size:11px;line-height:1.65;}
+.molecule3d-status.error{color:#ffb9a9;}
+.molecule3d-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:8px;padding:13px 22px 18px;border-top:1px solid #202a34;color:#82909e;font-size:10px;}
+.molecule3d-footer a{color:#c0d8c0;text-decoration:none;font-weight:800;}
+.molecule3d-footer a:hover{text-decoration:underline;}
+/* Isomer groups distinguish connectivity from spatial configuration. */
+.isomer-section{margin-top:29px;}
+.isomer-group{padding:15px 0 16px;border-top:1px solid #e7ebe4;}
+.isomer-group-heading{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin-bottom:6px;}
+.isomer-relation-tag{display:inline-block;padding:4px 7px;border-radius:5px;background:#eaf1e8;color:#527458;font-size:9px;font-weight:850;}
+.isomer-group-heading h3{margin:0;color:#35453a;font-size:14px;font-weight:800;}
+.isomer-group-note{margin:0 0 12px;color:#859186;font-size:10px;line-height:1.7;}
+.isomer-card-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;}
+.isomer-card{display:flex;flex-direction:column;min-width:0;border:1px solid #e2e8df;border-radius:11px;overflow:hidden;background:#fff;color:var(--ink);text-align:left;padding:0;transition:border-color .15s,transform .15s;}
+.isomer-card:hover{border-color:#aac5a9;transform:translateY(-1px);}
+.isomer-card.is-current{border-color:#82a887;box-shadow:inset 0 0 0 1px #82a887;}
+.isomer-thumb{height:84px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fafbf8;border-bottom:1px solid #eff1ec;padding:5px;}
+.isomer-thumb svg{display:block;width:100%;height:100%;max-height:100%;}
+.isomer-thumb .structure-loading,.isomer-thumb .structure-error{font-size:8px;}
+.isomer-card-copy{padding:9px 10px 10px;min-width:0;}
+.isomer-card-name{display:block;font-size:11px;line-height:1.4;font-weight:800;overflow-wrap:anywhere;}
+.isomer-card-formula{display:block;margin-top:4px;color:#869286;font-size:10px;}
+.isomer-card-state{display:block;margin-top:6px;color:#6e8b72;font-size:8px;font-weight:800;}
+@media(max-width:620px){
+ .structure-foot{align-items:flex-start;flex-direction:column;gap:8px;}
+ .structure-foot-actions{width:100%;justify-content:space-between;}
+ .molecule3d-dialog{width:calc(100% - 16px);border-radius:14px;}
+ .molecule3d-header{padding:17px 15px 12px;}
+ .molecule3d-header h2{font-size:18px;}
+ .molecule3d-toolbar{padding:10px 12px 6px;}
+ .molecule3d-help{width:100%;margin-left:0;}
+ .molecule3d-stage{height:48vh;min-height:280px;margin:5px 8px 0;}
+ .molecule3d-fallback{width:calc(100% - 16px);max-height:48vh;margin:5px 8px 0;}
+ .molecule3d-footer{padding:12px 15px 15px;}
+ .isomer-card-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+ .isomer-thumb{height:82px;}
+ .isomer-card-copy{padding:8px;}
+}
