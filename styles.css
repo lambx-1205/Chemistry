@@ -175,3 +175,215 @@ a{color:inherit}
   animation: structure-pulse 1.1s ease-in-out infinite alternate;
 }
 @keyframes structure-pulse { to { opacity: .45; } }
+
+
+
+/* Previous/next reaction cards and the reaction-detail dialog. */
+.reaction-card {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e3e8e0;
+  border-radius: 14px;
+  background: #fff;
+  padding: 13px 14px 14px;
+  transition: transform .16s, border-color .16s, box-shadow .16s;
+}
+.reaction-card:hover {
+  transform: translateY(-2px);
+  border-color: #b9cdb8;
+  box-shadow: 0 10px 25px rgba(32,49,36,.065);
+}
+.reaction-neighbor-button {
+  width: 100%;
+  min-width: 0;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+.reaction-neighbor-button:focus-visible { outline-offset: 1px; }
+.reaction-route {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #eff1ec;
+  color: #637267;
+  font-size: 10px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.route-arrow { color: #719078; font-size: 14px; font-weight: 800; }
+.reaction-card .reaction-condition { margin-top: auto; }
+.reaction-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+.reaction-open-button,
+.reaction-details-button {
+  min-height: 32px;
+  border: 1px solid #dfe7de;
+  border-radius: 8px;
+  background: #f8faf7;
+  color: #4d6a54;
+  padding: 7px 9px;
+  font-size: 10px;
+  line-height: 1.3;
+  font-weight: 750;
+  text-align: center;
+}
+.reaction-open-button:hover,
+.reaction-details-button:hover {
+  background: #edf4eb;
+  border-color: #bfd1bc;
+}
+.reaction-details-button {
+  background: #315f46;
+  color: #fff;
+  border-color: #315f46;
+}
+.reaction-details-button:hover {
+  background: #244a35;
+  border-color: #244a35;
+  color: #fff;
+}
+.reaction-dialog {
+  width: min(640px, calc(100% - 28px));
+  max-width: 640px;
+  max-height: min(84vh, 760px);
+  overflow: auto;
+  padding: 0;
+  border: 1px solid #e1e7df;
+  border-radius: 18px;
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 0 24px 90px rgba(18,35,22,.24);
+}
+.reaction-dialog::backdrop { background: rgba(22,34,25,.46); backdrop-filter: blur(3px); }
+.reaction-dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 23px 24px 17px;
+  border-bottom: 1px solid #edf0eb;
+}
+.reaction-dialog-header h2 {
+  margin: 6px 0 0;
+  font-size: 22px;
+  line-height: 1.35;
+  letter-spacing: -.5px;
+}
+.dialog-icon-close {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border: 1px solid #e4e9e2;
+  border-radius: 9px;
+  background: #fff;
+  color: #657166;
+  font-size: 23px;
+  line-height: 1;
+}
+.dialog-icon-close:hover { background: #f3f6f1; }
+.reaction-detail-content { padding: 20px 24px 8px; }
+.reaction-detail-flow {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 36px minmax(0,1fr);
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.reaction-detail-compound {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 16px;
+  border: 1px solid #e3e9e0;
+  border-radius: 12px;
+  background: #f9fbf8;
+}
+.detail-step-label,.detail-label {
+  color: #8a968b;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .7px;
+}
+.reaction-detail-compound strong {
+  font-size: 15px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.detail-formula {
+  color: #78887a;
+  font-family: ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size: 12px;
+}
+.reaction-detail-arrow {
+  text-align: center;
+  color: #5c8264;
+  font-size: 25px;
+  font-weight: 500;
+}
+.reaction-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.reaction-detail-block {
+  min-width: 0;
+  padding: 15px;
+  border: 1px solid #e7ebe4;
+  border-radius: 11px;
+  background: #fff;
+}
+.reaction-detail-block strong {
+  display: block;
+  margin-top: 7px;
+  font-size: 13px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+.reaction-detail-block p {
+  margin: 6px 0 0;
+  color: #657267;
+  font-size: 12px;
+  line-height: 1.75;
+}
+.reaction-detail-explanation { grid-column: 1 / -1; }
+.reaction-detail-explanation p { color: #39483d; font-size: 13px; }
+.reaction-detail-caveat {
+  margin: 13px 0 0;
+  color: #8a958a;
+  font-size: 10px;
+  line-height: 1.7;
+}
+.reaction-dialog-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 24px 20px;
+  color: #929b91;
+  font-size: 10px;
+}
+@media(max-width:620px) {
+  .reaction-card { padding: 11px; }
+  .reaction-card-actions { flex-direction: column; align-items: stretch; }
+  .reaction-open-button,.reaction-details-button { width: 100%; }
+  .reaction-detail-content { padding: 15px 15px 5px; }
+  .reaction-dialog-header { padding: 18px 15px 13px; }
+  .reaction-detail-flow { grid-template-columns: minmax(0,1fr) 24px minmax(0,1fr); gap: 5px; }
+  .reaction-detail-compound { padding: 11px; }
+  .reaction-detail-compound strong { font-size: 12px; }
+  .reaction-detail-arrow { font-size: 19px; }
+  .reaction-detail-grid { grid-template-columns: 1fr; }
+  .reaction-detail-explanation { grid-column: auto; }
+  .reaction-dialog-footer { padding: 12px 15px 16px; align-items: flex-end; }
+}
