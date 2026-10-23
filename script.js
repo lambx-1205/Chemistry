@@ -9,7 +9,9 @@ compounds.forEach(function(c){byId[c.id]=c;byName[c.name.toLocaleLowerCase()]=c;
 var currentCompound=null,lookupSequence=0,structureSequence=0;
 var input=document.getElementById("compound-search");
 var searchButton=document.getElementById("search-button");
-var suggestions=document.getElementById("compound-options");
+var suggestions=document.getElementById("compound-suggestions-list");
+var searchContainer=document.getElementById("search-container");
+var suggestionSequence=0,suggestionTimer=null,activeCandidates=[],activeCandidateIndex=-1;
 var status=document.getElementById("search-status");
 var mainStructure=document.getElementById("main-structure");
 var mainPubchemLink=document.getElementById("pubchem-link");
@@ -54,15 +56,119 @@ function setLoading(loading){
  searchButton.classList.toggle("loading",loading);
  searchButton.setAttribute("aria-busy",loading?"true":"false");
 }
-function fillSuggestions(){
- var seen={};
- var values=[];
- compounds.forEach(function(c){
-  [c.name,c.pubchemName].concat(c.aliases||[]).forEach(function(v){
-   if(v&&!seen[v.toLocaleLowerCase()]){seen[v.toLocaleLowerCase()]=true;values.push(v);}
+function fillSuggestions(){suggestions.innerHTML="";suggestions.hidden=true;}
+
+var restrictedLookupPattern=/(trinitrotoluene|(^|\\W)tnt($|\\W)|nitroglycerin|nitroglycerine|methamphetamine|amphetamine|cocaine|heroin|fentanyl|mdma|ecstasy|oxycodone|hydrocodone|carfentanil|ricin|sarin|vx nerve agent|cyanide|hydrazoic acid|rdx|pentaerythritol tetranitrate|petn)/i;
+function isRestrictedLookupTerm(value){return restrictedLookupPattern.test(String(value||""));}
+function showCandidateMenu(items,query,loading){
+ activeCandidates=items.slice();
+ activeCandidateIndex=-1;
+ var all=items.map(function(item,index){
+  var registered=item.compound&&item.compound.kind!=="external"&&byId[item.compound.id];
+  var label=registered?"登録済み":"PubChem候補";
+  var formula=item.formula||item.compound&&(item.compound.pubchemFormula||item.compound.formula)||"分子式を取得中";
+  return '<button type="button" class="compound-suggestion" role="option" aria-selected="false" data-candidate-index="'+index+'">'+
+   '<span class="compound-suggestion-copy"><strong>'+esc(item.name)+'</strong><span>'+formulaHtml(formula)+'</span></span>'+
+   '<span class="compound-suggestion-kind">'+label+'</span></button>';
+ }).join("");
+ var loadingRow=loading?'<div class="compound-suggestion-message">PubChemから候補を取得中…</div>':"";
+ var emptyRow=!items.length&&!loading?'<div class="compound-suggestion-message">候補がありません。名前を変えるか、検索ボタンで直接検索してください。</div>':"";
+ suggestions.innerHTML=all+loadingRow+emptyRow;
+ suggestions.hidden=!(all||loadingRow||emptyRow);
+ input.setAttribute("aria-expanded",suggestions.hidden?"false":"true");
+ suggestions.querySelectorAll("[data-candidate-index]").forEach(function(button){
+  button.addEventListener("mousedown",function(event){event.preventDefault();});
+  button.addEventListener("click",function(){
+   var idx=Number(button.getAttribute("data-candidate-index"));
+   if(activeCandidates[idx])selectCompoundCandidate(activeCandidates[idx]);
   });
  });
- suggestions.innerHTML=values.map(function(v){return '<option value="'+esc(v)+'"></option>';}).join("");
+}
+function highlightCandidate(){
+ suggestions.querySelectorAll("[data-candidate-index]").forEach(function(button,index){
+  var active=index===activeCandidateIndex;
+  button.classList.toggle("is-active",active);
+  button.setAttribute("aria-selected",active?"true":"false");
+  if(active)button.scrollIntoView({block:"nearest"});
+ });
+}
+function selectCompoundCandidate(item){
+ if(!item||!item.compound)return;
+ window.clearTimeout(suggestionTimer);
+ suggestions.hidden=true;input.setAttribute("aria-expanded","false");
+ var c=item.compound;
+ input.value=c.name;
+ var local=byId[c.id]&&c.kind!=="external"?byId[c.id]:null;
+ if(local){
+  setStatus("登録済み化合物","success");
+  renderCompound(local);resolveStructure(local);
+ }else{
+  renderExternalCompound(c);
+  setStatus("PubChemから取得 · Organic Atlas 未登録","success");
+ }
+}
+function localCandidateMatches(query){
+ var q=String(query||"").trim().toLocaleLowerCase();
+ if(q.length<1)return [];
+ var matches=compounds.filter(function(c){
+  return [c.name,c.pubchemName,c.formula,c.family].concat(c.aliases||[]).some(function(v){return String(v||"").toLocaleLowerCase().indexOf(q)>=0;});
+ });
+ matches.sort(function(a,b){
+  var an=[a.name,a.pubchemName].concat(a.aliases||[]).some(function(v){return String(v||"").toLocaleLowerCase()===q;});
+  var bn=[b.name,b.pubchemName].concat(b.aliases||[]).some(function(v){return String(v||"").toLocaleLowerCase()===q;});
+  if(an!==bn)return an?-1:1;
+  return a.name.localeCompare(b.name,"ja");
+ });
+ return matches.slice(0,5).map(function(c){return {name:c.name,formula:c.pubchemFormula||c.formula,compound:c};});
+}
+async function lookupRemoteCandidates(query,sequence){
+ var endpoint="https://pubchem.ncbi.nlm.nih.gov/rest/autocomplete/compound/"+encodeURIComponent(query)+"/json?limit=8";
+ var response=await fetch(endpoint,{headers:{Accept:"application/json"}});
+ if(!response.ok)throw new Error("PubChem候補検索に失敗しました");
+ var data=await response.json();
+ var terms=data&&data.dictionary_terms&&data.dictionary_terms.compound||[];
+ var localNames=new Set(compounds.flatMap(function(c){return [c.name,c.pubchemName].concat(c.aliases||[]).filter(Boolean).map(function(v){return String(v).toLocaleLowerCase();});}));
+ var names=[],seen=new Set();
+ terms.forEach(function(name){
+  var key=String(name||"").toLocaleLowerCase();
+  if(!key||seen.has(key)||localNames.has(key)||isRestrictedLookupTerm(name))return;
+  seen.add(key);names.push(String(name));
+ });
+ var remote=[];
+ for(var i=0;i<Math.min(4,names.length);i++){
+  if(sequence!==suggestionSequence||input.value.trim()!==query)return;
+  try{
+   var compound=await fetchCompound(names[i]);
+   if(sequence!==suggestionSequence||input.value.trim()!==query)return;
+   if(isRestrictedLookupTerm(compound.name)||isRestrictedLookupTerm(compound.pubchemName))continue;
+   remote.push({name:compound.name,formula:compound.pubchemFormula||compound.formula,compound:compound});
+  }catch(error){
+   // One unavailable suggestion should not prevent the others from appearing.
+  }
+  if(i<Math.min(4,names.length)-1)await new Promise(function(resolve){window.setTimeout(resolve,230);});
+ }
+ if(sequence!==suggestionSequence||input.value.trim()!==query)return;
+ var local=localCandidateMatches(query);
+ var merged=local.concat(remote.filter(function(item){return !local.some(function(existing){return existing.name.toLocaleLowerCase()===item.name.toLocaleLowerCase();});})).slice(0,8);
+ showCandidateMenu(merged,query,false);
+ if(merged.length)setStatus("候補を選ぶと構造式・情報を表示します","success");
+}
+function scheduleCandidateSearch(){
+ var query=input.value.trim();
+ var sequence=++suggestionSequence;
+ activeCandidates=[];activeCandidateIndex=-1;
+ window.clearTimeout(suggestionTimer);
+ if(!query){suggestions.hidden=true;input.setAttribute("aria-expanded","false");setStatus("","");return;}
+ var local=localCandidateMatches(query);
+ showCandidateMenu(local,query,query.length>=2);
+ if(query.length<2)return;
+ suggestionTimer=window.setTimeout(function(){
+  lookupRemoteCandidates(query,sequence).catch(function(error){
+   if(sequence!==suggestionSequence)return;
+   showCandidateMenu(localCandidateMatches(query),query,false);
+   if(!local.length)setStatus("PubChem候補を取得できませんでした。検索ボタンで直接検索できます","error");
+  });
+ },420);
 }
 var rdkitInstance=null;
 var rdkitInitPromise=null;
@@ -189,9 +295,12 @@ function renderCompound(c){
  mainStructureSource.textContent=c.structureSource==="PubChem"?"PUBCHEM DATA · RDKIT SVG":"RDKIT SVG";
  document.getElementById("compound-facts").innerHTML=
   fact("分類",c.family||"—")+
+  (c.iupacName?fact("IUPAC名",c.iupacName):"")+
   fact("分子量",c.molecularWeight?(Number(c.molecularWeight).toFixed(2)+" g/mol"):"—")+
   fact("状態",c.state||"—")+
   fact("InChIKey",c.inchiKey||"—");
+ var registrationNote=document.getElementById("registration-note");
+ if(registrationNote)registrationNote.hidden=c.kind!=="external";
  renderOneStep(c);
  renderIsomerGroups(c);
  var modelButton=document.getElementById("open-3d-model");
@@ -267,6 +376,17 @@ function openReactionDetails(edgeId){
  else reactionDetailDialog.setAttribute("open","");
 }
 function renderOneStep(c){
+ var previousSection=previousRoot.closest(".one-step-section");
+ var nextSection=nextRoot.closest(".one-step-section");
+ if(c&&c.kind==="external"){
+  if(previousSection)previousSection.hidden=true;
+  if(nextSection)nextSection.hidden=true;
+  previousRoot.innerHTML="";nextRoot.innerHTML="";
+  previousCount.textContent="00";nextCount.textContent="00";
+  return;
+ }
+ if(previousSection)previousSection.hidden=false;
+ if(nextSection)nextSection.hidden=false;
  var incoming=edges.filter(function(edge){return edge.to===c.id;});
  var outgoing=edges.filter(function(edge){return edge.from===c.id;});
  previousCount.textContent=String(incoming.length).padStart(2,"0");
@@ -409,21 +529,23 @@ function renderExternalCompound(c){
  if(!c.id)c.id="pubchem-"+String(c.pubchemCid||Date.now());
  c.kind="external";c.family=c.family||"PubChem";
  c.state=c.state||"—";c.structureSource="PubChem";
+ c.name=c.name||c.iupacName||c.pubchemName||"化合物";
  renderCompound(c);
 }
 async function fetchCompound(query){
+ if(isRestrictedLookupTerm(query))throw new Error("この検索には対応していません。");
  var key=query.trim().toLocaleLowerCase();
  if(lookupCache[key])return lookupCache[key];
- var endpoint="https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/"+encodeURIComponent(query.trim())+"/property/IUPACName,ConnectivitySMILES,InChIKey,MolecularFormula,MolecularWeight/JSON";
+ var endpoint="https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/"+encodeURIComponent(query.trim())+"/property/Title,IUPACName,SMILES,ConnectivitySMILES,InChIKey,MolecularFormula,MolecularWeight/JSON";
  var response=await fetch(endpoint,{headers:{Accept:"application/json"}});
  if(!response.ok)throw new Error(response.status===404?"化合物が見つかりません":"PubChemへの接続に失敗しました");
  var data=await response.json();
  var p=data&&data.PropertyTable&&data.PropertyTable.Properties&&data.PropertyTable.Properties[0];
- if(!p||!(p.ConnectivitySMILES||p.SMILES))throw new Error("構造データがありません");
+ if(!p||!(p.SMILES||p.ConnectivitySMILES))throw new Error("構造データがありません");
  var existing=knownCompound(query);
  var c=existing||{
   id:"pubchem-"+String(p.CID||key.replace(/[^a-z0-9]+/gi,"-")),
-  name:query,
+  name:p.Title||query,
   formula:p.MolecularFormula||"—",
   family:"PubChem",
   kind:"external",
@@ -434,11 +556,11 @@ async function fetchCompound(query){
   desc:"",
   iupacName:p.IUPACName||null,
   pubchemName:query,
-  smiles:p.ConnectivitySMILES||p.SMILES
+  smiles:p.SMILES||p.ConnectivitySMILES
  };
  c.pubchemCid=p.CID||c.pubchemCid||null;
  c.pubchemName=c.pubchemName||query;
- c.smiles=p.ConnectivitySMILES||p.SMILES;
+ c.smiles=p.SMILES||p.ConnectivitySMILES;
  c.pubchemFormula=p.MolecularFormula||c.pubchemFormula||c.formula;
  c.molecularWeight=p.MolecularWeight||c.molecularWeight||null;
  c.inchiKey=p.InChIKey||c.inchiKey||null;
@@ -471,6 +593,7 @@ async function resolveStructure(c){
 }
 async function searchCompound(){
  var query=input.value.trim();
+ if(isRestrictedLookupTerm(query)){setStatus("この検索には対応していません。安全な学習用化合物名で検索してください。","error");return;}
  if(!query){setStatus("化合物名を入力してください","error");input.focus();return;}
  var sequence=++lookupSequence;
  var known=knownCompound(query);
@@ -499,8 +622,24 @@ function init(){
  document.getElementById("molecule3d-ballstick").addEventListener("click",function(){setMolecule3DMode("ballstick");});
  molecule3dDialog.addEventListener("click",function(event){if(event.target===molecule3dDialog){molecule3dRequest++;if(activeMolecule3D&&activeMolecule3D.dispose)activeMolecule3D.dispose();activeMolecule3D=null;molecule3dDialog.close();}});
  molecule3dDialog.addEventListener("close",function(){molecule3dRequest++;if(activeMolecule3D&&activeMolecule3D.dispose)activeMolecule3D.dispose();activeMolecule3D=null;});
- document.getElementById("search-form").addEventListener("submit",function(ev){ev.preventDefault();searchCompound();});
+ document.getElementById("search-form").addEventListener("submit",function(ev){
+  ev.preventDefault();
+  if(!suggestions.hidden&&activeCandidates.length){
+   var selected=activeCandidateIndex>=0?activeCandidates[activeCandidateIndex]:activeCandidates[0];
+   selectCompoundCandidate(selected);
+  }else searchCompound();
+ }); 
+ input.addEventListener("keydown",function(event){
+  if(suggestions.hidden||!activeCandidates.length)return;
+  if(event.key==="ArrowDown"){event.preventDefault();activeCandidateIndex=Math.min(activeCandidates.length-1,activeCandidateIndex+1);highlightCandidate();}
+  else if(event.key==="ArrowUp"){event.preventDefault();activeCandidateIndex=Math.max(0,activeCandidateIndex-1);highlightCandidate();}
+  else if(event.key==="Escape"){suggestions.hidden=true;input.setAttribute("aria-expanded","false");}
+ }); 
+ document.addEventListener("click",function(event){
+  if(searchContainer&&!searchContainer.contains(event.target)){suggestions.hidden=true;input.setAttribute("aria-expanded","false");}
+ });
  input.addEventListener("input",function(){
+  scheduleCandidateSearch();
   if(!input.value.trim())setStatus("","");
  });
  document.getElementById("clear-search").addEventListener("click",function(){
