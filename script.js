@@ -365,8 +365,7 @@ function show3DFallback(c,message,token){
 }
 async function open3DMolecule(){
  var c=currentCompound;
- if(!c||!molecule3dDialog)return;
- if(c.id==="tnt"||/trinitrotoluene|(^|\W)tnt($|\W)/i.test(String(c.name||"")+" "+String(c.pubchemName||""))){
+ if(is3DRestrictedCompound(c)){
   setStatus("この化合物の3D表示は利用できません。","error");return;
  }
  var token=++molecule3dRequest;
