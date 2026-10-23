@@ -56,3 +56,16 @@
   .compound-card-copy { padding: 7px; }
   .compound-card-name { font-size: 11px; }
 }
+
+
+.list-page-foot{margin-bottom:0;}
+.site-update-footer{width:min(1000px,calc(100% - 48px));margin:18px auto 0;padding:16px 0 24px;border-top:1px solid #e2e8df;color:#879187;}
+.site-update-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:10px;}
+.site-update-heading strong{color:#596b5c;font-size:11px;font-weight:850;}
+.site-update-heading span{font-variant-numeric:tabular-nums;}
+.site-update-history{margin-top:8px;font-size:10px;}
+.site-update-history summary{width:max-content;cursor:pointer;color:#66796a;font-weight:800;}
+.site-update-history ul{margin:8px 0 0;padding-left:18px;line-height:1.8;}
+.site-update-history li{padding:1px 0;}
+.site-update-history time{font-variant-numeric:tabular-nums;color:#687c6b;font-weight:800;margin-right:5px;}
+@media(max-width:620px){.site-update-footer{width:calc(100% - 24px);}.site-update-heading{align-items:flex-start;flex-direction:column;gap:5px;}}
