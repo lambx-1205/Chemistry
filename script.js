@@ -60,6 +60,97 @@ function fillSuggestions(){suggestions.innerHTML="";suggestions.hidden=true;}
 
 var restrictedLookupPattern=/(trinitrotoluene|(^|\W)tnt($|\W)|nitroglycerin|nitroglycerine|methamphetamine|amphetamine|cocaine|heroin|fentanyl|mdma|ecstasy|oxycodone|hydrocodone|carfentanil|ricin|sarin|vx nerve agent|cyanide|hydrazoic acid|rdx|pentaerythritol tetranitrate|petn|トリニトロトルエン|ニトログリセリン|メタンフェタミン|覚醒剤|コカイン|ヘロイン|フェンタニル|エクスタシー|モルヒネ|オキシコドン|リシン|サリン|シアン化物|青酸|爆薬|爆発物|神経剤)/i;
 function isRestrictedLookupTerm(value){return restrictedLookupPattern.test(String(value||""));}
+var japaneseNameCache=Object.create(null);
+var knownJapaneseCompoundNames={
+ "ethanol":"エタノール","ethyl alcohol":"エタノール","methanol":"メタノール","methyl alcohol":"メタノール",
+ "benzene":"ベンゼン","toluene":"トルエン","ethylbenzene":"エチルベンゼン","styrene":"スチレン","acetone":"アセトン",
+ "propanone":"アセトン","formaldehyde":"ホルムアルデヒド","methanal":"ホルムアルデヒド","acetaldehyde":"アセトアルデヒド",
+ "ethanal":"アセトアルデヒド","acetic acid":"酢酸","ethanoic acid":"酢酸","formic acid":"ギ酸","methanoic acid":"ギ酸",
+ "propionic acid":"プロピオン酸","propanoic acid":"プロピオン酸","lactic acid":"乳酸","2-hydroxypropanoic acid":"乳酸",
+ "l-lactic acid":"L-乳酸","d-lactic acid":"D-乳酸","glucose":"グルコース","d-glucose":"D-グルコース",
+ "fructose":"フルクトース","d-fructose":"D-フルクトース","galactose":"ガラクトース","d-galactose":"D-ガラクトース",
+ "mannose":"マンノース","d-mannose":"D-マンノース","glycerol":"グリセリン","glycerin":"グリセリン",
+ "oleic acid":"オレイン酸","linoleic acid":"リノール酸","alpha-linolenic acid":"α-リノレン酸",
+ "palmitic acid":"パルミチン酸","stearic acid":"ステアリン酸","lauric acid":"ラウリン酸",
+ "citric acid":"クエン酸","ascorbic acid":"アスコルビン酸","aspirin":"アスピリン","acetylsalicylic acid":"アセチルサリチル酸",
+ "caffeine":"カフェイン","phenol":"フェノール","aniline":"アニリン","benzaldehyde":"ベンズアルデヒド",
+ "benzoic acid":"安息香酸","sucrose":"スクロース","saccharose":"ショ糖","lactose":"ラクトース",
+ "maltose":"マルトース","sodium chloride":"塩化ナトリウム","water":"水","ammonia":"アンモニア",
+ "hydrogen peroxide":"過酸化水素","sulfuric acid":"硫酸","hydrochloric acid":"塩酸","nitric acid":"硝酸",
+ "sodium hydroxide":"水酸化ナトリウム","calcium carbonate":"炭酸カルシウム","carbon dioxide":"二酸化炭素",
+ "carbon monoxide":"一酸化炭素","ethene":"エチレン","ethylene":"エチレン","propene":"プロピレン",
+ "propylene":"プロピレン","ethyne":"アセチレン","acetylene":"アセチレン","butane":"ブタン",
+ "propane":"プロパン","pentane":"ペンタン","hexane":"ヘキサン","cyclohexane":"シクロヘキサン",
+ "naphthalene":"ナフタレン","anthracene":"アントラセン","xylene":"キシレン","p-xylene":"p-キシレン",
+ "m-xylene":"m-キシレン","o-xylene":"o-キシレン","cumene":"クメン","isopropylbenzene":"イソプロピルベンゼン",
+ "terephthalic acid":"テレフタル酸","phthalic acid":"フタル酸","isophthalic acid":"イソフタル酸",
+ "glycine":"グリシン","alanine":"アラニン","ATP":"ATP","DNA":"DNA","RNA":"RNA","NADH":"NADH","NADPH":"NADPH"
+};
+function hasJapaneseCharacters(value){return /[\u3040-\u30ff\u3400-\u9fff]/.test(String(value||""));}
+function normalizeCompoundName(value){return String(value||"").trim().normalize("NFKC").replace(/\s+/g," ").toLocaleLowerCase();}
+function decodeTranslationText(value){var el=document.createElement("textarea");el.innerHTML=String(value||"");return el.value.trim();}
+async function getJapanesePubChemSynonym(compound){
+ if(!compound||!compound.pubchemCid)return "";
+ try{
+  var url="https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/"+encodeURIComponent(compound.pubchemCid)+"/synonyms/JSON";
+  var response=await fetch(url,{headers:{Accept:"application/json"}});
+  if(!response.ok)return "";
+  var data=await response.json();
+  var infos=data&&data.InformationList&&data.InformationList.Information||[];
+  var synonyms=[];
+  infos.forEach(function(info){(info.Synonym||[]).forEach(function(value){if(hasJapaneseCharacters(value)&&String(value).trim().length<=42)synonyms.push(String(value).trim());});});
+  synonyms=Array.from(new Set(synonyms));
+  synonyms.sort(function(a,b){
+   var aKana=/[\u3040-\u30ff]/.test(a)?0:1;
+   var bKana=/[\u3040-\u30ff]/.test(b)?0:1;
+   if(aKana!==bKana)return aKana-bKana;
+   return a.length-b.length;
+  });
+  return synonyms[0]||"";
+ }catch(error){return "";}
+}
+async function machineTranslateCompoundName(source){
+ var original=String(source||"").trim();
+ if(!original||hasJapaneseCharacters(original))return original;
+ if(/^[A-Z][A-Z0-9-]{1,8}$/.test(original)&&!knownJapaneseCompoundNames[original])return original;
+ var cacheKey=normalizeCompoundName(original);
+ if(japaneseNameCache[cacheKey])return japaneseNameCache[cacheKey];
+ try{
+  var url="https://api.mymemory.translated.net/get?q="+encodeURIComponent(original)+"&langpair=en%7Cja";
+  var response=await fetch(url,{headers:{Accept:"application/json"}});
+  if(response.ok){
+   var data=await response.json();
+   var translation=decodeTranslationText(data&&data.responseData&&data.responseData.translatedText);
+   if(hasJapaneseCharacters(translation)&&normalizeCompoundName(translation)!==cacheKey&&!/PLEASE SELECT|MYMEMORY WARNING/i.test(translation)){
+    japaneseNameCache[cacheKey]=translation;
+    return translation;
+   }
+  }
+ }catch(error){}
+ return "";
+}
+async function ensureJapaneseCompoundName(compound,fallbackName){
+ if(!compound)return "名称未確認の化合物";
+ if(compound.kind!=="external")return compound.name||"化合物";
+ if(compound.japaneseName&&hasJapaneseCharacters(compound.japaneseName)){compound.name=compound.japaneseName;return compound.name;}
+ var candidates=[compound.sourceTitle,compound.englishName,compound.pubchemName,fallbackName,compound.name,compound.iupacName].filter(Boolean);
+ for(var i=0;i<candidates.length;i++){
+  var candidate=String(candidates[i]).trim();
+  if(hasJapaneseCharacters(candidate)){compound.japaneseName=candidate;compound.name=candidate;return candidate;}
+  var mapped=knownJapaneseCompoundNames[normalizeCompoundName(candidate)];
+  if(mapped){compound.japaneseName=mapped;compound.name=mapped;return mapped;}
+ }
+ var synonym=await getJapanesePubChemSynonym(compound);
+ if(synonym){compound.japaneseName=synonym;compound.name=synonym;return synonym;}
+ for(var j=0;j<candidates.length;j++){
+  var translated=await machineTranslateCompoundName(candidates[j]);
+  if(translated&&hasJapaneseCharacters(translated)){compound.japaneseName=translated;compound.name=translated;return translated;}
+ }
+ var formula=compound.pubchemFormula||compound.formula||"";
+ var fallback="名称未確認の化合物"+(formula?"（"+formula+"）":"");
+ compound.japaneseName=fallback;compound.name=fallback;
+ return fallback;
+}
 function showCandidateMenu(items,query,loading){
  activeCandidates=items.slice();
  activeCandidateIndex=-1;
@@ -69,7 +160,6 @@ function showCandidateMenu(items,query,loading){
   var formula=item.formula||item.compound&&(item.compound.pubchemFormula||item.compound.formula)||"分子式を取得中";
   return '<button type="button" class="compound-suggestion" role="option" aria-selected="false" data-candidate-index="'+index+'">'+
    '<span class="compound-suggestion-copy"><strong>'+esc(item.name)+'</strong>'+
-   (item.displayName&&item.displayName!==item.name?'<span class="compound-suggestion-native">'+esc(item.displayName)+'</span>':'')+
    '<span class="compound-suggestion-formula">'+formulaHtml(formula)+'</span></span>'+
    '<span class="compound-suggestion-kind">'+label+'</span></button>';
  }).join("");
@@ -99,7 +189,7 @@ function selectCompoundCandidate(item){
  window.clearTimeout(suggestionTimer);
  suggestions.hidden=true;input.setAttribute("aria-expanded","false");
  var c=item.compound;
- input.value=item.searchTerm||c.name;
+ input.value=c.name;
  var local=byId[c.id]&&c.kind!=="external"?byId[c.id]:null;
  if(local){
   setStatus("登録済み化合物","success");
@@ -123,26 +213,19 @@ function localCandidateMatches(query){
   return a.name.localeCompare(b.name,"ja");
  });
  return matches.slice(0,5).map(function(c){
-  var englishQuery=/[a-z]/i.test(q)&&/^[\x00-\x7F]+$/.test(q);
-  var englishName=englishQuery&&c.pubchemName&&String(c.pubchemName).toLocaleLowerCase().indexOf(q)>=0?c.pubchemName:c.name;
-  return {name:englishName,displayName:englishName!==c.name?c.name:"",searchTerm:englishQuery&&c.pubchemName&&String(c.pubchemName).toLocaleLowerCase().indexOf(q)>=0?c.pubchemName:c.name,formula:c.pubchemFormula||c.formula,compound:c};
- });
+  return {name:c.name,searchTerm:c.name,formula:c.pubchemFormula||c.formula,compound:c};
+ });;
 }
 async function directPubChemCandidate(query,sequence){
  try{
   var compound=await fetchCompound(query);
   if(sequence!==suggestionSequence||input.value.trim()!==query)return null;
   if(isRestrictedLookupTerm(compound.name)||isRestrictedLookupTerm(compound.pubchemName)||is3DRestrictedCompound(compound))return null;
-  var registered=byId[compound.id]&&compound.kind!=="external";
-  return {
-   name:registered&&compound.pubchemName?compound.pubchemName:(compound.name||query),
-   displayName:compound.name&&compound.pubchemName&&compound.name!==compound.pubchemName?compound.name:"",
-   searchTerm:query,
-   formula:compound.pubchemFormula||compound.formula,
-   compound:compound
-  };
+  if(compound.kind==="external")await ensureJapaneseCompoundName(compound,query);
+  return {name:compound.name||"名称未確認の化合物",searchTerm:compound.name||"名称未確認の化合物",formula:compound.pubchemFormula||compound.formula,compound:compound};
  }catch(error){return null;}
 }
+
 async function lookupRemoteCandidates(query,sequence){
  var local=localCandidateMatches(query);
  var terms=[];
@@ -165,17 +248,18 @@ async function lookupRemoteCandidates(query,sequence){
   seen.add(key);names.push(String(name).trim());
  });
  var remote=[];
- for(var i=0;i<Math.min(6,names.length);i++){
+ for(var i=0;i<Math.min(4,names.length);i++){
   if(sequence!==suggestionSequence||input.value.trim()!==query)return;
   try{
    var compound=await fetchCompound(names[i]);
    if(sequence!==suggestionSequence||input.value.trim()!==query)return;
    if(isRestrictedLookupTerm(compound.name)||isRestrictedLookupTerm(compound.pubchemName)||is3DRestrictedCompound(compound))continue;
-   remote.push({name:names[i],displayName:compound.name&&compound.name!==names[i]?compound.name:"",searchTerm:names[i],formula:compound.pubchemFormula||compound.formula,compound:compound});
+   if(compound.kind==="external")await ensureJapaneseCompoundName(compound,names[i]);
+   remote.push({name:compound.name||"名称未確認の化合物",searchTerm:compound.name||"名称未確認の化合物",formula:compound.pubchemFormula||compound.formula,compound:compound});
   }catch(error){
    // Some autocomplete terms are concepts rather than searchable compound names.
   }
-  if(i<Math.min(6,names.length)-1)await new Promise(function(resolve){window.setTimeout(resolve,150);});
+  if(i<Math.min(4,names.length)-1)await new Promise(function(resolve){window.setTimeout(resolve,150);});
  }
  if(sequence!==suggestionSequence||input.value.trim()!==query)return;
  var merged=local.concat(remote.filter(function(item){
@@ -589,6 +673,8 @@ async function fetchCompound(query){
  var c=existing||{
   id:"pubchem-"+String(p.CID||key.replace(/[^a-z0-9]+/gi,"-")),
   name:p.Title||query,
+  sourceTitle:p.Title||query,
+  englishName:p.Title||query,
   formula:p.MolecularFormula||"—",
   family:"PubChem",
   kind:"external",
@@ -608,6 +694,8 @@ async function fetchCompound(query){
  c.molecularWeight=p.MolecularWeight||c.molecularWeight||null;
  c.inchiKey=p.InChIKey||c.inchiKey||null;
  c.iupacName=p.IUPACName||c.iupacName||null;
+ c.sourceTitle=c.sourceTitle||p.Title||query;
+ c.englishName=c.englishName||p.Title||query;
  c.structureSource="PubChem";
  lookupCache[key]=c;
  return c;
@@ -646,6 +734,8 @@ async function searchCompound(){
  setLoading(true);setStatus("検索中","loading");
  try{
   var c=await fetchCompound(query);
+  if(sequence!==lookupSequence)return;
+  if(c.kind==="external")await ensureJapaneseCompoundName(c,query);
   if(sequence!==lookupSequence)return;
   input.value=c.name;
   renderExternalCompound(c);
