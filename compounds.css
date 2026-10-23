@@ -69,3 +69,6 @@
 .site-update-history li{padding:1px 0;}
 .site-update-history time{font-variant-numeric:tabular-nums;color:#687c6b;font-weight:800;margin-right:5px;}
 @media(max-width:620px){.site-update-footer{width:calc(100% - 24px);}.site-update-heading{align-items:flex-start;flex-direction:column;gap:5px;}}
+
+.compound-suggestion-native{color:#6e8171;font-size:10px;line-height:1.4;}
+.compound-suggestion-formula{color:#798a7b;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;line-height:1.4;}
