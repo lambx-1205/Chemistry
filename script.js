@@ -47,8 +47,13 @@ var mainStructure=document.getElementById("main-structure");
 var mainPubchemLink=document.getElementById("pubchem-link");
 var mainStructureSource=document.getElementById("structure-source");
 var resultRoot=document.getElementById("compound-content");
-var adjacentRoot=document.getElementById("one-step-results");
-var adjacentCount=document.getElementById("one-step-count");
+var previousRoot=document.getElementById("previous-step-results");
+var nextRoot=document.getElementById("next-step-results");
+var previousCount=document.getElementById("previous-step-count");
+var nextCount=document.getElementById("next-step-count");
+var reactionDetailDialog=document.getElementById("reaction-detail-dialog");
+var reactionDetailTitle=document.getElementById("reaction-detail-title");
+var reactionDetailContent=document.getElementById("reaction-detail-content");
 var lookupCache={};
 function esc(value){return String(value==null?"":value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
 function formulaHtml(value){return esc(value||"—").replace(/([0-9]+)/g,"<sub>$1</sub>");}
@@ -204,35 +209,94 @@ function renderCompound(c){
   fact("InChIKey",c.inchiKey||"—");
  renderOneStep(c);
 }
-function renderOneStep(c){
- var outgoing=edges.filter(function(e){return e.from===c.id;});
- adjacentCount.textContent=String(outgoing.length).padStart(2,"0");
- if(!outgoing.length){
-  adjacentRoot.innerHTML='<div class="no-reactions"><span class="no-reactions-mark">∅</span><span>登録された1段階反応はありません</span></div>';
+function renderReactionCard(edge,direction){
+ var from=byId[edge.from];
+ var to=byId[edge.to];
+ if(!from||!to)return "";
+ var neighbor=direction==="before"?from:to;
+ return '<article class="reaction-card">'+
+  '<div class="reaction-card-top"><span class="reaction-kind">'+esc(edge.name||edge.label)+'</span><span class="reaction-arrow" aria-hidden="true">'+(direction==="before"?"↙":"↗")+'</span></div>'+
+  '<button class="reaction-neighbor-button" type="button" data-compound="'+esc(neighbor.id)+'" aria-label="'+esc(neighbor.name)+'の化合物情報を表示">'+
+   '<span class="reaction-structure"><span class="small-structure" data-small-structure="'+esc(neighbor.id)+'" role="img" aria-label="'+esc(neighbor.name)+'の構造式"></span></span>'+
+   '<span class="reaction-compound-name">'+esc(neighbor.name)+'</span>'+
+   '<span class="reaction-compound-formula">'+formulaHtml(neighbor.pubchemFormula||neighbor.formula)+'</span>'+
+  '</button>'+
+  '<div class="reaction-route" aria-label="反応の流れ"><span>'+esc(from.name)+'</span><span class="route-arrow" aria-hidden="true">→</span><span>'+esc(to.name)+'</span></div>'+
+  '<div class="reaction-condition">'+esc(edge.condition||"反応条件の登録なし")+'</div>'+
+  '<div class="reaction-card-actions">'+
+   '<button class="reaction-open-button" type="button" data-compound="'+esc(neighbor.id)+'">化合物を開く</button>'+
+   '<button class="reaction-details-button" type="button" data-reaction-id="'+esc(edge.id)+'">反応の詳細を見る</button>'+
+  '</div>'+
+ '</article>';
+}
+function renderReactionList(root,list,direction){
+ if(!list.length){
+  root.innerHTML='<div class="no-reactions"><span class="no-reactions-mark">∅</span><span>'+(direction==="before"?"登録された一段階前の反応はありません":"登録された一段階後の反応はありません")+'</span></div>';
   return;
  }
- adjacentRoot.innerHTML=outgoing.map(function(e){
-  var target=byId[e.to];
-  if(!target)return "";
-  return '<button class="reaction-card" type="button" data-compound="'+esc(target.id)+'">'+
-   '<span class="reaction-card-top"><span class="reaction-kind">'+esc(e.name)+'</span><span class="reaction-arrow" aria-hidden="true">↗</span></span>'+
-   '<span class="reaction-structure"><span class="small-structure" data-small-structure="'+esc(target.id)+'" role="img" aria-label="'+esc(target.name)+'の構造式"></span></span>'+
-   '<span class="reaction-compound-name">'+esc(target.name)+'</span>'+
-   '<span class="reaction-compound-formula">'+formulaHtml(target.pubchemFormula||target.formula)+'</span>'+
-   '<span class="reaction-condition">'+esc(e.condition||"")+'</span>'+
-  '</button>';
- }).join("");
- adjacentRoot.querySelectorAll(".reaction-card").forEach(function(card){
-  card.addEventListener("click",function(){
-   var target=byId[card.getAttribute("data-compound")];
-   if(target){input.value=target.name;renderCompound(target);setStatus("", "");window.scrollTo({top:0,behavior:"smooth"});resolveStructure(target);}
+ root.innerHTML=list.map(function(edge){return renderReactionCard(edge,direction);}).join("");
+ root.querySelectorAll("[data-compound]").forEach(function(button){
+  button.addEventListener("click",function(){
+   var target=byId[button.getAttribute("data-compound")];
+   if(target){
+    input.value=target.name;
+    renderCompound(target);
+    setStatus("","");
+    window.scrollTo({top:0,behavior:"smooth"});
+    resolveStructure(target);
+   }
   });
  });
- adjacentRoot.querySelectorAll(".small-structure").forEach(function(svg){
-  var target=byId[svg.getAttribute("data-small-structure")];
-  if(target)drawStructure(svg,target.smiles,220,108,"small-"+target.id+"-"+target.smiles,target.pubchemFormula||target.formula);
+ root.querySelectorAll(".small-structure").forEach(function(host){
+  var target=byId[host.getAttribute("data-small-structure")];
+  if(target)drawStructure(host,target.smiles,220,108,"small-"+target.id+"-"+target.smiles,target.pubchemFormula||target.formula);
+ });
+ root.querySelectorAll("[data-reaction-id]").forEach(function(button){
+  button.addEventListener("click",function(){
+   openReactionDetails(button.getAttribute("data-reaction-id"));
+  });
  });
 }
+function openReactionDetails(edgeId){
+ var edge=edges.find(function(item){return item.id===edgeId;});
+ if(!edge)return;
+ var from=byId[edge.from],to=byId[edge.to];
+ if(!from||!to)return;
+ reactionDetailTitle.textContent=edge.name||edge.label||"反応の詳細";
+ reactionDetailContent.innerHTML=
+  '<div class="reaction-detail-flow">'+
+   '<div class="reaction-detail-compound"><span class="detail-step-label">反応前</span><strong>'+esc(from.name)+'</strong><span class="detail-formula">'+formulaHtml(from.pubchemFormula||from.formula)+'</span></div>'+
+   '<span class="reaction-detail-arrow" aria-hidden="true">→</span>'+
+   '<div class="reaction-detail-compound"><span class="detail-step-label">反応後</span><strong>'+esc(to.name)+'</strong><span class="detail-formula">'+formulaHtml(to.pubchemFormula||to.formula)+'</span></div>'+
+  '</div>'+
+  '<div class="reaction-detail-grid">'+
+   '<section class="reaction-detail-block"><span class="detail-label">反応の種類・名称</span><strong>'+esc(edge.label||"—")+'</strong><p>'+esc(edge.name||"—")+'</p></section>'+
+   '<section class="reaction-detail-block"><span class="detail-label">反応条件</span><strong>'+esc(edge.condition||"条件の登録なし")+'</strong></section>'+
+   '<section class="reaction-detail-block reaction-detail-explanation"><span class="detail-label">反応の概要</span><p>'+esc(edge.note||"この反応についての説明はまだ登録されていません。")+'</p></section>'+
+  '</div>'+
+  '<p class="reaction-detail-caveat">ここでは反応前後の化合物と登録済みの条件・概要を示しています。表示は反応経路の概略であり、副生成物や係数まで含めた平衡化済み反応式ではありません。</p>';
+ if(typeof reactionDetailDialog.showModal==="function")reactionDetailDialog.showModal();
+ else reactionDetailDialog.setAttribute("open","");
+}
+function renderOneStep(c){
+ var incoming=edges.filter(function(edge){return edge.to===c.id;});
+ var outgoing=edges.filter(function(edge){return edge.from===c.id;});
+ previousCount.textContent=String(incoming.length).padStart(2,"0");
+ nextCount.textContent=String(outgoing.length).padStart(2,"0");
+ renderReactionList(previousRoot,incoming,"before");
+ renderReactionList(nextRoot,outgoing,"after");
+}
+document.getElementById("reaction-detail-close").addEventListener("click",function(){
+ if(typeof reactionDetailDialog.close==="function")reactionDetailDialog.close();
+ else reactionDetailDialog.removeAttribute("open");
+});
+document.getElementById("reaction-detail-done").addEventListener("click",function(){
+ if(typeof reactionDetailDialog.close==="function")reactionDetailDialog.close();
+ else reactionDetailDialog.removeAttribute("open");
+});
+reactionDetailDialog.addEventListener("click",function(event){
+ if(event.target===reactionDetailDialog&&typeof reactionDetailDialog.close==="function")reactionDetailDialog.close();
+});
 function renderExternalCompound(c){
  if(!c.id)c.id="pubchem-"+String(c.pubchemCid||Date.now());
  c.kind="external";c.family=c.family||"PubChem";
