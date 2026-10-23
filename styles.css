@@ -461,3 +461,38 @@ a{color:inherit}
 }
 
 .molecule3d-fallback[hidden]{display:none;}
+
+
+
+/* Live PubChem compound suggestions */
+.search-container{position:relative;z-index:20;}
+.compound-suggestions{position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:60;max-height:min(390px,65vh);overflow:auto;border:1px solid #dfe7dd;border-radius:13px;background:#fff;box-shadow:0 18px 40px rgba(26,42,29,.15);padding:5px;}
+.compound-suggestions[hidden]{display:none;}
+.compound-suggestion{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-width:0;padding:10px 12px;border:0;border-radius:8px;background:transparent;color:var(--ink);text-align:left;}
+.compound-suggestion:hover,.compound-suggestion.is-active{background:#f0f5ee;}
+.compound-suggestion-copy{display:flex;flex-direction:column;gap:4px;min-width:0;}
+.compound-suggestion-copy strong{font-size:12px;font-weight:800;line-height:1.4;overflow-wrap:anywhere;}
+.compound-suggestion-copy>span{color:#798a7b;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;line-height:1.4;}
+.compound-suggestion-copy sub{font-size:.72em;vertical-align:baseline;position:relative;bottom:-.2em;}
+.compound-suggestion-kind{flex:none;padding:4px 6px;border-radius:5px;background:#edf3ea;color:#65816a;font-size:8px;font-weight:800;}
+.compound-suggestion-message{padding:13px 12px;color:#89958a;font-size:11px;line-height:1.6;}
+.registration-note{display:flex;flex-direction:column;gap:5px;width:100%;margin-top:15px;padding:11px 12px;border:1px solid #dfe7dc;border-radius:10px;background:#f7faf5;}
+.registration-note[hidden]{display:none;}
+.registration-note strong{color:#5c7e61;font-size:10px;letter-spacing:.1px;}
+.registration-note span{color:#828e82;font-size:10px;line-height:1.6;}
+.site-update-footer{width:min(1140px,calc(100% - 48px));margin:22px auto 0;padding:16px 0 24px;border-top:1px solid #e2e8df;color:#879187;}
+.site-update-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:10px;}
+.site-update-heading strong{color:#596b5c;font-size:11px;font-weight:850;}
+.site-update-heading span{font-variant-numeric:tabular-nums;}
+.site-update-history{margin-top:8px;font-size:10px;}
+.site-update-history summary{width:max-content;cursor:pointer;color:#66796a;font-weight:800;}
+.site-update-history ul{margin:8px 0 0;padding-left:18px;line-height:1.8;}
+.site-update-history li{padding:1px 0;}
+.site-update-history time{font-variant-numeric:tabular-nums;color:#687c6b;font-weight:800;margin-right:5px;}
+@media(max-width:620px){
+ .compound-suggestions{max-height:55vh;}
+ .compound-suggestion{padding:9px 8px;gap:7px;}
+ .compound-suggestion-kind{font-size:7px;}
+ .site-update-footer{width:calc(100% - 24px);padding-bottom:20px;}
+ .site-update-heading{align-items:flex-start;flex-direction:column;gap:5px;}
+}
