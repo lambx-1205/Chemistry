@@ -100,7 +100,7 @@ function getRDKit(){
  return rdkitInitPromise;
 }
 function countFormulaAtoms(formula){
- var text=String(formula||"").replace(/\\s/g,"");
+ var text=String(formula||"").replace(/[₀₁₂₃₄₅₆₇₈₉]/g,function(d){return "₀₁₂₃₄₅₆₇₈₉".indexOf(d);}).replace(/\\s/g,"");
  var parts=text.match(/[A-Z][a-z]?\\d*/g)||[];
  if(parts.join("")!==text||parts.length===0)return null;
  return parts.reduce(function(sum,part){
