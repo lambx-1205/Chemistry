@@ -126,7 +126,7 @@ var edges = [
 {"id":"e56","from":"aniline","to":"sulfanilic-acid","type":"substitution","label":"スルホン化","condition":"濃硫酸・加熱","name":"アニリンのスルホン化","note":"強酸性・加熱条件で芳香環にスルホ基が導入され、スルファニル酸が得られる。"},
 {"id":"e57","from":"aniline","to":"dimethylaniline","type":"substitution","label":"N-メチル化","condition":"メチル化剤・条件調整","name":"アニリンのN-メチル化","note":"窒素上の水素をメチル基で置換して、N,N-ジメチルアニリンを得る。"},
 {"id":"e58","from":"diazonium","to":"hydroxyazobenzene","type":"substitution","label":"アゾカップリング","condition":"フェノール・塩基性条件","name":"ベンゼンジアゾニウム塩のアゾカップリング","note":"ベンゼンジアゾニウムイオンとフェノールが反応し、p-フェニルアゾフェノールを生じる。"},
-{"id":"e59","from":"toluene","to":"tnt","type":"substitution","label":"ニトロ化","condition":"濃硝酸・濃硫酸・加熱","name":"トルエンのニトロ化","note":"強いニトロ化条件でニトロ基が3つ導入され、2,4,6-トリニトロトルエンが生成する。"},
+{"id":"e59","from":"toluene","to":"tnt","type":"substitution","label":"ニトロ化","condition":"工業的なニトロ化工程（詳細条件は省略）","name":"トルエンのニトロ化","note":"段階的な芳香族置換によって、メチル基に対して2,4,6位にニトロ基をもつ化合物が得られる。"},
 {"id":"e60","from":"sodium-benzenesulfonate","to":"phenol","type":"substitution","label":"アルカリ融解","condition":"NaOH・高温","name":"ベンゼンスルホン酸塩のアルカリ融解","note":"ベンゼンスルホン酸塩を高温の水酸化ナトリウムで処理し、酸処理後にフェノールを得る。"}
 ];
 
