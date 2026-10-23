@@ -143,3 +143,54 @@ a{color:inherit}
  .reaction-card{padding:8px;min-height:194px}
  .reaction-kind{font-size:8px}
 }
+
+
+/* RDKit returns a complete SVG document; the app places it inside these hosts. */
+.main-structure {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  height:280px;
+  flex:1 1 auto;
+  min-height:230px;
+  margin:6px auto;
+  overflow:hidden;
+}
+.main-structure > svg,
+.small-structure > svg {
+  display:block;
+  width:100%;
+  height:100%;
+  max-width:100%;
+  max-height:100%;
+}
+.main-structure svg rect:first-of-type,
+.small-structure svg rect:first-of-type {
+  fill:transparent !important;
+}
+.structure-loading,
+.structure-error {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  height:100%;
+  color:#8a958c;
+  font-size:10px;
+  text-align:center;
+}
+.structure-loading { animation:structure-pulse 1.1s ease-in-out infinite alternate; }
+@keyframes structure-pulse { to { opacity:.45; } }
+.small-structure {
+  width:100%;
+  height:108px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+@media(max-width:620px) {
+  .main-structure { height:205px; min-height:0; flex:1 1 auto; }
+  .small-structure { height:94px; }
+}
