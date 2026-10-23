@@ -15,7 +15,26 @@ var compounds = [
 {id:"aniline",pubchemName:"aniline",smiles:"Nc1ccccc1",name:"フェニルアミン",formula:"C₆H₇N",family:"芳香族アミン",kind:"aromatic",color:"#b8899c",desc:"アニリンとも呼ばれる芳香族アミン。ジアゾ化反応を経て、さまざまな芳香族化合物へつながる。",state:"常温で液体",feature:"ジアゾ化",hint:"アミノ基 −NH₂"},
 {id:"diazonium",pubchemName:"benzenediazonium chloride",smiles:"c1ccccc1[N+]#N",name:"塩化ベンゼンジアゾニウム",formula:"C₆H₅N₂Cl",family:"ジアゾニウム塩",kind:"aromatic",color:"#9c8bb8",desc:"芳香族第一級アミンのジアゾ化で生じる中間体。加水分解などで別の官能基へ変換できる。",state:"水溶液中で扱う中間体",feature:"ジアゾ化・置換",hint:"ジアゾ基 −N₂⁺"},
 {id:"phenol",pubchemName:"phenol",smiles:"Oc1ccccc1",name:"フェノール",formula:"C₆H₆O",family:"芳香族ヒドロキシ化合物",kind:"aromatic",color:"#689b83",desc:"ベンゼン環にヒドロキシ基が直接結合した化合物。アルコールとは異なる弱い酸性を示す。",state:"常温で固体",feature:"弱酸性",hint:"環に直接結合した−OH"},
-{id:"chlorobenzene",pubchemName:"chlorobenzene",smiles:"Clc1ccccc1",name:"クロロベンゼン",formula:"C₆H₅Cl",family:"ハロゲン化芳香族",kind:"aromatic",color:"#c49b64",desc:"ベンゼンの置換反応や、ジアゾニウム塩を経る変換で得られる芳香族ハロゲン化物。",state:"常温で液体",feature:"芳香族置換",hint:"芳香環にCl"}
+{id:"chlorobenzene",pubchemName:"chlorobenzene",smiles:"Clc1ccccc1",name:"クロロベンゼン",formula:"C₆H₅Cl",family:"ハロゲン化芳香族",kind:"aromatic",color:"#c49b64",desc:"ベンゼンの置換反応や、ジアゾニウム塩を経る変換で得られる芳香族ハロゲン化物。",state:"常温で液体",feature:"芳香族置換",hint:"芳香環にCl"},
+{id:"methane",pubchemName:"methane",smiles:"C",name:"メタン",formula:"CH₄",family:"炭化水素",kind:"aliphatic",color:"#7b9fa8",desc:"最も簡単なアルカン。光のもとで塩素と反応し、置換生成物を与える。",state:"気体",feature:"ラジカル置換",hint:"炭素原子1個の飽和炭化水素"},
+{id:"chloromethane",pubchemName:"chloromethane",smiles:"CCl",name:"クロロメタン",formula:"CH₃Cl",family:"ハロゲン化合物",kind:"aliphatic",color:"#d1a15b",desc:"メタンの水素原子1個が塩素原子に置き換わった化合物。水酸化ナトリウム水溶液で加水分解できる。",state:"気体",feature:"置換・加水分解",hint:"C–Cl結合をもつ"},
+{id:"methanol",pubchemName:"methanol",smiles:"CO",name:"メタノール",formula:"CH₄O",family:"アルコール",kind:"aliphatic",color:"#5f9c72",desc:"最も簡単なアルコール。酸化によってホルムアルデヒドを経てギ酸へ変化する。",state:"常温で液体",feature:"酸化",hint:"ヒドロキシ基 −OH"},
+{id:"formaldehyde",pubchemName:"formaldehyde",smiles:"C=O",name:"ホルムアルデヒド",formula:"CH₂O",family:"アルデヒド",kind:"aliphatic",color:"#c58b62",desc:"最も簡単なアルデヒド。酸化によってギ酸を生じる。水溶液はホルマリンと呼ばれる。",state:"気体（水溶液で扱うことが多い）",feature:"酸化",hint:"アルデヒド基 −CHO"},
+{id:"formic-acid",pubchemName:"formic acid",smiles:"O=CO",name:"ギ酸",formula:"CH₂O₂",family:"カルボン酸",kind:"aliphatic",color:"#bd8075",desc:"最も簡単なカルボン酸。アルデヒドの酸化で生じ、還元性を示す。",state:"常温で液体",feature:"酸性・還元性",hint:"カルボキシ基 −COOH"},
+{id:"ethyne",pubchemName:"acetylene",smiles:"C#C",name:"エチン（アセチレン）",formula:"C₂H₂",family:"アルキン",kind:"aliphatic",color:"#6499ad",desc:"炭素間に三重結合をもつ不飽和炭化水素。付加反応を行う。",state:"気体",feature:"付加反応",hint:"炭素間の三重結合"},
+{id:"propane",pubchemName:"propane",smiles:"CCC",name:"プロパン",formula:"C₃H₈",family:"炭化水素",kind:"aliphatic",color:"#7b9fa8",desc:"炭素数3のアルカン。燃料として利用され、置換反応を行う。",state:"気体",feature:"燃焼・置換",hint:"炭素原子3個の飽和鎖式炭化水素"},
+{id:"propene",pubchemName:"propene",smiles:"C=CC",name:"プロペン",formula:"C₃H₆",family:"アルケン",kind:"aliphatic",color:"#6499ad",desc:"炭素数3のアルケン。水素や臭素の付加、水和などを行う。",state:"気体",feature:"付加反応",hint:"炭素間の二重結合"},
+{id:"dibromopropane",pubchemName:"1,2-dibromopropane",smiles:"CC(Br)CBr",name:"1,2-ジブロモプロパン",formula:"C₃H₆Br₂",family:"ハロゲン化合物",kind:"aliphatic",color:"#d1a15b",desc:"プロペンの二重結合に臭素が付加して生じる化合物。",state:"常温で液体",feature:"付加反応",hint:"隣接する炭素に臭素原子"},
+{id:"propan-1-ol",pubchemName:"1-propanol",smiles:"CCCO",name:"1-プロパノール",formula:"C₃H₈O",family:"アルコール",kind:"aliphatic",color:"#5f9c72",desc:"第一級アルコール。酸化するとプロパナールを経てプロピオン酸へ変化する。",state:"常温で液体",feature:"酸化",hint:"末端炭素にヒドロキシ基"},
+{id:"propanal",pubchemName:"propanal",smiles:"CCC=O",name:"プロパナール",formula:"C₃H₆O",family:"アルデヒド",kind:"aliphatic",color:"#c58b62",desc:"第一級アルコールの酸化で生じるアルデヒド。さらに酸化するとプロピオン酸になる。",state:"揮発性の液体",feature:"酸化",hint:"アルデヒド基 −CHO"},
+{id:"propionic-acid",pubchemName:"propionic acid",smiles:"CCC(=O)O",name:"プロピオン酸",formula:"C₃H₆O₂",family:"カルボン酸",kind:"aliphatic",color:"#bd8075",desc:"炭素数3のカルボン酸。アルコールとのエステル化でエステルをつくる。",state:"常温で液体",feature:"酸性・エステル化",hint:"カルボキシ基 −COOH"},
+{id:"propan-2-ol",pubchemName:"2-propanol",smiles:"CC(O)C",name:"2-プロパノール",formula:"C₃H₈O",family:"アルコール",kind:"aliphatic",color:"#5f9c72",desc:"第二級アルコール。酸化するとケトンであるアセトンになる。",state:"常温で液体",feature:"酸化",hint:"中央の炭素にヒドロキシ基"},
+{id:"acetone",pubchemName:"acetone",smiles:"CC(=O)C",name:"アセトン",formula:"C₃H₆O",family:"ケトン",kind:"aliphatic",color:"#c58b62",desc:"最も簡単なケトン。2-プロパノールの酸化で生じる。",state:"常温で液体",feature:"ケトン・酸化",hint:"ケトン基 >C=O"},
+{id:"toluene",pubchemName:"toluene",smiles:"Cc1ccccc1",name:"トルエン",formula:"C₇H₈",family:"芳香族炭化水素",kind:"aromatic",color:"#639b9a",desc:"ベンゼン環にメチル基が結合した芳香族炭化水素。側鎖は強い酸化条件でカルボキシ基へ変化する。",state:"常温で液体",feature:"芳香族置換・側鎖酸化",hint:"ベンゼン環にメチル基"},
+{id:"benzoic-acid",pubchemName:"benzoic acid",smiles:"O=C(O)c1ccccc1",name:"安息香酸",formula:"C₇H₆O₂",family:"芳香族カルボン酸",kind:"aromatic",color:"#bd8075",desc:"ベンゼン環にカルボキシ基が結合した芳香族カルボン酸。トルエンの側鎖酸化で得られる。",state:"常温で固体",feature:"酸性・エステル化",hint:"ベンゼン環にカルボキシ基"},
+{id:"methyl-acetate",pubchemName:"methyl acetate",smiles:"COC(C)=O",name:"酢酸メチル",formula:"C₃H₆O₂",family:"エステル",kind:"aliphatic",color:"#9b8bb7",desc:"酢酸とメタノールのエステル化で生じるエステル。",state:"常温で液体",feature:"エステル化・加水分解",hint:"−COO−結合をもつ"},
+{id:"methyl-benzoate",pubchemName:"methyl benzoate",smiles:"COC(=O)c1ccccc1",name:"安息香酸メチル",formula:"C₈H₈O₂",family:"芳香族エステル",kind:"aromatic",color:"#9b8bb7",desc:"安息香酸とメタノールのエステル化で生じる芳香族エステル。",state:"常温で液体",feature:"エステル化",hint:"芳香環とエステル結合"},
+{id:"glucose",pubchemName:"D-glucose",smiles:"C([C@@H]1[C@H]([C@@H]([C@H](C(O1)O)O)O)O)O",name:"グルコース",formula:"C₆H₁₂O₆",family:"単糖",kind:"sugar",color:"#bc9b67",desc:"代表的な単糖。酵母の酵素によるアルコール発酵でエタノールと二酸化炭素を生じる。",state:"常温で固体",feature:"還元性・アルコール発酵",hint:"多数のヒドロキシ基をもつ"}
 ];
 var edges = [
 {id:"e1",from:"ethane",to:"chloroethane",type:"substitution",label:"塩素置換",condition:"Cl₂・光",name:"ラジカル置換反応",note:"水素原子の一部が塩素原子に置き換わる。"},
@@ -34,7 +53,24 @@ var edges = [
 {id:"e14",from:"nitrobenzene",to:"aniline",type:"oxidation",label:"還元",condition:"還元剤",name:"ニトロ基の還元",note:"ニトロ基がアミノ基へ変換される。"},
 {id:"e15",from:"aniline",to:"diazonium",type:"substitution",label:"ジアゾ化",condition:"NaNO₂・塩酸・低温",name:"ジアゾ化反応",note:"芳香族第一級アミンからジアゾニウム塩を得る。"},
 {id:"e16",from:"diazonium",to:"phenol",type:"substitution",label:"加水分解",condition:"水・加温",name:"ジアゾニウム塩の変換",note:"ジアゾ基がヒドロキシ基に置き換わる。"},
-{id:"e17",from:"diazonium",to:"chlorobenzene",type:"substitution",label:"塩素置換",condition:"CuClなど",name:"ジアゾニウム塩の置換",note:"ジアゾ基を塩素原子に置き換える代表的な変換。"}
+{id:"e17",from:"diazonium",to:"chlorobenzene",type:"substitution",label:"塩素置換",condition:"CuClなど",name:"ジアゾニウム塩の置換",note:"ジアゾ基を塩素原子に置き換える代表的な変換。"},
+{id:"e18",from:"methane",to:"chloromethane",type:"substitution",label:"塩素置換",condition:"Cl₂・光",name:"メタンのラジカル置換",note:"光のもとでメタンの水素原子1個が塩素原子に置き換わり、クロロメタンが生じる。"},
+{id:"e19",from:"chloromethane",to:"methanol",type:"substitution",label:"加水分解",condition:"NaOH水溶液・加熱",name:"ハロゲン化アルキルの加水分解",note:"塩素原子がヒドロキシ基に置き換わり、メタノールが生じる。"},
+{id:"e20",from:"methanol",to:"formaldehyde",type:"oxidation",label:"酸化",condition:"CuO・加熱など",name:"メタノールの酸化",note:"メタノールを穏やかに酸化するとホルムアルデヒドが得られる。"},
+{id:"e21",from:"formaldehyde",to:"formic-acid",type:"oxidation",label:"さらに酸化",condition:"酸化剤",name:"ホルムアルデヒドの酸化",note:"アルデヒド基がカルボキシ基へ酸化され、ギ酸が生じる。"},
+{id:"e22",from:"ethyne",to:"ethene",type:"addition",label:"水素付加",condition:"H₂・部分水素化触媒",name:"エチンの部分水素化",note:"三重結合に水素が付加して二重結合になる。触媒や条件により、さらに水素化が進む場合がある。"},
+{id:"e23",from:"ethyne",to:"ethane",type:"addition",label:"完全水素化",condition:"H₂過剰・触媒",name:"エチンの水素化",note:"三重結合に水素が付加し、飽和炭化水素のエタンになる。"},
+{id:"e24",from:"propene",to:"propane",type:"addition",label:"水素付加",condition:"H₂・Niなど",name:"プロペンの接触水素化",note:"二重結合に水素が付加してプロパンになる。"},
+{id:"e25",from:"propene",to:"dibromopropane",type:"addition",label:"臭素付加",condition:"Br₂",name:"プロペンへの臭素付加",note:"二重結合に臭素が付加し、隣接する炭素に臭素原子をもつ生成物になる。"},
+{id:"e26",from:"propene",to:"propan-2-ol",type:"addition",label:"水和",condition:"酸触媒",name:"プロペンの水和",note:"二重結合に水の成分が付加し、主に2-プロパノールが生じる。"},
+{id:"e27",from:"propan-2-ol",to:"acetone",type:"oxidation",label:"酸化",condition:"酸化剤",name:"第二級アルコールの酸化",note:"第二級アルコールのヒドロキシ基をもつ炭素が酸化され、ケトンのアセトンになる。"},
+{id:"e28",from:"propan-1-ol",to:"propanal",type:"oxidation",label:"酸化",condition:"酸化剤・穏やかな条件",name:"第一級アルコールの酸化",note:"1-プロパノールからアルデヒドのプロパナールが生じる。"},
+{id:"e29",from:"propanal",to:"propionic-acid",type:"oxidation",label:"さらに酸化",condition:"酸化剤",name:"プロパナールの酸化",note:"アルデヒド基がカルボキシ基へ変化し、プロピオン酸になる。"},
+{id:"e30",from:"acetic-acid",to:"methyl-acetate",type:"substitution",label:"エステル化",condition:"メタノール・濃硫酸・加熱",name:"酢酸とメタノールのエステル化",note:"酢酸とメタノールから、エステルの酢酸メチルと水が生じる。"},
+{id:"e31",from:"benzene",to:"toluene",type:"substitution",label:"メチル化",condition:"CH₃Cl・AlCl₃など",name:"フリーデル・クラフツ反応",note:"ベンゼン環にメチル基を導入し、トルエンを得る芳香族求電子置換反応。"},
+{id:"e32",from:"toluene",to:"benzoic-acid",type:"oxidation",label:"側鎖酸化",condition:"熱KMnO₄など・酸性処理",name:"トルエンの側鎖酸化",note:"ベンゼン環に結合したメチル基が強い酸化条件でカルボキシ基へ変化し、安息香酸になる。"},
+{id:"e33",from:"benzoic-acid",to:"methyl-benzoate",type:"substitution",label:"エステル化",condition:"メタノール・酸触媒・加熱",name:"安息香酸のエステル化",note:"安息香酸とメタノールから安息香酸メチルと水が生じる。"},
+{id:"e34",from:"glucose",to:"ethanol",type:"other",label:"アルコール発酵",condition:"酵母・嫌気条件",name:"グルコースのアルコール発酵",note:"グルコースからエタノールと二酸化炭素が生じる。反応式全体では二酸化炭素も生成物に含まれる。"}
 ];
 var byId={},byName={};
 compounds.forEach(function(c){byId[c.id]=c;byName[c.name.toLocaleLowerCase()]=c;if(c.pubchemName)byName[c.pubchemName.toLocaleLowerCase()]=c;});
