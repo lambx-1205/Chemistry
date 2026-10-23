@@ -65,7 +65,27 @@ var compounds = [
 {"id":"anthracene","pubchemName":"anthracene","smiles":"c1ccc2cc3ccccc3cc2c1","name":"アントラセン","formula":"C₁₄H₁₀","family":"縮合多環芳香族炭化水素","kind":"aromatic","color":"#639b9a","desc":"ベンゼン環3つが直線状に縮合した芳香族炭化水素。染料などの原料。","state":"固体","feature":"芳香族化合物","hint":"直線状に縮合した三環構造"},
 {"id":"p-phenylenediamine","pubchemName":"p-phenylenediamine","smiles":"Nc1ccc(N)cc1","name":"p-フェニレンジアミン","formula":"C₆H₈N₂","family":"芳香族ジアミン","kind":"aromatic","color":"#b8899c","desc":"ベンゼン環の1,4位にアミノ基を2つもつ化合物。ポリマー原料になる。","state":"固体","feature":"重縮合","hint":"p-ベンゼンジアミン"},
 {"id":"m-phenylenediamine","pubchemName":"m-phenylenediamine","smiles":"Nc1cc(N)ccc1","name":"m-フェニレンジアミン","formula":"C₆H₈N₂","family":"芳香族ジアミン","kind":"aromatic","color":"#b8899c","desc":"ベンゼン環の1,3位にアミノ基を2つもつ化合物。ポリマー原料になる。","state":"固体","feature":"重縮合","hint":"m-ベンゼンジアミン"},
-{"id":"sulfanilamide","pubchemName":"sulfanilamide","smiles":"Nc1ccc(S(N)(=O)=O)cc1","name":"スルファニルアミド","formula":"C₆H₈N₂O₂S","family":"芳香族スルホンアミド","kind":"aromatic","color":"#b8899c","desc":"アミノ基とスルホンアミド基をもつ化合物。サルファ剤の一種。","state":"固体","feature":"芳香族アミン・スルホンアミド","hint":"p-アミノベンゼンスルホンアミド"}
+{"id":"sulfanilamide","pubchemName":"sulfanilamide","smiles":"Nc1ccc(S(N)(=O)=O)cc1","name":"スルファニルアミド","formula":"C₆H₈N₂O₂S","family":"芳香族スルホンアミド","kind":"aromatic","color":"#b8899c","desc":"アミノ基とスルホンアミド基をもつ化合物。サルファ剤の一種。","state":"固体","feature":"芳香族アミン・スルホンアミド","hint":"p-アミノベンゼンスルホンアミド"},
+{"id":"butyric-acid","pubchemName":"butyric acid","smiles":"CCCC(=O)O","name":"酪酸（酪酸／ブタン酸）","formula":"C₄H₈O₂","family":"飽和脂肪酸","kind":"aliphatic","color":"#bd8075","desc":"炭素数4の短鎖脂肪酸。乳製品などに含まれる。","state":"常温で液体","feature":"カルボン酸","hint":"炭素数4"},
+{"id":"valeric-acid","pubchemName":"valeric acid","smiles":"CCCCC(=O)O","name":"吉草酸（ペンタン酸）","formula":"C₅H₁₀O₂","family":"飽和脂肪酸","kind":"aliphatic","color":"#bd8075","desc":"炭素数5の脂肪酸。","state":"常温で液体","feature":"カルボン酸","hint":"炭素数5"},
+{"id":"caproic-acid","pubchemName":"caproic acid","smiles":"CCCCCC(=O)O","name":"カプロン酸（ヘキサン酸）","formula":"C₆H₁₂O₂","family":"飽和脂肪酸","kind":"aliphatic","color":"#bd8075","desc":"炭素数6の脂肪酸。","state":"常温で液体","feature":"カルボン酸","hint":"炭素数6"},
+{"id":"caprylic-acid","pubchemName":"caprylic acid","smiles":"CCCCCCCC(=O)O","name":"カプリル酸（オクタン酸）","formula":"C₈H₁₆O₂","family":"飽和脂肪酸","kind":"aliphatic","color":"#bd8075","desc":"炭素数8の中鎖脂肪酸。","state":"常温で液体","feature":"カルボン酸","hint":"炭素数8"},
+{"id":"capric-acid","pubchemName":"capric acid","smiles":"CCCCCCCCCC(=O)O","name":"カプリン酸（デカン酸）","formula":"C₁₀H₂₀O₂","family":"飽和脂肪酸","kind":"aliphatic","color":"#bd8075","desc":"炭素数10の中鎖脂肪酸。","state":"常温で液体","feature":"カルボン酸","hint":"炭素数10"},
+{"id":"lauric-acid","pubchemName":"lauric acid","smiles":"CCCCCCCCCCCC(=O)O","name":"ラウリン酸","formula":"C₁₂H₂₄O₂","family":"飽和脂肪酸","kind":"aliphatic","color":"#bd8075","desc":"炭素数12の飽和脂肪酸。ヤシ油などに多い。","state":"固体","feature":"エステル化・けん化","hint":"炭素数12"},
+{"id":"myristic-acid","pubchemName":"myristic acid","smiles":"CCCCCCCCCCCCCC(=O)O","name":"ミリスチン酸","formula":"C₁₄H₂₈O₂","family":"飽和脂肪酸","kind":"aliphatic","color":"#bd8075","desc":"炭素数14の飽和脂肪酸。","state":"固体","feature":"エステル化・けん化","hint":"炭素数14"},
+{"id":"palmitic-acid","pubchemName":"palmitic acid","smiles":"CCCCCCCCCCCCCCCC(=O)O","name":"パルミチン酸","formula":"C₁₆H₃₂O₂","family":"飽和脂肪酸","kind":"aliphatic","color":"#bd8075","desc":"炭素数16の代表的な飽和脂肪酸。","state":"固体","feature":"エステル化・けん化","hint":"炭素数16"},
+{"id":"stearic-acid","pubchemName":"stearic acid","smiles":"CCCCCCCCCCCCCCCCCC(=O)O","name":"ステアリン酸","formula":"C₁₈H₃₆O₂","family":"飽和脂肪酸","kind":"aliphatic","color":"#bd8075","desc":"炭素数18の飽和脂肪酸。","state":"固体","feature":"エステル化・けん化","hint":"炭素数18・二重結合なし"},
+{"id":"oleic-acid","pubchemName":"oleic acid","smiles":"CCCCCCCC/C=C\\CCCCCCCC(=O)O","name":"オレイン酸","formula":"C₁₈H₃₄O₂","family":"不飽和脂肪酸","kind":"aliphatic","color":"#bd8075","desc":"炭素数18で二重結合を1つもつ代表的な不飽和脂肪酸。","state":"常温で液体","feature":"付加反応・水素添加","hint":"二重結合1個"},
+{"id":"linoleic-acid","pubchemName":"linoleic acid","smiles":"CCCCCC/C=C\\C/C=C\\CCCCCCCC(=O)O","name":"リノール酸","formula":"C₁₈H₃₂O₂","family":"不飽和脂肪酸","kind":"aliphatic","color":"#bd8075","desc":"炭素数18で二重結合を2つもつ不飽和脂肪酸。","state":"常温で液体","feature":"付加反応・水素添加","hint":"二重結合2個"},
+{"id":"linolenic-acid","pubchemName":"alpha-linolenic acid","smiles":"CC/C=C\\C/C=C\\C/C=C\\CCCCCCCC(=O)O","name":"α-リノレン酸","formula":"C₁₈H₃₀O₂","family":"不飽和脂肪酸","kind":"aliphatic","color":"#bd8075","desc":"炭素数18で二重結合を3つもつ不飽和脂肪酸。","state":"常温で液体","feature":"付加反応・水素添加","hint":"二重結合3個"},
+{"id":"arachidonic-acid","pubchemName":"arachidonic acid","smiles":"CCCCC/C=C\\C/C=C\\C/C=C\\C/C=C\\CCCC(=O)O","name":"アラキドン酸","formula":"C₂₀H₃₂O₂","family":"不飽和脂肪酸","kind":"aliphatic","color":"#bd8075","desc":"炭素数20で二重結合を4つもつ多価不飽和脂肪酸。","state":"常温で液体","feature":"多価不飽和脂肪酸","hint":"二重結合4個"},
+{"id":"glycerol","pubchemName":"glycerol","smiles":"OCC(O)CO","name":"グリセリン","formula":"C₃H₈O₃","family":"多価アルコール","kind":"aliphatic","color":"#5f9c72","desc":"ヒドロキシ基を3つもつ三価アルコール。油脂の構成成分。","state":"常温で液体","feature":"エステル化","hint":"三価アルコール"},
+{"id":"tristearin","pubchemName":"tristearin","smiles":"CCCCCCCCCCCCCCCCCC(=O)OCC(COC(=O)CCCCCCCCCCCCCCCCC)OC(=O)CCCCCCCCCCCCCCCCC","name":"トリステアリン","formula":"C₅₇H₁₁₀O₆","family":"油脂（トリグリセリド）","kind":"aliphatic","color":"#c58b62","desc":"グリセリンとステアリン酸3分子からできるトリアシルグリセロール。","state":"固体","feature":"エステル化・けん化","hint":"ステアリン酸のトリグリセリド"},
+{"id":"triolein","pubchemName":"triolein","smiles":"CCCCCCCC/C=C\\CCCCCCCC(=O)OCC(COC(=O)CCCCCCCC/C=C\\CCCCCCCC)OC(=O)CCCCCCCC/C=C\\CCCCCCCC","name":"トリオレイン","formula":"C₅₇H₁₀₄O₆","family":"油脂（トリグリセリド）","kind":"aliphatic","color":"#c58b62","desc":"グリセリンとオレイン酸3分子からできる代表的な液状油の成分。","state":"常温で液体","feature":"エステル化・水素添加","hint":"オレイン酸のトリグリセリド"},
+{"id":"sodium-stearate","pubchemName":"sodium stearate","smiles":"[Na+].CCCCCCCCCCCCCCCCC(=O)[O-]","name":"ステアリン酸ナトリウム","formula":"C₁₈H₃₅NaO₂","family":"脂肪酸塩（石けん）","kind":"aliphatic","color":"#8799a9","desc":"ステアリン酸のナトリウム塩。石けんの主成分の一つ。","state":"固体","feature":"中和・石けん","hint":"長鎖カルボン酸のナトリウム塩"},
+{"id":"sodium-oleate","pubchemName":"sodium oleate","smiles":"[Na+].CCCCCCCC/C=C\\CCCCCCCC(=O)[O-]","name":"オレイン酸ナトリウム","formula":"C₁₈H₃₃NaO₂","family":"脂肪酸塩（石けん）","kind":"aliphatic","color":"#8799a9","desc":"オレイン酸のナトリウム塩。不飽和脂肪酸由来の石けん。","state":"固体","feature":"中和・石けん","hint":"不飽和脂肪酸のナトリウム塩"},
+{"id":"methyl-stearate","pubchemName":"methyl stearate","smiles":"CCCCCCCCCCCCCCCCCC(=O)OC","name":"ステアリン酸メチル","formula":"C₁₉H₃₈O₂","family":"脂肪酸エステル","kind":"aliphatic","color":"#9b8bb7","desc":"ステアリン酸とメタノールから得られるエステル。","state":"固体","feature":"エステル化・加水分解","hint":"長鎖脂肪酸のメチルエステル"},
+{"id":"sodium-palmitate","pubchemName":"sodium palmitate","smiles":"[Na+].CCCCCCCCCCCCCCC(=O)[O-]","name":"パルミチン酸ナトリウム","formula":"C₁₆H₃₁NaO₂","family":"脂肪酸塩（石けん）","kind":"aliphatic","color":"#8799a9","desc":"パルミチン酸のナトリウム塩。石けんを構成する脂肪酸塩の一つ。","state":"固体","feature":"中和・石けん","hint":"長鎖カルボン酸のナトリウム塩"}
 ];
 var edges = [
 {id:"e1",from:"ethane",to:"chloroethane",type:"substitution",label:"塩素置換",condition:"Cl₂・光",name:"ラジカル置換反応",note:"水素原子の一部が塩素原子に置き換わる。"},
@@ -127,7 +147,27 @@ var edges = [
 {"id":"e57","from":"aniline","to":"dimethylaniline","type":"substitution","label":"N-メチル化","condition":"メチル化剤・条件調整","name":"アニリンのN-メチル化","note":"窒素上の水素をメチル基で置換して、N,N-ジメチルアニリンを得る。"},
 {"id":"e58","from":"diazonium","to":"hydroxyazobenzene","type":"substitution","label":"アゾカップリング","condition":"フェノール・塩基性条件","name":"ベンゼンジアゾニウム塩のアゾカップリング","note":"ベンゼンジアゾニウムイオンとフェノールが反応し、p-フェニルアゾフェノールを生じる。"},
 {"id":"e59","from":"toluene","to":"tnt","type":"substitution","label":"ニトロ化","condition":"工業的なニトロ化工程（詳細条件は省略）","name":"トルエンのニトロ化","note":"段階的な芳香族置換によって、メチル基に対して2,4,6位にニトロ基をもつ化合物が得られる。"},
-{"id":"e60","from":"sodium-benzenesulfonate","to":"phenol","type":"substitution","label":"アルカリ融解","condition":"NaOH・高温","name":"ベンゼンスルホン酸塩のアルカリ融解","note":"ベンゼンスルホン酸塩を高温の水酸化ナトリウムで処理し、酸処理後にフェノールを得る。"}
+{"id":"e60","from":"sodium-benzenesulfonate","to":"phenol","type":"substitution","label":"アルカリ融解","condition":"NaOH・高温","name":"ベンゼンスルホン酸塩のアルカリ融解","note":"ベンゼンスルホン酸塩を高温の水酸化ナトリウムで処理し、酸処理後にフェノールを得る。"},
+{"id":"e61","from":"propionic-acid","to":"butyric-acid","type":"other","label":"炭素鎖の比較","condition":"—","name":"脂肪酸の炭素鎖の比較","note":"プロピオン酸と酪酸は炭素数の異なるカルボン酸であり、この矢印は反応を表すものではなく、系列の比較を示す。"},
+{"id":"e62","from":"butyric-acid","to":"valeric-acid","type":"other","label":"炭素鎖の比較","condition":"—","name":"脂肪酸の炭素数の比較","note":"酪酸と吉草酸は隣り合う同族体。矢印は反応経路ではなく炭素鎖の比較を示す。"},
+{"id":"e63","from":"valeric-acid","to":"caproic-acid","type":"other","label":"炭素鎖の比較","condition":"—","name":"脂肪酸の炭素数の比較","note":"吉草酸とカプロン酸は隣り合う同族体。"},
+{"id":"e64","from":"caproic-acid","to":"caprylic-acid","type":"other","label":"炭素鎖の比較","condition":"—","name":"中鎖脂肪酸の比較","note":"カプロン酸とカプリル酸は炭素数の異なる脂肪酸。矢印は反応を表さない。"},
+{"id":"e65","from":"caprylic-acid","to":"capric-acid","type":"other","label":"炭素鎖の比較","condition":"—","name":"中鎖脂肪酸の比較","note":"カプリル酸とカプリン酸は炭素数の異なる脂肪酸。"},
+{"id":"e66","from":"capric-acid","to":"lauric-acid","type":"other","label":"炭素鎖の比較","condition":"—","name":"脂肪酸の炭素鎖の比較","note":"カプリン酸とラウリン酸は隣り合う同族体。"},
+{"id":"e67","from":"lauric-acid","to":"myristic-acid","type":"other","label":"炭素鎖の比較","condition":"—","name":"脂肪酸の炭素鎖の比較","note":"ラウリン酸とミリスチン酸は隣り合う同族体。"},
+{"id":"e68","from":"myristic-acid","to":"palmitic-acid","type":"other","label":"炭素鎖の比較","condition":"—","name":"脂肪酸の炭素鎖の比較","note":"ミリスチン酸とパルミチン酸は隣り合う同族体。"},
+{"id":"e69","from":"palmitic-acid","to":"stearic-acid","type":"other","label":"炭素鎖の比較","condition":"—","name":"長鎖脂肪酸の比較","note":"パルミチン酸とステアリン酸は炭素数16と18の飽和脂肪酸。矢印は反応を表さない。"},
+{"id":"e70","from":"stearic-acid","to":"oleic-acid","type":"other","label":"不飽和度の比較","condition":"—","name":"飽和脂肪酸と不飽和脂肪酸の比較","note":"ステアリン酸とオレイン酸はどちらも炭素数18だが、オレイン酸には二重結合が1つある。"},
+{"id":"e71","from":"oleic-acid","to":"linoleic-acid","type":"other","label":"不飽和度の比較","condition":"—","name":"不飽和脂肪酸の比較","note":"オレイン酸は二重結合1つ、リノール酸は2つをもつ。"},
+{"id":"e72","from":"linoleic-acid","to":"linolenic-acid","type":"other","label":"不飽和度の比較","condition":"—","name":"多価不飽和脂肪酸の比較","note":"リノール酸とα-リノレン酸は二重結合の数が異なる。"},
+{"id":"e73","from":"linolenic-acid","to":"arachidonic-acid","type":"other","label":"不飽和度の比較","condition":"—","name":"多価不飽和脂肪酸の比較","note":"α-リノレン酸とアラキドン酸は炭素数と二重結合の数が異なる。"},
+{"id":"e74","from":"glycerol","to":"tristearin","type":"other","label":"エステル化","condition":"ステアリン酸・触媒","name":"グリセリンとステアリン酸からの油脂形成","note":"グリセリンの3つのヒドロキシ基が脂肪酸とエステル結合をつくると、トリステアリンのようなトリグリセリドが得られる。"},
+{"id":"e75","from":"glycerol","to":"triolein","type":"other","label":"エステル化","condition":"オレイン酸・触媒","name":"グリセリンとオレイン酸からの油脂形成","note":"グリセリンとオレイン酸からトリオレインのようなトリグリセリドができる。"},
+{"id":"e76","from":"stearic-acid","to":"sodium-stearate","type":"other","label":"中和","condition":"NaOH","name":"ステアリン酸の中和","note":"脂肪酸のカルボキシ基を塩にすると、ステアリン酸ナトリウムが得られる。"},
+{"id":"e77","from":"oleic-acid","to":"sodium-oleate","type":"other","label":"中和","condition":"NaOH","name":"オレイン酸の中和","note":"オレイン酸のカルボキシ基を中和するとオレイン酸ナトリウムになる。"},
+{"id":"e78","from":"palmitic-acid","to":"sodium-palmitate","type":"other","label":"中和","condition":"NaOH","name":"パルミチン酸の中和","note":"パルミチン酸を中和してパルミチン酸ナトリウムを得る。"},
+{"id":"e79","from":"stearic-acid","to":"methyl-stearate","type":"other","label":"エステル化","condition":"メタノール・酸触媒","name":"ステアリン酸のエステル化","note":"ステアリン酸とメタノールからステアリン酸メチルが得られる。"},
+{"id":"e80","from":"tristearin","to":"glycerol","type":"other","label":"けん化","condition":"NaOH水溶液・加熱","name":"油脂のけん化","note":"トリグリセリドの塩基性加水分解ではグリセリンと脂肪酸塩が生じる。ここでは主要な構成成分を示す。"}
 ];
 
 global.OrganicAtlasData={compounds:compounds,edges:edges};
