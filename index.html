@@ -3,122 +3,78 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#f4f6f1">
-<meta name="description" content="高校有機化学の化合物と反応経路を、地図のようにたどれる学習ツール。">
-<title>Organic Atlas — 有機化学 MAP</title>
+<meta name="theme-color" content="#f5f6f2">
+<meta name="description" content="高校有機化学の化合物を検索し、構造式と一段階の反応を確認する。">
+<title>Organic Atlas — 化合物</title>
+<link rel="preconnect" href="https://pubchem.ncbi.nlm.nih.gov">
 <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-<header class="topbar">
-  <div class="brand" aria-label="Organic Atlas">
-    <div class="brand-mark"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3.1" stroke="white" stroke-width="1.6"/><ellipse cx="12" cy="12" rx="9.2" ry="4.2" stroke="white" stroke-width="1.25" transform="rotate(45 12 12)"/><ellipse cx="12" cy="12" rx="9.2" ry="4.2" stroke="white" stroke-width="1.25" transform="rotate(-45 12 12)"/><circle cx="18.6" cy="5.6" r="1.5" fill="#c8e2c8"/></svg></div>
-    <div><div class="brand-name">Organic Atlas</div><div class="brand-sub">高校有機化学 MAP</div></div>
-  </div>
-  <nav class="topnav" aria-label="メインナビゲーション">
-    <button class="nav-btn active" id="nav-map">反応マップ</button>
-    <button class="nav-btn" id="nav-compounds">化合物を探す</button>
-    <button class="nav-btn quiz" id="nav-quiz">学習モード ↗</button>
-  </nav>
-  <div class="top-right"><span class="curriculum"><span class="status-dot"></span>高校化学 · 有機分野</span></div>
-</header>
-
-<main class="app">
-  <aside class="panel sidebar">
-    <section>
-      <div class="search-title-row"><span class="eyebrow">ROUTE PLANNER</span><span class="step-badge">PATHFINDER</span></div>
-      <h2 class="section-heading">反応の道筋を探す</h2>
-      <p class="section-copy">出発物質と目的物質を選ぶと、反応をたどるルートを表示する。</p>
-    </section>
-    <section aria-label="反応経路検索">
-      <div class="field">
-        <label for="from-input">START · 出発物質</label>
-        <div class="field-row"><span class="field-icon" aria-hidden="true"></span><input id="from-input" list="compound-options" value="エタノール" autocomplete="off" placeholder="例：エタノール"></div>
-      </div>
-      <div class="field-row swap-row">
-        <div class="route-divider"></div>
-        <button class="swap-btn" id="swap-route" aria-label="出発物質と目的物質を入れ替え" title="入れ替え"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 7h12l-3-3M17 17H5l3 3"/></svg></button>
-        <div class="route-divider"></div>
-      </div>
-      <div class="field">
-        <label for="to-input">DESTINATION · 目的物質</label>
-        <div class="field-row"><span class="field-icon to" aria-hidden="true"></span><input id="to-input" list="compound-options" value="酢酸" autocomplete="off" placeholder="例：酢酸"></div>
-      </div>
-      <datalist id="compound-options"></datalist>
-      <button class="primary-btn" id="find-route"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4M8 10.5h5M10.5 8v5"/></svg>反応経路を検索</button>
-      <div class="quick-routes">
-        <button class="chip" data-from="エタノール" data-to="酢酸">酸化ルート</button>
-        <button class="chip" data-from="エテン" data-to="エタノール">水和反応</button>
-        <button class="chip" data-from="ニトロベンゼン" data-to="フェニルアミン">芳香族の還元</button>
-      </div>
-    </section>
-    <div class="rule"></div>
-    <section class="route-output" aria-live="polite">
-      <div class="route-head"><strong>検索したルート</strong><span class="route-count" id="route-count">2 REACTIONS</span></div>
-      <div id="route-results"></div>
-    </section>
-    <div class="rule"></div>
-    <section>
-      <div class="eyebrow explore-eyebrow">EXPLORE BY REGION</div>
-      <div class="filter-row" role="group" aria-label="化合物の分類">
-        <button class="filter-btn active" data-filter="all">すべて</button>
-        <button class="filter-btn" data-filter="aliphatic">脂肪族</button>
-        <button class="filter-btn" data-filter="aromatic">芳香族</button>
-      </div>
-    </section>
-    <section class="learn-note">
-      <div class="learn-note-title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#578464" stroke-width="1.8"><path d="M12 3 3.5 7.5 12 12l8.5-4.5L12 3Z"/><path d="M3.5 12 12 16.5l8.5-4.5M3.5 16.5 12 21l8.5-4.5"/></svg>この地図の使い方</div>
-      <p>化合物をクリックして詳細を確認。始点・終点に設定すれば、反応経路を検索できる。線は反応、丸は化合物を表す。</p>
-    </section>
-  </aside>
-
-  <section class="panel map-panel" aria-label="有機化学の反応マップ">
-    <div class="map-top">
-      <div class="map-heading"><div class="eyebrow">REACTION NETWORK / 01</div><h1>有機化学の世界を、地図で歩く。</h1><p>化合物と反応のつながりを、ひとつずつ。</p></div>
-      <div class="map-tools">
-        <button class="map-tool" id="zoom-in" title="拡大" aria-label="拡大"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M10.5 7v7M7 10.5h7M16 16l4 4"/></svg></button>
-        <button class="map-tool" id="zoom-out" title="縮小" aria-label="縮小"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M7 10.5h7M16 16l4 4"/></svg></button>
-        <button class="map-tool" id="reset-map" title="全体表示" aria-label="全体表示"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/><path d="M9 9h6v6H9z"/></svg></button>
-      </div>
-    </div>
-    <svg class="map-canvas" id="reaction-map" viewBox="0 0 1000 760" role="img" aria-label="化合物同士の反応ネットワーク。ノードをクリックすると詳細を表示。">
-      <defs>
-        <pattern id="map-grid" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r="1" fill="#d6dfd4"/></pattern>
-        <marker id="arrow" markerWidth="7" markerHeight="7" refX="5.2" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#b1beb0"/></marker>
-        <marker id="arrow-active" markerWidth="7" markerHeight="7" refX="5.2" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#d67e46"/></marker>
-      </defs>
-      <rect width="1000" height="760" fill="#eef2eb"/>
-      <rect width="1000" height="760" fill="url(#map-grid)"/>
-      <g id="map-world"></g>
-    </svg>
-    <div class="map-caption">
-      <div class="legend">
-        <span class="legend-item"><i class="legend-dot substitution-legend"></i>置換</span>
-        <span class="legend-item"><i class="legend-dot oxidation-legend"></i>酸化・還元</span>
-        <span class="legend-item"><i class="legend-dot addition-legend"></i>付加</span>
-        <span class="legend-item"><i class="legend-dot elimination-legend"></i>脱離</span>
-        <span class="legend-item"><i class="legend-dot polymerization-legend"></i>重合</span>
-      </div>
-      <div class="map-hint">ドラッグで移動 · ホイールで拡大縮小</div>
-    </div>
-  </section>
-
-  <aside class="panel rightbar">
-    <div class="detail-top"><span class="eyebrow">COMPOUND PROFILE</span><span class="selected-label">選択中</span></div>
-    <section class="compound-hero" id="compound-detail" aria-live="polite"></section>
-    <section>
-      <h3 class="mini-heading">化合物データ</h3>
-      <div class="property-list" id="compound-properties"></div>
-    </section>
-    <section>
-      <h3 class="mini-heading">この物質から進める反応</h3>
-      <div class="detail-reactions" id="compound-reactions"></div>
-    </section>
-    <div class="right-foot">表示される反応は高校化学の学習用サンプル。条件や反応の向きは代表例であり、実験手順を示すものではありません。</div>
-  </aside>
-</main>
-<div class="toast" id="toast" role="status"></div>
-
 <script src="https://unpkg.com/smiles-drawer@2.2.1/dist/smiles-drawer.min.js" defer></script>
 <script src="script.js" defer></script>
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" id="home-link" href="./" aria-label="Organic Atlas ホーム">
+    <span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 32 32" width="27" height="27" fill="none"><path d="M6 20.5 13 7l13 5-7 13-13-4.5Z" stroke="currentColor" stroke-width="1.6"/><circle cx="13" cy="7" r="2" fill="currentColor"/><circle cx="26" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="25" r="2" fill="currentColor"/><circle cx="6" cy="20.5" r="2" fill="currentColor"/></svg></span>
+    <span class="brand-wordmark"><strong>Organic Atlas</strong><span>HIGH SCHOOL ORGANIC CHEMISTRY</span></span>
+  </a>
+  <span class="header-label"><span class="header-dot"></span>COMPOUND INDEX</span>
+</header>
+
+<main class="page-shell">
+  <form class="search-bar" id="search-form" role="search">
+    <svg class="search-icon" viewBox="0 0 24 24" width="21" height="21" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    <label class="visually-hidden" for="compound-search">化合物名で検索</label>
+    <input id="compound-search" name="compound" list="compound-options" autocomplete="off" spellcheck="false" placeholder="化合物名を入力  /  Search a compound">
+    <datalist id="compound-options"></datalist>
+    <button class="clear-search" type="button" id="clear-search" aria-label="検索欄をクリア">×</button>
+    <button class="search-submit" id="search-button" type="submit" aria-label="検索"><span>検索</span><span aria-hidden="true">↵</span></button>
+  </form>
+  <div class="search-meta">
+    <span class="search-status" id="search-status" aria-live="polite"></span>
+    <span class="local-index">LOCAL INDEX <b id="local-count">15</b></span>
+  </div>
+
+  <section class="compound-main" id="compound-main" aria-live="polite" hidden>
+    <div class="compound-overview">
+      <div class="structure-panel">
+        <div class="panel-kicker"><span>MOLECULAR STRUCTURE</span><span class="structure-source" id="structure-source">STRUCTURE</span></div>
+        <svg class="main-structure" id="main-structure" viewBox="0 0 440 270" role="img" aria-label="選択した化合物の構造式"></svg>
+        <div class="structure-foot"><span class="bond-key"><i></i><i></i><i></i></span><span>2D STRUCTURE</span></div>
+      </div>
+      <div class="identity-panel">
+        <div class="compound-family" id="compound-family">アルコール</div>
+        <h1 id="compound-name">エタノール</h1>
+        <div class="formula-display" id="compound-formula">C₂H₆O</div>
+        <div class="identity-rule"></div>
+        <div class="facts-grid" id="compound-facts"></div>
+        <a class="pubchem-link" id="pubchem-link" href="https://pubchem.ncbi.nlm.nih.gov/" target="_blank" rel="noopener noreferrer">PubChem <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+    <section class="one-step-section">
+      <div class="section-heading">
+        <div><span class="section-eyebrow">REACTION NEIGHBORS</span><h2>1反応先</h2></div>
+        <div class="neighbor-count"><b id="one-step-count">02</b><span>COMPOUNDS</span></div>
+      </div>
+      <div class="reaction-grid" id="one-step-results"></div>
+    </section>
+    <footer class="page-foot"><span>ORGANIC ATLAS</span><span>STRUCTURE DATA · PUBCHEM</span></footer>
+  </section>
+
+  <section class="empty-compound" id="compound-empty" hidden>
+    <div class="empty-symbol"><svg viewBox="0 0 100 100" width="84" height="84" fill="none" aria-hidden="true"><path d="m20 33 27-16 28 16v33L47 83 20 66V33Z" stroke="currentColor" stroke-width="1.5"/><path d="m20 33 27 17 28-17M47 50v33" stroke="currentColor" stroke-width="1.5"/><circle cx="47" cy="17" r="3" fill="currentColor"/><circle cx="75" cy="33" r="3" fill="currentColor"/><circle cx="20" cy="33" r="3" fill="currentColor"/></svg></div>
+    <span class="empty-overline">COMPOUND NOT FOUND</span>
+    <h1>化合物が見つかりません</h1>
+    <p>名前を確認して、もう一度検索してください。</p>
+  </section>
+
+  <section class="starter-strip" id="starter-compounds">
+    <span class="starter-label">QUICK ACCESS</span>
+    <button type="button" data-preset="ethanol">エタノール</button>
+    <button type="button" data-preset="ethene">エテン</button>
+    <button type="button" data-preset="benzene">ベンゼン</button>
+    <button type="button" data-preset="acetic-acid">酢酸</button>
+    <button type="button" data-preset="aniline">フェニルアミン</button>
+  </section>
+</main>
 </body>
 </html>
