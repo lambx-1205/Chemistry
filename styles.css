@@ -496,3 +496,7 @@ a{color:inherit}
  .site-update-footer{width:calc(100% - 24px);padding-bottom:20px;}
  .site-update-heading{align-items:flex-start;flex-direction:column;gap:5px;}
 }
+
+.compound-suggestion-native{color:#6e8171;font-size:10px;line-height:1.4;}
+.compound-suggestion-formula{color:#798a7b;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;line-height:1.4;}
+.compound-suggestion-formula sub{font-size:.72em;vertical-align:baseline;position:relative;bottom:-.2em;}
