@@ -59,7 +59,7 @@ function pubchemUrl(c){
 function updateStructureSource(c){
  var label=document.getElementById("structure-source");
  var link=document.getElementById("pubchem-link");
- if(label)label.textContent=c.structureSource==="PubChem"?"構造データ: PubChem":(c.pubchemName?"PubChem参照中・内蔵構造を表示":"内蔵構造データ");
+ if(label)label.textContent=c.structureSource==="PubChem"?"構造データ: PubChem":(c.structureSource==="fallback"?"内蔵構造式 · PubChem未取得":(c.pubchemName?"PubChem参照中 · 内蔵構造を表示":"内蔵構造データ"));
  if(link)link.href=pubchemUrl(c);
 }
 function drawStructureInto(target,c,large){
