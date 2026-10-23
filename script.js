@@ -1,21 +1,21 @@
 (function(){
 "use strict";
 var compounds = [
-{id:"ethane",name:"エタン",formula:"C₂H₆",family:"炭化水素",kind:"aliphatic",color:"#7b9fa8",desc:"アルカンに属する飽和炭化水素。置換反応によってハロゲン化アルキルへつながる。",state:"気体",feature:"置換反応",hint:"炭素間の単結合のみ"},
-{id:"chloroethane",name:"クロロエタン",formula:"C₂H₅Cl",family:"ハロゲン化合物",kind:"aliphatic",color:"#d1a15b",desc:"ハロゲン化アルキルの一種。水酸化ナトリウム水溶液などとの反応でアルコールへ変換できる。",state:"常温で気体に近い揮発性物質",feature:"加水分解・置換",hint:"C–Cl結合をもつ"},
-{id:"ethanol",name:"エタノール",formula:"C₂H₆O",family:"アルコール",kind:"aliphatic",color:"#5f9c72",desc:"代表的な第一級アルコール。脱水でエテンに、酸化でアセトアルデヒドを経て酢酸へつながる。",state:"常温で液体",feature:"脱水・酸化",hint:"ヒドロキシ基 −OH"},
-{id:"ethene",name:"エテン",formula:"C₂H₄",family:"アルケン",kind:"aliphatic",color:"#6499ad",desc:"二重結合をもつ不飽和炭化水素。付加反応、水和、付加重合などの出発物質になる。",state:"気体",feature:"付加・重合",hint:"炭素間の二重結合"},
-{id:"dibromoethane",name:"1,2-ジブロモエタン",formula:"C₂H₄Br₂",family:"ハロゲン化合物",kind:"aliphatic",color:"#d1a15b",desc:"エテンの二重結合に臭素が付加してできる化合物。付加反応の代表例として扱う。",state:"常温で液体",feature:"付加反応",hint:"隣接する炭素にBr"},
-{id:"polyethylene",name:"ポリエチレン",formula:"(C₂H₄)ₙ",family:"高分子化合物",kind:"aliphatic",color:"#8799a9",desc:"エテンを付加重合して得られる合成高分子。小さな分子が繰り返し単位をつくる。",state:"固体",feature:"付加重合",hint:"繰り返し構造をもつ"},
-{id:"acetaldehyde",name:"アセトアルデヒド",formula:"C₂H₄O",family:"アルデヒド",kind:"aliphatic",color:"#c58b62",desc:"エタノールなどの第一級アルコールの酸化で得られるアルデヒド。さらに酸化するとカルボン酸になる。",state:"常温で揮発性の液体",feature:"酸化",hint:"アルデヒド基 −CHO"},
-{id:"acetic-acid",name:"酢酸",formula:"C₂H₄O₂",family:"カルボン酸",kind:"aliphatic",color:"#bd8075",desc:"代表的なカルボン酸。アルコールとのエステル化でエステルをつくる。",state:"常温で液体",feature:"酸性・エステル化",hint:"カルボキシ基 −COOH"},
-{id:"ethyl-acetate",name:"酢酸エチル",formula:"C₄H₈O₂",family:"エステル",kind:"aliphatic",color:"#9b8bb7",desc:"酢酸とエタノールのエステル化で生成するエステル。加水分解するとカルボン酸とアルコールに戻る。",state:"常温で液体",feature:"エステル化・加水分解",hint:"−COO−結合をもつ"},
-{id:"benzene",name:"ベンゼン",formula:"C₆H₆",family:"芳香族炭化水素",kind:"aromatic",color:"#639b9a",desc:"芳香族化合物の基本となる環状構造。代表的な反応は付加よりも置換反応である。",state:"常温で液体",feature:"芳香族置換",hint:"六員環の共役構造"},
-{id:"nitrobenzene",name:"ニトロベンゼン",formula:"C₆H₅NO₂",family:"芳香族ニトロ化合物",kind:"aromatic",color:"#b8899c",desc:"ベンゼンのニトロ化で得られる化合物。ニトロ基を還元するとアミノ基をもつ化合物になる。",state:"常温で液体",feature:"還元",hint:"ニトロ基 −NO₂"},
-{id:"aniline",name:"フェニルアミン",formula:"C₆H₇N",family:"芳香族アミン",kind:"aromatic",color:"#b8899c",desc:"アニリンとも呼ばれる芳香族アミン。ジアゾ化反応を経て、さまざまな芳香族化合物へつながる。",state:"常温で液体",feature:"ジアゾ化",hint:"アミノ基 −NH₂"},
-{id:"diazonium",name:"塩化ベンゼンジアゾニウム",formula:"C₆H₅N₂Cl",family:"ジアゾニウム塩",kind:"aromatic",color:"#9c8bb8",desc:"芳香族第一級アミンのジアゾ化で生じる中間体。加水分解などで別の官能基へ変換できる。",state:"水溶液中で扱う中間体",feature:"ジアゾ化・置換",hint:"ジアゾ基 −N₂⁺"},
-{id:"phenol",name:"フェノール",formula:"C₆H₆O",family:"芳香族ヒドロキシ化合物",kind:"aromatic",color:"#689b83",desc:"ベンゼン環にヒドロキシ基が直接結合した化合物。アルコールとは異なる弱い酸性を示す。",state:"常温で固体",feature:"弱酸性",hint:"環に直接結合した−OH"},
-{id:"chlorobenzene",name:"クロロベンゼン",formula:"C₆H₅Cl",family:"ハロゲン化芳香族",kind:"aromatic",color:"#c49b64",desc:"ベンゼンの置換反応や、ジアゾニウム塩を経る変換で得られる芳香族ハロゲン化物。",state:"常温で液体",feature:"芳香族置換",hint:"芳香環にCl"}
+{id:"ethane",pubchemName:"ethane",smiles:"CC",name:"エタン",formula:"C₂H₆",family:"炭化水素",kind:"aliphatic",color:"#7b9fa8",desc:"アルカンに属する飽和炭化水素。置換反応によってハロゲン化アルキルへつながる。",state:"気体",feature:"置換反応",hint:"炭素間の単結合のみ"},
+{id:"chloroethane",pubchemName:"chloroethane",smiles:"CCCl",name:"クロロエタン",formula:"C₂H₅Cl",family:"ハロゲン化合物",kind:"aliphatic",color:"#d1a15b",desc:"ハロゲン化アルキルの一種。水酸化ナトリウム水溶液などとの反応でアルコールへ変換できる。",state:"常温で気体に近い揮発性物質",feature:"加水分解・置換",hint:"C–Cl結合をもつ"},
+{id:"ethanol",pubchemName:"ethanol",smiles:"CCO",name:"エタノール",formula:"C₂H₆O",family:"アルコール",kind:"aliphatic",color:"#5f9c72",desc:"代表的な第一級アルコール。脱水でエテンに、酸化でアセトアルデヒドを経て酢酸へつながる。",state:"常温で液体",feature:"脱水・酸化",hint:"ヒドロキシ基 −OH"},
+{id:"ethene",pubchemName:"ethene",smiles:"C=C",name:"エテン",formula:"C₂H₄",family:"アルケン",kind:"aliphatic",color:"#6499ad",desc:"二重結合をもつ不飽和炭化水素。付加反応、水和、付加重合などの出発物質になる。",state:"気体",feature:"付加・重合",hint:"炭素間の二重結合"},
+{id:"dibromoethane",pubchemName:"1,2-dibromoethane",smiles:"BrCCBr",name:"1,2-ジブロモエタン",formula:"C₂H₄Br₂",family:"ハロゲン化合物",kind:"aliphatic",color:"#d1a15b",desc:"エテンの二重結合に臭素が付加してできる化合物。付加反応の代表例として扱う。",state:"常温で液体",feature:"付加反応",hint:"隣接する炭素にBr"},
+{id:"polyethylene",pubchemName:null,smiles:"CC",name:"ポリエチレン",formula:"(C₂H₄)ₙ",family:"高分子化合物",kind:"aliphatic",color:"#8799a9",desc:"エテンを付加重合して得られる合成高分子。小さな分子が繰り返し単位をつくる。",state:"固体",feature:"付加重合",hint:"繰り返し構造をもつ"},
+{id:"acetaldehyde",pubchemName:"acetaldehyde",smiles:"CC=O",name:"アセトアルデヒド",formula:"C₂H₄O",family:"アルデヒド",kind:"aliphatic",color:"#c58b62",desc:"エタノールなどの第一級アルコールの酸化で得られるアルデヒド。さらに酸化するとカルボン酸になる。",state:"常温で揮発性の液体",feature:"酸化",hint:"アルデヒド基 −CHO"},
+{id:"acetic-acid",pubchemName:"acetic acid",smiles:"CC(=O)O",name:"酢酸",formula:"C₂H₄O₂",family:"カルボン酸",kind:"aliphatic",color:"#bd8075",desc:"代表的なカルボン酸。アルコールとのエステル化でエステルをつくる。",state:"常温で液体",feature:"酸性・エステル化",hint:"カルボキシ基 −COOH"},
+{id:"ethyl-acetate",pubchemName:"ethyl acetate",smiles:"CCOC(C)=O",name:"酢酸エチル",formula:"C₄H₈O₂",family:"エステル",kind:"aliphatic",color:"#9b8bb7",desc:"酢酸とエタノールのエステル化で生成するエステル。加水分解するとカルボン酸とアルコールに戻る。",state:"常温で液体",feature:"エステル化・加水分解",hint:"−COO−結合をもつ"},
+{id:"benzene",pubchemName:"benzene",smiles:"c1ccccc1",name:"ベンゼン",formula:"C₆H₆",family:"芳香族炭化水素",kind:"aromatic",color:"#639b9a",desc:"芳香族化合物の基本となる環状構造。代表的な反応は付加よりも置換反応である。",state:"常温で液体",feature:"芳香族置換",hint:"六員環の共役構造"},
+{id:"nitrobenzene",pubchemName:"nitrobenzene",smiles:"O=[N+]([O-])c1ccccc1",name:"ニトロベンゼン",formula:"C₆H₅NO₂",family:"芳香族ニトロ化合物",kind:"aromatic",color:"#b8899c",desc:"ベンゼンのニトロ化で得られる化合物。ニトロ基を還元するとアミノ基をもつ化合物になる。",state:"常温で液体",feature:"還元",hint:"ニトロ基 −NO₂"},
+{id:"aniline",pubchemName:"aniline",smiles:"Nc1ccccc1",name:"フェニルアミン",formula:"C₆H₇N",family:"芳香族アミン",kind:"aromatic",color:"#b8899c",desc:"アニリンとも呼ばれる芳香族アミン。ジアゾ化反応を経て、さまざまな芳香族化合物へつながる。",state:"常温で液体",feature:"ジアゾ化",hint:"アミノ基 −NH₂"},
+{id:"diazonium",pubchemName:"benzenediazonium chloride",smiles:"c1ccccc1[N+]#N",name:"塩化ベンゼンジアゾニウム",formula:"C₆H₅N₂Cl",family:"ジアゾニウム塩",kind:"aromatic",color:"#9c8bb8",desc:"芳香族第一級アミンのジアゾ化で生じる中間体。加水分解などで別の官能基へ変換できる。",state:"水溶液中で扱う中間体",feature:"ジアゾ化・置換",hint:"ジアゾ基 −N₂⁺"},
+{id:"phenol",pubchemName:"phenol",smiles:"Oc1ccccc1",name:"フェノール",formula:"C₆H₆O",family:"芳香族ヒドロキシ化合物",kind:"aromatic",color:"#689b83",desc:"ベンゼン環にヒドロキシ基が直接結合した化合物。アルコールとは異なる弱い酸性を示す。",state:"常温で固体",feature:"弱酸性",hint:"環に直接結合した−OH"},
+{id:"chlorobenzene",pubchemName:"chlorobenzene",smiles:"Clc1ccccc1",name:"クロロベンゼン",formula:"C₆H₅Cl",family:"ハロゲン化芳香族",kind:"aromatic",color:"#c49b64",desc:"ベンゼンの置換反応や、ジアゾニウム塩を経る変換で得られる芳香族ハロゲン化物。",state:"常温で液体",feature:"芳香族置換",hint:"芳香環にCl"}
 ];
 var positions = {
 "ethane":[125,176],"chloroethane":[310,135],"ethanol":[468,266],"ethene":[296,355],
@@ -51,11 +51,99 @@ function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").repl
 function compound(id){return byId[id];}
 function accessible(id){var c=compound(id);return currentFilter==="all"||(c&&c.kind===currentFilter);}
 function showToast(message){var el=document.getElementById("toast");el.textContent=message;el.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(function(){el.classList.remove("show");},2600);}
+var structureRenderCache={};
+function pubchemUrl(c){
+ if(c.pubchemCid)return "https://pubchem.ncbi.nlm.nih.gov/compound/"+encodeURIComponent(c.pubchemCid);
+ return "https://pubchem.ncbi.nlm.nih.gov/#query="+encodeURIComponent(c.pubchemName||c.name);
+}
+function updateStructureSource(c){
+ var label=document.getElementById("structure-source");
+ var link=document.getElementById("pubchem-link");
+ if(label)label.textContent=c.structureSource==="PubChem"?"構造データ: PubChem":(c.pubchemName?"PubChem参照中・内蔵構造を表示":"内蔵構造データ");
+ if(link)link.href=pubchemUrl(c);
+}
+function drawStructureInto(target,c,large){
+ if(!target||!c)return;
+ var smiles=c.smiles;
+ var cacheKey=c.id+"|"+smiles+"|"+(large?"detail":"map");
+ if(target.dataset.structureKey===cacheKey)return;
+ target.innerHTML="";
+ target.dataset.structureKey=cacheKey;
+ if(!window.SmilesDrawer){
+  target.innerHTML='<text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" fill="#8a958c" font-size="9">構造式ライブラリを読み込めません</text>';
+  return;
+ }
+ try{
+  var width=large?244:122,height=large?112:54;
+  var drawer=new SmilesDrawer.SmiDrawer({
+   width:width,height:height,padding:large?10:2,
+   bondLength:large?19:9,bondThickness:large?1.15:0.9,
+   bondSpacing:large?3.2:2.1,fontSizeLarge:large?8:5.5,fontSizeSmall:large?4:3,
+   compactDrawing:true,explicitHydrogens:false,terminalCarbons:false
+  });
+  drawer.draw(smiles,target,"light",function(){
+   target.dataset.structureKey=cacheKey;
+  },function(){
+   target.innerHTML='<text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" fill="#8a958c" font-size="9">構造式を表示できません</text>';
+  });
+ }catch(err){
+  target.innerHTML='<text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" fill="#8a958c" font-size="9">構造式を表示できません</text>';
+ }
+}
+function renderMapStructures(){
+ world.querySelectorAll(".node-structure").forEach(function(el){
+  drawStructureInto(el,byId[el.getAttribute("data-structure-id")],false);
+ });
+}
+function redrawCompoundStructure(c){
+ var nodeSvg=world.querySelector('.node-structure[data-structure-id="'+c.id+'"]');
+ if(nodeSvg)drawStructureInto(nodeSvg,c,false);
+ if(selectedId===c.id){
+  var detailSvg=document.getElementById("detail-structure-svg");
+  if(detailSvg)drawStructureInto(detailSvg,c,true);
+  updateStructureSource(c);
+ }
+}
+async function fetchPubChemStructure(c){
+ if(!c.pubchemName||c.pubchemRequested)return;
+ c.pubchemRequested=true;
+ try{
+  var endpoint="https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/"+encodeURIComponent(c.pubchemName)+"/property/ConnectivitySMILES,InChIKey,MolecularFormula/JSON";
+  var response=await fetch(endpoint,{headers:{Accept:"application/json"}});
+  if(!response.ok)throw new Error("PubChem HTTP "+response.status);
+  var data=await response.json();
+  var props=data&&data.PropertyTable&&data.PropertyTable.Properties&&data.PropertyTable.Properties[0];
+  if(!props||!(props.ConnectivitySMILES||props.SMILES))throw new Error("No structure was returned");
+  c.smiles=props.ConnectivitySMILES||props.SMILES;
+  c.pubchemCid=props.CID||null;
+  c.inchiKey=props.InChIKey||null;
+  c.pubchemFormula=props.MolecularFormula||null;
+  c.structureSource="PubChem";
+ }catch(err){
+  c.structureSource="fallback";
+  console.info("PubChem lookup used the bundled fallback for "+c.name,err&&err.message?err.message:err);
+ }
+ redrawCompoundStructure(c);
+}
+function loadPubChemStructures(){
+ var targets=compounds.filter(function(c){return !!c.pubchemName;});
+ (async function(){
+  for(var i=0;i<targets.length;i++){
+   await fetchPubChemStructure(targets[i]);
+   if(i<targets.length-1)await new Promise(function(resolve){setTimeout(resolve,350);});
+  }
+ })();
+}
 function edgePath(e){
- var a=positions[e.from],b=positions[e.to],dx=b[0]-a[0],dy=b[1]-a[1],dist=Math.sqrt(dx*dx+dy*dy)||1;
- var sx=a[0]+dx/dist*44,sy=a[1]+dy/dist*31,ex=b[0]-dx/dist*47,ey=b[1]-dy/dist*33;
+ var a=positions[e.from],b=positions[e.to],dx=b[0]-a[0],dy=b[1]-a[1];
+ var hw=68,hh=52;
+ var sxScale=Math.min(dx===0?Infinity:hw/Math.abs(dx),dy===0?Infinity:hh/Math.abs(dy));
+ var exScale=sxScale;
+ var sx=a[0]+dx*sxScale,sy=a[1]+dy*sxScale;
+ var ex=b[0]-dx*exScale,ey=b[1]-dy*exScale;
  var bend=(((parseInt(e.id.slice(1),10)%3)-1)*24);
- var mx=(sx+ex)/2+(-dy/dist)*bend,my=(sy+ey)/2+(dx/dist)*bend;
+ var mx=(sx+ex)/2+(-dy/Math.sqrt(dx*dx+dy*dy||1))*bend;
+ var my=(sy+ey)/2+(dx/Math.sqrt(dx*dx+dy*dy||1))*bend;
  e.mid=[mx,my];
  return "M "+sx.toFixed(1)+" "+sy.toFixed(1)+" Q "+mx.toFixed(1)+" "+my.toFixed(1)+" "+ex.toFixed(1)+" "+ey.toFixed(1);
 }
@@ -73,9 +161,8 @@ function renderMap(){
  compounds.forEach(function(c){
    var p=positions[c.id],selected=c.id===selectedId,route=routeNodeIds.indexOf(c.id)>=0,dim=!accessible(c.id);
    out+='<g class="map-node'+(selected?' selected':'')+(route?' in-route':'')+(dim?' dimmed':'')+'" data-node="'+c.id+'" tabindex="0" role="button" aria-label="'+esc(c.name)+'を選択">';
-   out+='<circle class="node-halo" cx="'+p[0]+'" cy="'+p[1]+'" r="37"/><circle cx="'+p[0]+'" cy="'+p[1]+'" r="26" fill="'+c.color+'" opacity=".12"/><circle class="node-dot" cx="'+p[0]+'" cy="'+p[1]+'" r="7" fill="'+c.color+'"/>';
-   if(route){out+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="31" fill="none" stroke="#df9a6c" stroke-width="1.5" stroke-dasharray="3 5"/>';}
-   out+='<text class="node-name" x="'+p[0]+'" y="'+(p[1]+56)+'">'+esc(c.name)+'</text><text class="node-formula" x="'+p[0]+'" y="'+(p[1]+72)+'">'+esc(c.formula)+'</text></g>';
+   out+='<foreignObject class="node-card-foreign" x="'+(p[0]-68)+'" y="'+(p[1]-54)+'" width="136" height="108"><div xmlns="http://www.w3.org/1999/xhtml" class="compound-node-card color-'+c.id+'"><div class="node-structure-frame"><svg class="node-structure" data-structure-id="'+c.id+'" width="122" height="54" viewBox="0 0 122 54" role="img" aria-label="'+esc(c.name)+'の構造式"></svg></div><div class="compound-node-name">'+esc(c.name)+'</div><div class="compound-node-formula">'+esc(c.formula)+'</div></div></foreignObject>';
+   out+='</g>';
  });
  out+='</g>';
  world.innerHTML=out;
@@ -83,6 +170,7 @@ function renderMap(){
    el.addEventListener("click",function(){if(drag&&drag.moved)return;selectCompound(el.getAttribute("data-node"));});
    el.addEventListener("keydown",function(ev){if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();selectCompound(el.getAttribute("data-node"));}});
  });
+ renderMapStructures();
  applyView();
 }
 function applyView(){world.setAttribute("transform","translate("+panX+" "+panY+") translate(500 380) scale("+zoom+") translate(-500 -380)");}
@@ -146,7 +234,9 @@ function selectCompound(id){
 function renderDetail(){
  var c=compound(selectedId);if(!c)return;
  var detail=document.getElementById("compound-detail");
- detail.innerHTML='<div class="compound-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="'+c.color+'" stroke-width="1.7"/><circle cx="12" cy="12" r="3" fill="'+c.color+'" opacity=".65"/><path d="M12 4v5m0 6v5M4 12h5m6 0h5" stroke="'+c.color+'" stroke-width="1.3"/></svg></div><h2 class="compound-name">'+esc(c.name)+'</h2><div class="compound-formula">'+esc(c.formula)+'</div><span class="type-pill"><i class="legend-dot compound-color color-'+c.id+'"></i>'+esc(c.family)+'</span><p class="detail-description">'+esc(c.desc)+'</p><div class="detail-actions detail-actions-spaced"><button class="outline-btn" id="set-as-start">⊙ 始点に設定</button><button class="outline-btn" id="set-as-goal">◎ 終点に設定</button></div>';
+ detail.innerHTML='<div class="compound-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="'+c.color+'" stroke-width="1.7"/><circle cx="12" cy="12" r="3" fill="'+c.color+'" opacity=".65"/><path d="M12 4v5m0 6v5M4 12h5m6 0h5" stroke="'+c.color+'" stroke-width="1.3"/></svg></div><h2 class="compound-name">'+esc(c.name)+'</h2><div class="compound-formula">'+esc(c.formula)+'</div><div class="detail-structure-box"><div class="detail-structure-heading"><span>STRUCTURE</span><span class="structure-source" id="structure-source">PubChem参照中…</span></div><svg class="detail-structure-svg" id="detail-structure-svg" width="244" height="112" viewBox="0 0 244 112" role="img" aria-label="'+esc(c.name)+'の構造式"></svg><a class="pubchem-link" id="pubchem-link" target="_blank" rel="noopener noreferrer" href="'+esc(pubchemUrl(c))+'">PubChemで構造・データを参照 ↗</a></div><span class="type-pill"><i class="legend-dot compound-color color-'+c.id+'"></i>'+esc(c.family)+'</span><p class="detail-description">'+esc(c.desc)+'</p><div class="detail-actions detail-actions-spaced"><button class="outline-btn" id="set-as-start">⊙ 始点に設定</button><button class="outline-btn" id="set-as-goal">◎ 終点に設定</button></div>';
+ drawStructureInto(document.getElementById("detail-structure-svg"),c,true);
+ updateStructureSource(c);
  document.getElementById("compound-properties").innerHTML='<div class="property"><span>分類</span><strong>'+esc(c.family)+'</strong></div><div class="property"><span>状態の例</span><strong>'+esc(c.state)+'</strong></div><div class="property"><span>注目反応</span><strong>'+esc(c.feature)+'</strong></div><div class="property"><span>構造のヒント</span><strong>'+esc(c.hint)+'</strong></div>';
  var outgoing=edges.filter(function(e){return e.from===c.id;});
  var incoming=edges.filter(function(e){return e.to===c.id;});
@@ -197,4 +287,5 @@ document.getElementById("nav-map").addEventListener("click",function(){zoom=1;pa
 populateOptions();
 setRoute("エタノール","酢酸",true);
 renderDetail();
+loadPubChemStructures();
 })();
