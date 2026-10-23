@@ -170,7 +170,7 @@ function renderExternalCompound(c){
 async function fetchCompound(query){
  var key=query.trim().toLocaleLowerCase();
  if(lookupCache[key])return lookupCache[key];
- var endpoint="https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/"+encodeURIComponent(query.trim())+"/property/Title,ConnectivitySMILES,InChIKey,MolecularFormula,MolecularWeight/JSON";
+ var endpoint="https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/"+encodeURIComponent(query.trim())+"/property/IUPACName,ConnectivitySMILES,InChIKey,MolecularFormula,MolecularWeight/JSON";
  var response=await fetch(endpoint,{headers:{Accept:"application/json"}});
  if(!response.ok)throw new Error(response.status===404?"化合物が見つかりません":"PubChemへの接続に失敗しました");
  var data=await response.json();
@@ -179,7 +179,7 @@ async function fetchCompound(query){
  var existing=knownCompound(query);
  var c=existing||{
   id:"pubchem-"+String(p.CID||key.replace(/[^a-z0-9]+/gi,"-")),
-  name:p.Title||query,
+  name:query,
   formula:p.MolecularFormula||"—",
   family:"PubChem",
   kind:"external",
@@ -188,6 +188,7 @@ async function fetchCompound(query){
   feature:"",
   hint:"",
   desc:"",
+  iupacName:p.IUPACName||null,
   pubchemName:query,
   smiles:p.ConnectivitySMILES||p.SMILES
  };
@@ -197,6 +198,7 @@ async function fetchCompound(query){
  c.pubchemFormula=p.MolecularFormula||c.pubchemFormula||c.formula;
  c.molecularWeight=p.MolecularWeight||c.molecularWeight||null;
  c.inchiKey=p.InChIKey||c.inchiKey||null;
+ c.iupacName=p.IUPACName||c.iupacName||null;
  c.structureSource="PubChem";
  lookupCache[key]=c;
  return c;
@@ -210,7 +212,7 @@ async function resolveStructure(c){
   var loaded=await fetchCompound(c.pubchemName);
   if(currentCompound&&currentCompound.id===c.id){
    c.smiles=loaded.smiles;c.pubchemCid=loaded.pubchemCid;c.pubchemFormula=loaded.pubchemFormula;
-   c.molecularWeight=loaded.molecularWeight;c.inchiKey=loaded.inchiKey;c.structureSource="PubChem";
+   c.molecularWeight=loaded.molecularWeight;c.inchiKey=loaded.inchiKey;c.iupacName=loaded.iupacName;c.structureSource="PubChem";
    renderCompound(c);
   }
  }catch(error){
@@ -219,6 +221,8 @@ async function resolveStructure(c){
    mainStructureSource.textContent="LOCAL STRUCTURE";
    mainPubchemLink.href=pubchemUrl(c);
   }
+ }finally{
+  delete structureRequest[c.id];
  }
 }
 async function searchCompound(){
