@@ -100,11 +100,11 @@ function getRDKit(){
  return rdkitInitPromise;
 }
 function countFormulaAtoms(formula){
- var text=String(formula||"").replace(/[₀₁₂₃₄₅₆₇₈₉]/g,function(d){return "₀₁₂₃₄₅₆₇₈₉".indexOf(d);}).replace(/\\s/g,"");
- var parts=text.match(/[A-Z][a-z]?\\d*/g)||[];
+ var text=String(formula||"").replace(/[₀₁₂₃₄₅₆₇₈₉]/g,function(d){return "₀₁₂₃₄₅₆₇₈₉".indexOf(d);}).replace(/\s/g,"");
+ var parts=text.match(/[A-Z][a-z]?\d*/g)||[];
  if(parts.join("")!==text||parts.length===0)return null;
  return parts.reduce(function(sum,part){
-  var match=part.match(/^([A-Z][a-z]?)(\\d*)$/);
+  var match=part.match(/^([A-Z][a-z]?)(\d*)$/);
   return sum+(match[2]?Number(match[2]):1);
  },0);
 }
@@ -152,7 +152,7 @@ function drawStructure(target,smilesValue,width,height,key,formula){
    if(!mol)throw new Error("SMILESを解析できません");
    var drawOptions=getStructureDrawOptions(formula);
    var markup=mol.get_svg_with_highlights(JSON.stringify(drawOptions));
-   if(!markup||!/<svg[\\s>]/i.test(markup))throw new Error("RDKit returned empty SVG");
+   if(!markup||!/<svg[\s>]/i.test(markup))throw new Error("RDKit returned empty SVG");
    if(!target.isConnected||target.dataset.structureKey!==renderKey)return;
    target.innerHTML=markup;
    var output=target.querySelector("svg");
