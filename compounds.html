@@ -7,11 +7,11 @@
 <meta name="description" content="登録された有機化合物を構造式サムネイルで一覧表示し、分類や分子量で並べ替える。">
 <title>化合物一覧 — Organic Atlas</title>
 <link rel="preconnect" href="https://pubchem.ncbi.nlm.nih.gov">
-<link rel="stylesheet" href="styles.css?v=20261024-3d-isomers4">
-<link rel="stylesheet" href="compounds.css?v=20261024-3d-isomers4">
+<link rel="stylesheet" href="styles.css?v=20261024-unknown-search1">
+<link rel="stylesheet" href="compounds.css?v=20261024-unknown-search1">
 <script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js" defer></script>
-<script src="chemistry-data.js?v=20261024-3d-isomers4" defer></script>
-<script src="compounds.js?v=20261024-3d-isomers4" defer></script>
+<script src="chemistry-data.js?v=20261024-unknown-search1" defer></script>
+<script src="compounds.js?v=20261024-unknown-search1" defer></script>
 </head>
 <body>
 <header class="site-header">
@@ -45,6 +45,17 @@
   <section class="compound-list-grid" id="compound-list" aria-label="化合物一覧"></section>
   <div class="list-empty" id="list-empty" hidden>該当する化合物がありません。</div>
   <footer class="list-page-foot"><span>ORGANIC ATLAS</span><span>構造データ · RDKit.js</span></footer>
+<footer class="site-update-footer" aria-label="更新日時と更新履歴">
+  <div class="site-update-heading"><strong>更新情報</strong><span>最終更新：2026-10-24</span></div>
+  <details class="site-update-history">
+    <summary>更新履歴</summary>
+    <ul>
+      <li><time datetime="2026-10-24">2026-10-24</time> 未登録化合物の候補検索・構造表示、3D結合表示の改善</li>
+      <li><time datetime="2026-10-24">2026-10-24</time> 3D分子模型と異性体比較機能を追加</li>
+      <li><time datetime="2026-10-24">2026-10-24</time> 芳香族化合物・脂肪酸・油脂のデータを拡張</li>
+    </ul>
+  </details>
+</footer>
 </main>
 </body>
 </html>
