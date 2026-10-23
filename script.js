@@ -171,7 +171,7 @@ function fact(label,value){
 }
 function is3DRestrictedCompound(c){
  var identity=(String(c&&c.name||"")+" "+String(c&&c.pubchemName||"")).toLocaleLowerCase();
- return Boolean(c&&c.id==="tnt")||identity.indexOf("trinitrotoluene")>=0||identity.indexOf(" tnt")>=0||identity.trim()==="tnt";
+ return Boolean(c&&(c.id==="tnt"||c.id==="cumene-hydroperoxide"))||identity.indexOf("trinitrotoluene")>=0||identity.indexOf("cumene hydroperoxide")>=0||identity.indexOf(" tnt")>=0||identity.trim()==="tnt";
 }
 function renderCompound(c){
  currentCompound=c;
@@ -365,6 +365,10 @@ function show3DFallback(c,message,token){
 }
 async function open3DMolecule(){
  var c=currentCompound;
+ if(!c)return;
+ if(c.id==="lactic-acid"){
+  setStatus("乳酸は立体配置未指定です。3D模型は異性体カードからL-乳酸またはD-乳酸を選んで表示してください。","error");return;
+ }
  if(is3DRestrictedCompound(c)){
   setStatus("この化合物の3D表示は利用できません。","error");return;
  }
