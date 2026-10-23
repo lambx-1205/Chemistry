@@ -7,9 +7,9 @@
 <meta name="description" content="高校有機化学の化合物を検索し、構造式と一段階の反応を確認する。">
 <title>Organic Atlas — 化合物</title>
 <link rel="preconnect" href="https://pubchem.ncbi.nlm.nih.gov">
-<link rel="stylesheet" href="styles.css?v=20261023-renderfix4">
+<link rel="stylesheet" href="styles.css?v=20261024-reactions1">
 <script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js" defer></script>
-<script src="script.js?v=20261023-renderfix4" defer></script>
+<script src="script.js?v=20261024-reactions1" defer></script>
 </head>
 <body>
 <header class="site-header">
@@ -50,12 +50,19 @@
         <a class="pubchem-link" id="pubchem-link" href="https://pubchem.ncbi.nlm.nih.gov/" target="_blank" rel="noopener noreferrer">PubChem <span aria-hidden="true">↗</span></a>
       </div>
     </div>
-    <section class="one-step-section">
+    <section class="one-step-section" aria-labelledby="previous-step-title">
       <div class="section-heading">
-        <div><span class="section-eyebrow">REACTION NEIGHBORS</span><h2>1反応先</h2></div>
-        <div class="neighbor-count"><b id="one-step-count">02</b><span>COMPOUNDS</span></div>
+        <div><span class="section-eyebrow">PREVIOUS REACTIONS</span><h2 id="previous-step-title">一段階前</h2></div>
+        <div class="neighbor-count"><b id="previous-step-count">00</b><span>COMPOUNDS</span></div>
       </div>
-      <div class="reaction-grid" id="one-step-results"></div>
+      <div class="reaction-grid" id="previous-step-results"></div>
+    </section>
+    <section class="one-step-section" aria-labelledby="next-step-title">
+      <div class="section-heading">
+        <div><span class="section-eyebrow">NEXT REACTIONS</span><h2 id="next-step-title">一段階後</h2></div>
+        <div class="neighbor-count"><b id="next-step-count">00</b><span>COMPOUNDS</span></div>
+      </div>
+      <div class="reaction-grid" id="next-step-results"></div>
     </section>
     <footer class="page-foot"><span>ORGANIC ATLAS</span><span>STRUCTURE DATA · PUBCHEM</span></footer>
   </section>
@@ -76,5 +83,19 @@
     <button type="button" data-preset="aniline">フェニルアミン</button>
   </section>
 </main>
+<dialog class="reaction-dialog" id="reaction-detail-dialog" aria-labelledby="reaction-detail-title">
+  <div class="reaction-dialog-header">
+    <div>
+      <span class="section-eyebrow">REACTION DETAILS</span>
+      <h2 id="reaction-detail-title">反応の詳細</h2>
+    </div>
+    <button class="dialog-icon-close" type="button" id="reaction-detail-close" aria-label="閉じる">×</button>
+  </div>
+  <div class="reaction-detail-content" id="reaction-detail-content"></div>
+  <div class="reaction-dialog-footer">
+    <span>登録済みの反応データに基づく概要です。</span>
+    <button class="reaction-details-button" type="button" id="reaction-detail-done">閉じる</button>
+  </div>
+</dialog>
 </body>
 </html>
