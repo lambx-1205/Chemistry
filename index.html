@@ -34,10 +34,10 @@
         <label for="from-input">START · 出発物質</label>
         <div class="field-row"><span class="field-icon" aria-hidden="true"></span><input id="from-input" list="compound-options" value="エタノール" autocomplete="off" placeholder="例：エタノール"></div>
       </div>
-      <div class="field-row" style="justify-content:center;margin:-2px 0 8px">
-        <div style="height:1px;background:#e5ebe3;flex:1"></div>
+      <div class="field-row swap-row">
+        <div class="route-divider"></div>
         <button class="swap-btn" id="swap-route" aria-label="出発物質と目的物質を入れ替え" title="入れ替え"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 7h12l-3-3M17 17H5l3 3"/></svg></button>
-        <div style="height:1px;background:#e5ebe3;flex:1"></div>
+        <div class="route-divider"></div>
       </div>
       <div class="field">
         <label for="to-input">DESTINATION · 目的物質</label>
@@ -58,7 +58,7 @@
     </section>
     <div class="rule"></div>
     <section>
-      <div class="eyebrow" style="margin-bottom:10px">EXPLORE BY REGION</div>
+      <div class="eyebrow explore-eyebrow">EXPLORE BY REGION</div>
       <div class="filter-row" role="group" aria-label="化合物の分類">
         <button class="filter-btn active" data-filter="all">すべて</button>
         <button class="filter-btn" data-filter="aliphatic">脂肪族</button>
@@ -92,11 +92,11 @@
     </svg>
     <div class="map-caption">
       <div class="legend">
-        <span class="legend-item"><i class="legend-dot" style="background:#7fa789"></i>置換</span>
-        <span class="legend-item"><i class="legend-dot" style="background:#c5a17b"></i>酸化・還元</span>
-        <span class="legend-item"><i class="legend-dot" style="background:#85a9b5"></i>付加</span>
-        <span class="legend-item"><i class="legend-dot" style="background:#b4a4c8"></i>脱離</span>
-        <span class="legend-item"><i class="legend-dot" style="background:#8ba7bc"></i>重合</span>
+        <span class="legend-item"><i class="legend-dot substitution-legend"></i>置換</span>
+        <span class="legend-item"><i class="legend-dot oxidation-legend"></i>酸化・還元</span>
+        <span class="legend-item"><i class="legend-dot addition-legend"></i>付加</span>
+        <span class="legend-item"><i class="legend-dot elimination-legend"></i>脱離</span>
+        <span class="legend-item"><i class="legend-dot polymerization-legend"></i>重合</span>
       </div>
       <div class="map-hint">ドラッグで移動 · ホイールで拡大縮小</div>
     </div>
