@@ -287,7 +287,7 @@ reactionDetailDialog.addEventListener("click",function(event){
 });
 
 function renderIsomerGroups(c){
- var groups=(window.OrganicAtlasData.isomerGroups||[]).filter(function(group){return group.members.indexOf(c.id)>=0;});
+ var groups=(window.OrganicAtlasData.isomerGroups||[]).filter(function(group){return group.members.indexOf(c.id)>=0||(group.contextIds||[]).indexOf(c.id)>=0;});
  if(!isomerRoot||!isomerGroupsRoot)return;
  if(!groups.length){isomerRoot.hidden=true;isomerGroupsRoot.innerHTML="";return;}
  isomerRoot.hidden=false;
