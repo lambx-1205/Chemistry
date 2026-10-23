@@ -312,7 +312,7 @@ function renderIsomerGroups(c){
  });
  isomerGroupsRoot.querySelectorAll("[data-isomer-thumb]").forEach(function(host){
   var key=host.getAttribute("data-isomer-thumb");
-  var id=key.slice(key.indexOf("-")+1);
+  var id=host.getAttribute("data-isomer-compound");
   var target=byId[id];
   if(target)drawStructure(host,target.smiles,200,84,"isomer-"+key,target.pubchemFormula||target.formula);
  });
