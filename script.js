@@ -111,7 +111,7 @@ function localCandidateMatches(query){
  var q=String(query||"").trim().toLocaleLowerCase();
  if(q.length<1)return [];
  var matches=compounds.filter(function(c){
-  if(isRestrictedLookupTerm(c.name)||isRestrictedLookupTerm(c.pubchemName)||(c.aliases||[]).some(isRestrictedLookupTerm))return false;
+  if(is3DRestrictedCompound(c)||isRestrictedLookupTerm(c.name)||isRestrictedLookupTerm(c.pubchemName)||(c.aliases||[]).some(isRestrictedLookupTerm))return false;
   return [c.name,c.pubchemName,c.formula,c.family].concat(c.aliases||[]).some(function(v){return String(v||"").toLocaleLowerCase().indexOf(q)>=0;});
  });
  matches.sort(function(a,b){
@@ -596,10 +596,10 @@ async function resolveStructure(c){
 }
 async function searchCompound(){
  var query=input.value.trim();
- if(isRestrictedLookupTerm(query)){setStatus("この検索には対応していません。安全な学習用化合物名で検索してください。","error");return;}
  if(!query){setStatus("化合物名を入力してください","error");input.focus();return;}
- var sequence=++lookupSequence;
  var known=knownCompound(query);
+ if(isRestrictedLookupTerm(query)||(known&&is3DRestrictedCompound(known))){setStatus("この検索には対応していません。安全な学習用化合物名で検索してください。","error");return;}
+ var sequence=++lookupSequence;
  if(known){
   setLoading(false);setStatus("","");renderCompound(known);resolveStructure(known);return;
  }
