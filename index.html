@@ -7,10 +7,11 @@
 <meta name="description" content="高校有機化学の化合物を検索し、構造式と一段階の反応を確認する。">
 <title>Organic Atlas — 化合物</title>
 <link rel="preconnect" href="https://pubchem.ncbi.nlm.nih.gov">
-<link rel="stylesheet" href="styles.css?v=20261024-fatty1">
+<link rel="stylesheet" href="styles.css?v=20261024-3d-isomers1">
 <script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js" defer></script>
-<script src="chemistry-data.js?v=20261024-fatty1" defer></script>
-<script src="script.js?v=20261024-fatty1" defer></script>
+<script src="chemistry-data.js?v=20261024-3d-isomers1" defer></script>
+<script src="script.js?v=20261024-3d-isomers1" defer></script>
+<script type="module" src="molecule3d.js?v=20261024-3d-isomers1"></script>
 </head>
 <body>
 <header class="site-header">
@@ -40,7 +41,7 @@
       <div class="structure-panel">
         <div class="panel-kicker"><span>MOLECULAR STRUCTURE</span><span class="structure-source" id="structure-source">STRUCTURE</span></div>
         <div class="main-structure" id="main-structure" role="img" aria-label="選択した化合物の構造式"></div>
-        <div class="structure-foot"><span class="bond-key"><i></i><i></i><i></i></span><span>2D STRUCTURE</span></div>
+        <div class="structure-foot"><span class="bond-key" aria-hidden="true"><i></i><i></i><i></i></span><div class="structure-foot-actions"><span>2D STRUCTURE</span><button type="button" class="molecule-3d-trigger" id="open-3d-model">3D分子模型 <span aria-hidden="true">↗</span></button></div></div>
       </div>
       <div class="identity-panel">
         <div class="compound-family" id="compound-family">アルコール</div>
@@ -51,6 +52,11 @@
         <a class="pubchem-link" id="pubchem-link" href="https://pubchem.ncbi.nlm.nih.gov/" target="_blank" rel="noopener noreferrer">PubChem <span aria-hidden="true">↗</span></a>
       </div>
     </div>
+    <section class="isomer-section" id="isomer-section" hidden aria-labelledby="isomer-heading">
+      <div class="section-heading"><div><span class="section-eyebrow">ISOMER COMPARISON</span><h2 id="isomer-heading">異性体を比較</h2></div></div>
+      <div id="isomer-groups"></div>
+    </section>
+    
     <section class="one-step-section" aria-labelledby="previous-step-title">
       <div class="section-heading">
         <div><span class="section-eyebrow">PREVIOUS REACTIONS</span><h2 id="previous-step-title">一段階前</h2></div>
@@ -89,6 +95,21 @@
     <button type="button" data-preset="toluene">トルエン</button>
   </section>
 </main>
+<dialog class="molecule3d-dialog" id="molecule3d-dialog" aria-labelledby="molecule3d-title">
+  <div class="molecule3d-header">
+    <div><span class="section-eyebrow">3D MOLECULAR MODEL</span><h2 id="molecule3d-title">3D分子模型</h2></div>
+    <button class="dialog-icon-close" type="button" id="molecule3d-close" aria-label="閉じる">×</button>
+  </div>
+  <div class="molecule3d-toolbar" aria-label="分子模型の表示形式">
+    <button type="button" class="molecule3d-mode is-active" id="molecule3d-spacefill">空間充填</button>
+    <button type="button" class="molecule3d-mode" id="molecule3d-ballstick">球棒モデル</button>
+    <span class="molecule3d-help">ドラッグで回転 · ホイールで拡大</span>
+  </div>
+  <div class="molecule3d-stage" id="molecule3d-stage"></div>
+  <img class="molecule3d-fallback" id="molecule3d-fallback" alt="PubChemが提供する3D分子構造画像" hidden>
+  <p class="molecule3d-status" id="molecule3d-status" role="status" aria-live="polite">3D構造を取得しています…</p>
+  <div class="molecule3d-footer"><span id="molecule3d-source">PubChem 3Dデータ</span><a id="molecule3d-pubchem-link" href="https://pubchem.ncbi.nlm.nih.gov/" target="_blank" rel="noopener noreferrer">PubChem ↗</a></div>
+</dialog>
 <dialog class="reaction-dialog" id="reaction-detail-dialog" aria-labelledby="reaction-detail-title">
   <div class="reaction-dialog-header">
     <div>
@@ -103,5 +124,6 @@
     <button class="reaction-details-button" type="button" id="reaction-detail-done">閉じる</button>
   </div>
 </dialog>
+<script src="3d-and-isomer-ui.js?v=20261024-3d-isomers1" defer></script>
 </body>
 </html>
