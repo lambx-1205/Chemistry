@@ -58,7 +58,7 @@ function setLoading(loading){
 }
 function fillSuggestions(){suggestions.innerHTML="";suggestions.hidden=true;}
 
-var restrictedLookupPattern=/(trinitrotoluene|(^|\W)tnt($|\W)|nitroglycerin|nitroglycerine|methamphetamine|amphetamine|cocaine|heroin|fentanyl|mdma|ecstasy|oxycodone|hydrocodone|carfentanil|ricin|sarin|vx nerve agent|cyanide|hydrazoic acid|rdx|pentaerythritol tetranitrate|petn)/i;
+var restrictedLookupPattern=/(trinitrotoluene|(^|\W)tnt($|\W)|nitroglycerin|nitroglycerine|methamphetamine|amphetamine|cocaine|heroin|fentanyl|mdma|ecstasy|oxycodone|hydrocodone|carfentanil|ricin|sarin|vx nerve agent|cyanide|hydrazoic acid|rdx|pentaerythritol tetranitrate|petn|トリニトロトルエン|ニトログリセリン|メタンフェタミン|覚醒剤|コカイン|ヘロイン|フェンタニル|エクスタシー|モルヒネ|オキシコドン|リシン|サリン|シアン化物|青酸|爆薬|爆発物|神経剤)/i;
 function isRestrictedLookupTerm(value){return restrictedLookupPattern.test(String(value||""));}
 function showCandidateMenu(items,query,loading){
  activeCandidates=items.slice();
@@ -160,6 +160,7 @@ function scheduleCandidateSearch(){
  activeCandidates=[];activeCandidateIndex=-1;
  window.clearTimeout(suggestionTimer);
  if(!query){suggestions.hidden=true;input.setAttribute("aria-expanded","false");setStatus("","");return;}
+ if(isRestrictedLookupTerm(query)){showCandidateMenu([],query,false);setStatus("この検索には対応していません。安全な学習用化合物名で検索してください。","error");return;}
  var local=localCandidateMatches(query);
  showCandidateMenu(local,query,query.length>=2);
  if(query.length<2)return;
