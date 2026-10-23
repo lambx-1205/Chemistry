@@ -123,7 +123,7 @@ function localCandidateMatches(query){
   return a.name.localeCompare(b.name,"ja");
  });
  return matches.slice(0,5).map(function(c){
-  var englishQuery=/[a-z]/i.test(q)&&/^[\\x00-\\x7F]+$/.test(q);
+  var englishQuery=/[a-z]/i.test(q)&&/^[\x00-\x7F]+$/.test(q);
   var englishName=englishQuery&&c.pubchemName&&String(c.pubchemName).toLocaleLowerCase().indexOf(q)>=0?c.pubchemName:c.name;
   return {name:englishName,displayName:englishName!==c.name?c.name:"",searchTerm:englishQuery&&c.pubchemName&&String(c.pubchemName).toLocaleLowerCase().indexOf(q)>=0?c.pubchemName:c.name,formula:c.pubchemFormula||c.formula,compound:c};
  });
