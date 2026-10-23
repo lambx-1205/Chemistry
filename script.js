@@ -17,12 +17,6 @@ var compounds = [
 {id:"phenol",pubchemName:"phenol",smiles:"Oc1ccccc1",name:"フェノール",formula:"C₆H₆O",family:"芳香族ヒドロキシ化合物",kind:"aromatic",color:"#689b83",desc:"ベンゼン環にヒドロキシ基が直接結合した化合物。アルコールとは異なる弱い酸性を示す。",state:"常温で固体",feature:"弱酸性",hint:"環に直接結合した−OH"},
 {id:"chlorobenzene",pubchemName:"chlorobenzene",smiles:"Clc1ccccc1",name:"クロロベンゼン",formula:"C₆H₅Cl",family:"ハロゲン化芳香族",kind:"aromatic",color:"#c49b64",desc:"ベンゼンの置換反応や、ジアゾニウム塩を経る変換で得られる芳香族ハロゲン化物。",state:"常温で液体",feature:"芳香族置換",hint:"芳香環にCl"}
 ];
-var positions = {
-"ethane":[125,176],"chloroethane":[310,135],"ethanol":[468,266],"ethene":[296,355],
-"dibromoethane":[127,447],"polyethylene":[132,575],"acetaldehyde":[624,250],"acetic-acid":[791,279],
-"ethyl-acetate":[864,423],"benzene":[382,575],"nitrobenzene":[553,532],"aniline":[710,560],
-"diazonium":[791,666],"phenol":[930,634],"chlorobenzene":[421,692]
-};
 var edges = [
 {id:"e1",from:"ethane",to:"chloroethane",type:"substitution",label:"塩素置換",condition:"Cl₂・光",name:"ラジカル置換反応",note:"水素原子の一部が塩素原子に置き換わる。"},
 {id:"e2",from:"chloroethane",to:"ethanol",type:"substitution",label:"加水分解",condition:"NaOH水溶液",name:"加水分解",note:"ハロゲン原子がヒドロキシ基に置き換わる。"},
@@ -43,249 +37,232 @@ var edges = [
 {id:"e17",from:"diazonium",to:"chlorobenzene",type:"substitution",label:"塩素置換",condition:"CuClなど",name:"ジアゾニウム塩の置換",note:"ジアゾ基を塩素原子に置き換える代表的な変換。"}
 ];
 var byId={},byName={};
-compounds.forEach(function(c){byId[c.id]=c;byName[c.name]=c;});
-var selectedId="ethanol",routeEdgeIds=[],routeNodeIds=["ethanol","acetaldehyde","acetic-acid"],currentFilter="all",zoom=1,panX=0,panY=0,drag=null,toastTimer;
-var svg=document.getElementById("reaction-map"),world=document.getElementById("map-world");
-var fromInput=document.getElementById("from-input"),toInput=document.getElementById("to-input");
-function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
-function compound(id){return byId[id];}
-function accessible(id){var c=compound(id);return currentFilter==="all"||(c&&c.kind===currentFilter);}
-function showToast(message){var el=document.getElementById("toast");el.textContent=message;el.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(function(){el.classList.remove("show");},2600);}
-var structureRenderCache={};
-function pubchemUrl(c){
- if(c.pubchemCid)return "https://pubchem.ncbi.nlm.nih.gov/compound/"+encodeURIComponent(c.pubchemCid);
- return "https://pubchem.ncbi.nlm.nih.gov/#query="+encodeURIComponent(c.pubchemName||c.name);
+compounds.forEach(function(c){byId[c.id]=c;byName[c.name.toLocaleLowerCase()]=c;if(c.pubchemName)byName[c.pubchemName.toLocaleLowerCase()]=c;});
+var currentCompound=null,lookupSequence=0,structureSequence=0;
+var input=document.getElementById("compound-search");
+var searchButton=document.getElementById("search-button");
+var suggestions=document.getElementById("compound-options");
+var status=document.getElementById("search-status");
+var mainStructure=document.getElementById("main-structure");
+var mainPubchemLink=document.getElementById("pubchem-link");
+var mainStructureSource=document.getElementById("structure-source");
+var resultRoot=document.getElementById("compound-content");
+var adjacentRoot=document.getElementById("one-step-results");
+var adjacentCount=document.getElementById("one-step-count");
+var lookupCache={};
+function esc(value){return String(value==null?"":value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
+function formulaHtml(value){return esc(value||"—").replace(/([0-9]+)/g,"<sub>$1</sub>");}
+function pubchemUrl(c){return c.pubchemCid?"https://pubchem.ncbi.nlm.nih.gov/compound/"+encodeURIComponent(c.pubchemCid):"https://pubchem.ncbi.nlm.nih.gov/#query="+encodeURIComponent(c.pubchemName||c.name);}
+function knownCompound(query){
+ var q=String(query||"").trim().toLocaleLowerCase();
+ if(!q)return null;
+ if(byName[q])return byName[q];
+ return compounds.find(function(c){return c.formula.toLocaleLowerCase()===q||c.id.toLocaleLowerCase()===q;})||null;
 }
-function updateStructureSource(c){
- var label=document.getElementById("structure-source");
- var link=document.getElementById("pubchem-link");
- if(label)label.textContent=c.structureSource==="PubChem"?"構造データ: PubChem":(c.structureSource==="fallback"?"内蔵構造式 · PubChem未取得":(c.pubchemName?"PubChem参照中 · 内蔵構造を表示":"内蔵構造データ"));
- if(link)link.href=pubchemUrl(c);
+function setStatus(message,kind){
+ status.textContent=message||"";
+ status.className="search-status"+(kind?" "+kind:"");
 }
-function drawStructureInto(target,c,large){
- if(!target||!c)return;
- var smiles=c.smiles;
- var cacheKey=c.id+"|"+smiles+"|"+(large?"detail":"map");
- if(target.dataset.structureKey===cacheKey)return;
- target.innerHTML="";
- target.dataset.structureKey=cacheKey;
- if(!window.SmilesDrawer){
-  target.innerHTML='<text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" fill="#8a958c" font-size="9">構造式ライブラリを読み込めません</text>';
-  return;
- }
- try{
-  var width=large?244:122,height=large?112:54;
-  var drawer=new SmilesDrawer.SmiDrawer({
-   width:width,height:height,padding:large?10:2,
-   bondLength:large?19:9,bondThickness:large?1.15:0.9,
-   bondSpacing:large?3.2:2.1,fontSizeLarge:large?8:5.5,fontSizeSmall:large?4:3,
-   compactDrawing:true,explicitHydrogens:false,terminalCarbons:false
-  });
-  drawer.draw(smiles,target,"light",function(){
-   target.dataset.structureKey=cacheKey;
-  },function(){
-   target.innerHTML='<text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" fill="#8a958c" font-size="9">構造式を表示できません</text>';
-  });
- }catch(err){
-  target.innerHTML='<text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" fill="#8a958c" font-size="9">構造式を表示できません</text>';
- }
+function setLoading(loading){
+ searchButton.disabled=loading;
+ searchButton.classList.toggle("loading",loading);
+ searchButton.setAttribute("aria-busy",loading?"true":"false");
 }
-function renderMapStructures(){
- world.querySelectorAll(".node-structure").forEach(function(el){
-  drawStructureInto(el,byId[el.getAttribute("data-structure-id")],false);
- });
-}
-function redrawCompoundStructure(c){
- var nodeSvg=world.querySelector('.node-structure[data-structure-id="'+c.id+'"]');
- if(nodeSvg)drawStructureInto(nodeSvg,c,false);
- if(selectedId===c.id){
-  var detailSvg=document.getElementById("detail-structure-svg");
-  if(detailSvg)drawStructureInto(detailSvg,c,true);
-  updateStructureSource(c);
- }
-}
-async function fetchPubChemStructure(c){
- if(!c.pubchemName||c.pubchemRequested)return;
- c.pubchemRequested=true;
- try{
-  var endpoint="https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/"+encodeURIComponent(c.pubchemName)+"/property/ConnectivitySMILES,InChIKey,MolecularFormula/JSON";
-  var response=await fetch(endpoint,{headers:{Accept:"application/json"}});
-  if(!response.ok)throw new Error("PubChem HTTP "+response.status);
-  var data=await response.json();
-  var props=data&&data.PropertyTable&&data.PropertyTable.Properties&&data.PropertyTable.Properties[0];
-  if(!props||!(props.ConnectivitySMILES||props.SMILES))throw new Error("No structure was returned");
-  c.smiles=props.ConnectivitySMILES||props.SMILES;
-  c.pubchemCid=props.CID||null;
-  c.inchiKey=props.InChIKey||null;
-  c.pubchemFormula=props.MolecularFormula||null;
-  c.structureSource="PubChem";
- }catch(err){
-  c.structureSource="fallback";
-  console.info("PubChem lookup used the bundled fallback for "+c.name,err&&err.message?err.message:err);
- }
- redrawCompoundStructure(c);
-}
-function loadPubChemStructures(){
- var targets=compounds.filter(function(c){return !!c.pubchemName;});
- (async function(){
-  for(var i=0;i<targets.length;i++){
-   await fetchPubChemStructure(targets[i]);
-   if(i<targets.length-1)await new Promise(function(resolve){setTimeout(resolve,350);});
-  }
- })();
-}
-function edgePath(e){
- var a=positions[e.from],b=positions[e.to],dx=b[0]-a[0],dy=b[1]-a[1];
- var hw=68,hh=52;
- var sxScale=Math.min(dx===0?Infinity:hw/Math.abs(dx),dy===0?Infinity:hh/Math.abs(dy));
- var exScale=sxScale;
- var sx=a[0]+dx*sxScale,sy=a[1]+dy*sxScale;
- var ex=b[0]-dx*exScale,ey=b[1]-dy*exScale;
- var bend=(((parseInt(e.id.slice(1),10)%3)-1)*24);
- var mx=(sx+ex)/2+(-dy/Math.sqrt(dx*dx+dy*dy||1))*bend;
- var my=(sy+ey)/2+(dx/Math.sqrt(dx*dx+dy*dy||1))*bend;
- e.mid=[mx,my];
- return "M "+sx.toFixed(1)+" "+sy.toFixed(1)+" Q "+mx.toFixed(1)+" "+my.toFixed(1)+" "+ex.toFixed(1)+" "+ey.toFixed(1);
-}
-function renderMap(){
- var out='<g class="regions"><text class="region-label" x="48" y="76">ALIPHATIC / 脂肪族</text><line class="region-line" x1="48" y1="92" x2="555" y2="92"/><text class="region-label" x="525" y="478">AROMATIC / 芳香族</text><line class="region-line" x1="525" y1="493" x2="950" y2="493"/></g><g id="edges-layer">';
- edges.forEach(function(e){
-   var active=routeEdgeIds.indexOf(e.id)>=0;
-   var dim=(currentFilter!=="all"&&(!accessible(e.from)||!accessible(e.to)));
-   out+='<g class="edge-wrap"><path class="edge '+e.type+(active?' active':'')+(dim?' dimmed':'')+'" data-edge="'+e.id+'" d="'+edgePath(e)+'" marker-end="url(#'+(active?'arrow-active':'arrow')+')" vector-effect="non-scaling-stroke"/>';
-   var showLabel=active||(["e1","e3","e4","e8","e9","e12","e14","e15","e16"].indexOf(e.id)>=0);
-   if(showLabel){out+='<text class="edge-label'+(active?' active':'')+(dim?' dimmed':'')+'" x="'+e.mid[0].toFixed(1)+'" y="'+(e.mid[1]-7).toFixed(1)+'">'+esc(e.label)+'</text>';}
-   out+='</g>';
- });
- out+='</g><g id="nodes-layer">';
+function fillSuggestions(){
+ var seen={};
+ var values=[];
  compounds.forEach(function(c){
-   var p=positions[c.id],selected=c.id===selectedId,route=routeNodeIds.indexOf(c.id)>=0,dim=!accessible(c.id);
-   out+='<g class="map-node'+(selected?' selected':'')+(route?' in-route':'')+(dim?' dimmed':'')+'" data-node="'+c.id+'" tabindex="0" role="button" aria-label="'+esc(c.name)+'を選択">';
-   out+='<foreignObject class="node-card-foreign" x="'+(p[0]-68)+'" y="'+(p[1]-54)+'" width="136" height="108"><div xmlns="http://www.w3.org/1999/xhtml" class="compound-node-card color-'+c.id+'"><div class="node-structure-frame"><svg class="node-structure" data-structure-id="'+c.id+'" width="122" height="54" viewBox="0 0 122 54" role="img" aria-label="'+esc(c.name)+'の構造式"></svg></div><div class="compound-node-name">'+esc(c.name)+'</div><div class="compound-node-formula">'+esc(c.formula)+'</div></div></foreignObject>';
-   out+='</g>';
+  [c.name,c.pubchemName].forEach(function(v){
+   if(v&&!seen[v.toLocaleLowerCase()]){seen[v.toLocaleLowerCase()]=true;values.push(v);}
+  });
  });
- out+='</g>';
- world.innerHTML=out;
- world.querySelectorAll(".map-node").forEach(function(el){
-   el.addEventListener("click",function(){if(drag&&drag.moved)return;selectCompound(el.getAttribute("data-node"));});
-   el.addEventListener("keydown",function(ev){if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();selectCompound(el.getAttribute("data-node"));}});
- });
- renderMapStructures();
- applyView();
+ suggestions.innerHTML=values.map(function(v){return '<option value="'+esc(v)+'"></option>';}).join("");
 }
-function applyView(){world.setAttribute("transform","translate("+panX+" "+panY+") translate(500 380) scale("+zoom+") translate(-500 -380)");}
-function findPath(from,to){
- if(!byId[from]||!byId[to])return null;
- if(from===to)return {nodes:[from],edges:[]};
- var q=[{id:from,nodes:[from],edges:[]}],seen={};seen[from]=true;
- while(q.length){
-  var cur=q.shift();
-  for(var i=0;i<edges.length;i++){
-   var e=edges[i];if(e.from!==cur.id||seen[e.to])continue;
-   var nn=cur.nodes.concat([e.to]),ee=cur.edges.concat([e.id]);
-   if(e.to===to)return {nodes:nn,edges:ee};
-   seen[e.to]=true;q.push({id:e.to,nodes:nn,edges:ee});
-  }
- }
- return null;
-}
-function renderRoute(result,from,to){
- var holder=document.getElementById("route-results"),count=document.getElementById("route-count");
- if(!result){
-  count.textContent="NO ROUTE";
-  holder.innerHTML='<div class="route-alert">登録された反応データ内では経路を見つけられなかった。反応の向きや、別の中間体を使う経路も確認してみよう。</div>';
+function drawStructure(target,smilesValue,width,height,key){
+ if(!target)return;
+ target.innerHTML="";
+ target.dataset.structureKey=key||"";
+ if(!smilesValue){
+  target.innerHTML='<text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" fill="#8a958c" font-size="11">構造式なし</text>';
   return;
  }
- if(result.edges.length===0){
-  count.textContent="0 REACTIONS";
-  holder.innerHTML='<div class="route-empty">始点と目的物質が同じ。別の化合物を目的地に設定すると経路を探せる。</div>';return;
+ if(!window.SmilesDrawer){
+  target.innerHTML='<text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" fill="#8a958c" font-size="10">構造式ライブラリを読み込めません</text>';
+  return;
  }
- count.textContent=result.edges.length+" REACTION"+(result.edges.length===1?"":"S");
- var html="";
- result.nodes.forEach(function(id,i){
-  var c=compound(id);
-  html+='<div class="route-card"><div class="route-step-top"><span class="step-num">'+(i+1)+'</span><span class="route-step-title">'+esc(c.name)+'</span><span class="route-step-formula">'+esc(c.formula)+'</span></div>';
-  if(i<result.edges.length){
-   var e=edges.filter(function(x){return x.id===result.edges[i];})[0];
-   html+='<div class="route-reaction">↳ '+esc(e.name)+'</div><div class="route-condition">'+esc(e.condition)+'</div>';
-  }
-  html+='</div>';
- });
- holder.innerHTML=html;
-}
-function setRoute(from,to,quiet){
- var a=byName[from],b=byName[to];
- if(!a||!b){
-  if(!quiet)showToast("候補リストにある化合物名を入力してください。");
-  return false;
+ try{
+  var drawer=new SmilesDrawer.SmiDrawer({
+   width:width,height:height,padding:Math.max(4,Math.round(width*.025)),
+   bondLength:width>200?24:18,bondThickness:1.4,bondSpacing:3,
+   fontSizeLarge:9,fontSizeSmall:5,compactDrawing:true,
+   explicitHydrogens:false,terminalCarbons:false
+  });
+  drawer.draw(smilesValue,target,"light",function(){},function(){
+   target.innerHTML='<text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" fill="#8a958c" font-size="10">構造式を表示できません</text>';
+  });
+ }catch(err){
+  target.innerHTML='<text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" fill="#8a958c" font-size="10">構造式を表示できません</text>';
  }
- fromInput.value=a.name;toInput.value=b.name;
- var r=findPath(a.id,b.id);
- routeEdgeIds=r?r.edges.slice():[];routeNodeIds=r?r.nodes.slice():[];
- renderRoute(r,a.id,b.id);
- renderMap();
- if(!r){if(!quiet)showToast(a.name+" から "+b.name+" への登録経路は見つかりませんでした。");}
- else if(!quiet)showToast(r.edges.length===0?"始点と目的物質が同じです。":"反応 "+r.edges.length+" 段階の経路を表示しました。");
- return !!r;
 }
-function selectCompound(id){
- selectedId=id;renderDetail();renderMap();
+function renderSearchResults(){
+ var optionCount=compounds.length;
+ document.getElementById("local-count").textContent=String(optionCount).padStart(2,"0");
 }
-function renderDetail(){
- var c=compound(selectedId);if(!c)return;
- var detail=document.getElementById("compound-detail");
- detail.innerHTML='<div class="compound-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="'+c.color+'" stroke-width="1.7"/><circle cx="12" cy="12" r="3" fill="'+c.color+'" opacity=".65"/><path d="M12 4v5m0 6v5M4 12h5m6 0h5" stroke="'+c.color+'" stroke-width="1.3"/></svg></div><h2 class="compound-name">'+esc(c.name)+'</h2><div class="compound-formula">'+esc(c.formula)+'</div><div class="detail-structure-box"><div class="detail-structure-heading"><span>STRUCTURE</span><span class="structure-source" id="structure-source">PubChem参照中…</span></div><svg class="detail-structure-svg" id="detail-structure-svg" width="244" height="112" viewBox="0 0 244 112" role="img" aria-label="'+esc(c.name)+'の構造式"></svg><a class="pubchem-link" id="pubchem-link" target="_blank" rel="noopener noreferrer" href="'+esc(pubchemUrl(c))+'">PubChemで構造・データを参照 ↗</a></div><span class="type-pill"><i class="legend-dot compound-color color-'+c.id+'"></i>'+esc(c.family)+'</span><p class="detail-description">'+esc(c.desc)+'</p><div class="detail-actions detail-actions-spaced"><button class="outline-btn" id="set-as-start">⊙ 始点に設定</button><button class="outline-btn" id="set-as-goal">◎ 終点に設定</button></div>';
- drawStructureInto(document.getElementById("detail-structure-svg"),c,true);
- updateStructureSource(c);
- document.getElementById("compound-properties").innerHTML='<div class="property"><span>分類</span><strong>'+esc(c.family)+'</strong></div><div class="property"><span>状態の例</span><strong>'+esc(c.state)+'</strong></div><div class="property"><span>注目反応</span><strong>'+esc(c.feature)+'</strong></div><div class="property"><span>構造のヒント</span><strong>'+esc(c.hint)+'</strong></div>';
+function fact(label,value){
+ return '<div class="fact"><span class="fact-label">'+esc(label)+'</span><span class="fact-value">'+esc(value||"—")+'</span></div>';
+}
+function renderCompound(c){
+ currentCompound=c;
+ document.title=c.name+" — Organic Atlas";
+ var main=document.getElementById("compound-main");
+ main.hidden=false;
+ document.getElementById("compound-empty").hidden=true;
+ document.getElementById("compound-name").textContent=c.name;
+ document.getElementById("compound-family").textContent=c.family||"化合物";
+ document.getElementById("compound-formula").innerHTML=formulaHtml(c.pubchemFormula||c.formula);
+ mainStructure.setAttribute("aria-label",c.name+"の構造式");
+ drawStructure(mainStructure,c.smiles,440,270,"main-"+c.id+"-"+c.smiles);
+ mainPubchemLink.href=pubchemUrl(c);
+ mainPubchemLink.setAttribute("aria-label",c.name+"をPubChemで開く");
+ mainStructureSource.textContent=c.structureSource==="PubChem"?"PUBCHEM":c.structureSource==="fallback"?"LOCAL STRUCTURE":"STRUCTURE";
+ document.getElementById("compound-facts").innerHTML=
+  fact("分類",c.family||"—")+
+  fact("分子量",c.molecularWeight?(Number(c.molecularWeight).toFixed(2)+" g/mol"):"—")+
+  fact("状態",c.state||"—")+
+  fact("InChIKey",c.inchiKey||"—");
+ renderOneStep(c);
+}
+function renderOneStep(c){
  var outgoing=edges.filter(function(e){return e.from===c.id;});
- var incoming=edges.filter(function(e){return e.to===c.id;});
- var html="";
- outgoing.forEach(function(e){
-  var dst=compound(e.to);
-  html+='<button class="reaction-link" data-next="'+e.to+'"><strong>→ '+esc(dst.name)+'</strong><span>'+esc(e.name)+' · '+esc(e.condition)+'</span></button>';
+ adjacentCount.textContent=String(outgoing.length).padStart(2,"0");
+ if(!outgoing.length){
+  adjacentRoot.innerHTML='<div class="no-reactions"><span class="no-reactions-mark">∅</span><span>登録された1段階反応はありません</span></div>';
+  return;
+ }
+ adjacentRoot.innerHTML=outgoing.map(function(e){
+  var target=byId[e.to];
+  if(!target)return "";
+  return '<button class="reaction-card" type="button" data-compound="'+esc(target.id)+'">'+
+   '<span class="reaction-card-top"><span class="reaction-kind">'+esc(e.name)+'</span><span class="reaction-arrow" aria-hidden="true">↗</span></span>'+
+   '<span class="reaction-structure"><svg class="small-structure" data-small-structure="'+esc(target.id)+'" viewBox="0 0 220 108" role="img" aria-label="'+esc(target.name)+'の構造式"></svg></span>'+
+   '<span class="reaction-compound-name">'+esc(target.name)+'</span>'+
+   '<span class="reaction-compound-formula">'+formulaHtml(target.pubchemFormula||target.formula)+'</span>'+
+   '<span class="reaction-condition">'+esc(e.condition||"")+'</span>'+
+  '</button>';
+ }).join("");
+ adjacentRoot.querySelectorAll(".reaction-card").forEach(function(card){
+  card.addEventListener("click",function(){
+   var target=byId[card.getAttribute("data-compound")];
+   if(target){input.value=target.name;renderCompound(target);setStatus("", "");window.scrollTo({top:0,behavior:"smooth"});resolveStructure(target);}
+  });
  });
- if(!outgoing.length)html='<div class="empty-state">このサンプルでは、この物質から直接進む反応は未登録。</div>';
- document.getElementById("compound-reactions").innerHTML=html;
- detail.querySelector("#set-as-start").addEventListener("click",function(){fromInput.value=c.name;showToast(c.name+" を始点に設定しました。");});
- detail.querySelector("#set-as-goal").addEventListener("click",function(){toInput.value=c.name;showToast(c.name+" を目的物質に設定しました。");});
- document.querySelectorAll(".reaction-link").forEach(function(el){el.addEventListener("click",function(){var dst=compound(el.getAttribute("data-next"));toInput.value=dst.name;setRoute(c.name,dst.name,false);});});
+ adjacentRoot.querySelectorAll(".small-structure").forEach(function(svg){
+  var target=byId[svg.getAttribute("data-small-structure")];
+  if(target)drawStructure(svg,target.smiles,220,108,"small-"+target.id+"-"+target.smiles);
+ });
 }
-function populateOptions(){
- document.getElementById("compound-options").innerHTML=compounds.map(function(c){return '<option value="'+esc(c.name)+'"></option>';}).join("");
+function renderExternalCompound(c){
+ if(!c.id)c.id="pubchem-"+String(c.pubchemCid||Date.now());
+ c.kind="external";c.family=c.family||"PubChem";
+ c.state=c.state||"—";c.structureSource="PubChem";
+ renderCompound(c);
 }
-function changeFilter(f){
- currentFilter=f;
- document.querySelectorAll(".filter-btn").forEach(function(b){b.classList.toggle("active",b.getAttribute("data-filter")===f);});
- renderMap();
+async function fetchCompound(query){
+ var key=query.trim().toLocaleLowerCase();
+ if(lookupCache[key])return lookupCache[key];
+ var endpoint="https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/"+encodeURIComponent(query.trim())+"/property/Title,ConnectivitySMILES,InChIKey,MolecularFormula,MolecularWeight/JSON";
+ var response=await fetch(endpoint,{headers:{Accept:"application/json"}});
+ if(!response.ok)throw new Error(response.status===404?"化合物が見つかりません":"PubChemへの接続に失敗しました");
+ var data=await response.json();
+ var p=data&&data.PropertyTable&&data.PropertyTable.Properties&&data.PropertyTable.Properties[0];
+ if(!p||!(p.ConnectivitySMILES||p.SMILES))throw new Error("構造データがありません");
+ var existing=knownCompound(query);
+ var c=existing||{
+  id:"pubchem-"+String(p.CID||key.replace(/[^a-z0-9]+/gi,"-")),
+  name:p.Title||query,
+  formula:p.MolecularFormula||"—",
+  family:"PubChem",
+  kind:"external",
+  color:"#5f9c72",
+  state:"—",
+  feature:"",
+  hint:"",
+  desc:"",
+  pubchemName:query,
+  smiles:p.ConnectivitySMILES||p.SMILES
+ };
+ c.pubchemCid=p.CID||c.pubchemCid||null;
+ c.pubchemName=c.pubchemName||query;
+ c.smiles=p.ConnectivitySMILES||p.SMILES;
+ c.pubchemFormula=p.MolecularFormula||c.pubchemFormula||c.formula;
+ c.molecularWeight=p.MolecularWeight||c.molecularWeight||null;
+ c.inchiKey=p.InChIKey||c.inchiKey||null;
+ c.structureSource="PubChem";
+ lookupCache[key]=c;
+ return c;
 }
-document.getElementById("find-route").addEventListener("click",function(){setRoute(fromInput.value.trim(),toInput.value.trim(),false);});
-[fromInput,toInput].forEach(function(input){input.addEventListener("keydown",function(ev){if(ev.key==="Enter")setRoute(fromInput.value.trim(),toInput.value.trim(),false);});});
-document.getElementById("swap-route").addEventListener("click",function(){var v=fromInput.value;fromInput.value=toInput.value;toInput.value=v;setRoute(fromInput.value.trim(),toInput.value.trim(),false);});
-document.querySelectorAll(".chip[data-from]").forEach(function(el){el.addEventListener("click",function(){setRoute(el.getAttribute("data-from"),el.getAttribute("data-to"),false);});});
-document.querySelectorAll(".filter-btn").forEach(function(el){el.addEventListener("click",function(){changeFilter(el.getAttribute("data-filter"));});});
-document.getElementById("zoom-in").addEventListener("click",function(){zoom=Math.min(zoom*1.22,2.5);applyView();});
-document.getElementById("zoom-out").addEventListener("click",function(){zoom=Math.max(zoom/1.22,.65);applyView();});
-document.getElementById("reset-map").addEventListener("click",function(){zoom=1;panX=0;panY=0;changeFilter("all");renderMap();showToast("マップ全体を表示しました。");});
-svg.addEventListener("wheel",function(ev){ev.preventDefault();zoom=Math.max(.65,Math.min(2.5,zoom*(ev.deltaY<0?1.1:.91)));applyView();},{passive:false});
-svg.addEventListener("pointerdown",function(ev){
- if(ev.target.closest&&ev.target.closest(".map-node"))return;
- drag={x:ev.clientX,y:ev.clientY,px:panX,py:panY,moved:false};svg.setPointerCapture(ev.pointerId);svg.classList.add("dragging");
-});
-svg.addEventListener("pointermove",function(ev){
- if(!drag)return;
- var rect=svg.getBoundingClientRect(),sx=1000/rect.width,sy=760/rect.height;
- var dx=ev.clientX-drag.x,dy=ev.clientY-drag.y;
- if(Math.abs(dx)+Math.abs(dy)>4)drag.moved=true;
- panX=drag.px+dx*sx;panY=drag.py+dy*sy;applyView();
-});
-svg.addEventListener("pointerup",function(){if(drag&&drag.moved){renderMap();}drag=null;svg.classList.remove("dragging");});
-svg.addEventListener("pointercancel",function(){drag=null;svg.classList.remove("dragging");});
-document.getElementById("nav-quiz").addEventListener("click",function(){showToast("学習モードは今後追加予定。まずは反応経路を探索しよう。");});
-document.getElementById("nav-compounds").addEventListener("click",function(){document.querySelector(".sidebar").scrollIntoView({behavior:"smooth",block:"start"});fromInput.focus();document.querySelectorAll(".nav-btn").forEach(function(x){x.classList.toggle("active",x.id==="nav-compounds");});});
-document.getElementById("nav-map").addEventListener("click",function(){zoom=1;panX=0;panY=0;changeFilter("all");document.querySelectorAll(".nav-btn").forEach(function(x){x.classList.toggle("active",x.id==="nav-map");});});
-populateOptions();
-setRoute("エタノール","酢酸",true);
-renderDetail();
-loadPubChemStructures();
+var structureRequest={};
+async function resolveStructure(c){
+ if(!c||!c.pubchemName||c.structureSource==="PubChem"||structureRequest[c.id])return;
+ var token=(structureRequest[c.id]||0)+1;
+ structureRequest[c.id]=token;
+ try{
+  var loaded=await fetchCompound(c.pubchemName);
+  if(currentCompound&&currentCompound.id===c.id){
+   c.smiles=loaded.smiles;c.pubchemCid=loaded.pubchemCid;c.pubchemFormula=loaded.pubchemFormula;
+   c.molecularWeight=loaded.molecularWeight;c.inchiKey=loaded.inchiKey;c.structureSource="PubChem";
+   renderCompound(c);
+  }
+ }catch(error){
+  c.structureSource="fallback";
+  if(currentCompound&&currentCompound.id===c.id){
+   mainStructureSource.textContent="LOCAL STRUCTURE";
+   mainPubchemLink.href=pubchemUrl(c);
+  }
+ }
+}
+async function searchCompound(){
+ var query=input.value.trim();
+ if(!query){setStatus("化合物名を入力してください","error");input.focus();return;}
+ var sequence=++lookupSequence;
+ var known=knownCompound(query);
+ if(known){
+  setLoading(false);setStatus("","");renderCompound(known);resolveStructure(known);return;
+ }
+ setLoading(true);setStatus("検索中","loading");
+ try{
+  var c=await fetchCompound(query);
+  if(sequence!==lookupSequence)return;
+  input.value=c.name;
+  renderExternalCompound(c);
+  setStatus("PubChemから取得","success");
+ }catch(error){
+  if(sequence!==lookupSequence)return;
+  setStatus(error&&error.message?error.message:"化合物を取得できませんでした","error");
+ }finally{
+  if(sequence===lookupSequence)setLoading(false);
+ }
+}
+function init(){
+ fillSuggestions();renderSearchResults();
+ document.getElementById("search-form").addEventListener("submit",function(ev){ev.preventDefault();searchCompound();});
+ input.addEventListener("input",function(){
+  if(!input.value.trim())setStatus("","");
+ });
+ document.getElementById("clear-search").addEventListener("click",function(){
+  input.value="";setStatus("","");input.focus();
+ });
+ document.getElementById("home-link").addEventListener("click",function(ev){
+  ev.preventDefault();input.value="エタノール";renderCompound(byId.ethanol);resolveStructure(byId.ethanol);setStatus("","");
+ });
+ document.getElementById("starter-compounds").querySelectorAll("[data-preset]").forEach(function(btn){
+  btn.addEventListener("click",function(){
+   var c=byId[btn.getAttribute("data-preset")];
+   if(c){input.value=c.name;renderCompound(c);resolveStructure(c);setStatus("","");}
+  });
+ });
+ var initial=byId.ethanol||compounds[0];
+ input.value=initial.name;renderCompound(initial);resolveStructure(initial);
+}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
