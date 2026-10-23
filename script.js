@@ -136,7 +136,7 @@ function renderWithSmilesDrawer(target,smilesValue,width,height,renderKey){
   return false;
  }
 }
-function drawStructure(target,smilesValue,width,height,key){
+function drawWithLibraries(target,smilesValue,width,height,key){
  if(!target)return;
  var renderKey=key||"";
  target.dataset.structureKey=renderKey;
@@ -186,6 +186,37 @@ function drawStructure(target,smilesValue,width,height,key){
   console.warn("RDKit initialization failed; using SmilesDrawer fallback:",error&&error.message?error.message:error);
   renderWithSmilesDrawer(target,smilesValue,width,height,renderKey);
  });
+}
+function structureImageUrl(smilesValue,width,height){
+ return "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/"+encodeURIComponent(smilesValue)+"/PNG?image_size="+width+"x"+height;
+}
+function drawStructure(target,smilesValue,width,height,key){
+ if(!target)return;
+ var renderKey=key||"";
+ target.dataset.structureKey=renderKey;
+ target.dataset.renderEngine="";
+ target.innerHTML='<span class="structure-loading">構造式を読み込み中…</span>';
+ if(!smilesValue){
+  target.innerHTML='<span class="structure-error">構造式データなし</span>';
+  return;
+ }
+ var image=new Image();
+ image.className="chemical-structure-image";
+ image.alt=target.getAttribute("aria-label")||"化学構造式";
+ image.decoding="async";
+ image.onload=function(){
+  if(!target.isConnected||target.dataset.structureKey!==renderKey)return;
+  target.replaceChildren(image);
+  target.dataset.renderEngine="pubchem-png";
+  if(target.id==="main-structure")mainStructureSource.textContent="PUBCHEM 2D";
+ };
+ image.onerror=function(){
+  if(!target.isConnected||target.dataset.structureKey!==renderKey)return;
+  if(target.id==="main-structure")mainStructureSource.textContent="LOCAL RENDERER";
+  console.warn("PubChem structure image failed; using local renderers.");
+  drawWithLibraries(target,smilesValue,width,height,renderKey);
+ };
+ image.src=structureImageUrl(smilesValue,width,height);
 }
 function renderSearchResults(){
  var optionCount=compounds.length;
