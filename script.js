@@ -82,11 +82,14 @@ var rdkitInstance=null;
 var rdkitInitPromise=null;
 function getRDKit(){
  if(rdkitInstance)return Promise.resolve(rdkitInstance);
- if(!window.initRDKitModule)return Promise.reject(new Error("RDKitのライブラリを読み込めません"));
+ if(typeof window.initRDKitModule!=="function")return Promise.reject(new Error("RDKit loader is unavailable"));
  if(!rdkitInitPromise){
   rdkitInitPromise=window.initRDKitModule({
-   locateFile:function(file){return "https://unpkg.com/@rdkit/rdkit/dist/"+file;}
+   locateFile:function(file){
+    return "https://unpkg.com/@rdkit/rdkit@2026.9.1/dist/"+file;
+   }
   }).then(function(module){
+   if(!module||typeof module.get_mol!=="function")throw new Error("RDKit module did not initialize");
    rdkitInstance=module;
    return module;
   }).catch(function(error){
@@ -96,10 +99,48 @@ function getRDKit(){
  }
  return rdkitInitPromise;
 }
+function renderWithSmilesDrawer(target,smilesValue,width,height,renderKey){
+ if(!target||!target.isConnected||target.dataset.structureKey!==renderKey)return false;
+ if(!window.SmilesDrawer||!window.SmilesDrawer.SmiDrawer){
+  target.innerHTML='<span class="structure-error">構造式ライブラリを読み込めません</span>';
+  return false;
+ }
+ try{
+  target.innerHTML='<svg class="fallback-structure-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+width+' '+height+'" role="img" aria-label="'+(target.getAttribute("aria-label")||"化学構造式")+'"></svg>';
+  var output=target.querySelector("svg");
+  var drawer=new window.SmilesDrawer.SmiDrawer({
+   width:width,
+   height:height,
+   padding:Math.max(6,Math.round(width*.035)),
+   bondLength:width>260?26:18,
+   bondThickness:1.35,
+   bondSpacing:3,
+   fontSizeLarge:9,
+   fontSizeSmall:5,
+   compactDrawing:true,
+   explicitHydrogens:false,
+   terminalCarbons:false
+  });
+  drawer.draw(smilesValue,output,"light",function(){
+   if(target.dataset.structureKey===renderKey)target.dataset.renderEngine="smiles-drawer";
+  },function(error){
+   if(target.dataset.structureKey===renderKey){
+    target.innerHTML='<span class="structure-error">この構造式を描画できません</span>';
+   }
+   console.error("SmilesDrawer rendering failed:",error||"unknown error");
+  });
+  return true;
+ }catch(error){
+  if(target.dataset.structureKey===renderKey)target.innerHTML='<span class="structure-error">構造式を描画できません</span>';
+  console.error("SmilesDrawer fallback failed:",error&&error.message?error.message:error);
+  return false;
+ }
+}
 function drawStructure(target,smilesValue,width,height,key){
  if(!target)return;
  var renderKey=key||"";
  target.dataset.structureKey=renderKey;
+ target.dataset.renderEngine="";
  target.innerHTML='<span class="structure-loading">構造式を描画中…</span>';
  if(!smilesValue){
   target.innerHTML='<span class="structure-error">構造式データなし</span>';
@@ -110,7 +151,7 @@ function drawStructure(target,smilesValue,width,height,key){
   var mol=null;
   try{
    mol=RDKit.get_mol(smilesValue);
-   if(!mol)throw new Error("SMILESを解釈できません");
+   if(!mol)throw new Error("SMILESを解析できません");
    var details={
     width:width,
     height:height,
@@ -121,27 +162,29 @@ function drawStructure(target,smilesValue,width,height,key){
     centreMoleculesBeforeDrawing:true
    };
    var markup=mol.get_svg(JSON.stringify(details));
-   if(!markup)throw new Error("SVGの生成に失敗しました");
+   if(!markup||!/<svg[\s>]/i.test(markup)||!/<path[\s>]/i.test(markup)){
+    throw new Error("RDKit returned an empty drawing");
+   }
    if(target.dataset.structureKey!==renderKey)return;
    target.innerHTML=markup;
-   var svg=target.querySelector("svg");
-   if(svg){
-    svg.setAttribute("role","img");
-    svg.setAttribute("aria-label",target.getAttribute("aria-label")||"化学構造式");
-    svg.setAttribute("preserveAspectRatio","xMidYMid meet");
-    svg.style.width="100%";
-    svg.style.height="100%";
-    svg.style.display="block";
-   }
+   var output=target.querySelector("svg");
+   if(!output)throw new Error("RDKit SVG element missing");
+   output.setAttribute("role","img");
+   output.setAttribute("aria-label",target.getAttribute("aria-label")||"化学構造式");
+   output.setAttribute("preserveAspectRatio","xMidYMid meet");
+   output.style.width="100%";
+   output.style.height="100%";
+   output.style.display="block";
+   target.dataset.renderEngine="rdkit";
   }catch(error){
-   if(target.dataset.structureKey===renderKey)target.innerHTML='<span class="structure-error">構造式を生成できません</span>';
-   console.warn("RDKit structure rendering failed:",error&&error.message?error.message:error);
+   console.warn("RDKit render failed; using SmilesDrawer fallback:",error&&error.message?error.message:error);
+   renderWithSmilesDrawer(target,smilesValue,width,height,renderKey);
   }finally{
    if(mol&&typeof mol.delete==="function")mol.delete();
   }
  }).catch(function(error){
-  if(target.dataset.structureKey===renderKey)target.innerHTML='<span class="structure-error">構造式ライブラリを読み込めません</span>';
-  console.error("RDKit failed to initialize:",error&&error.message?error.message:error);
+  console.warn("RDKit initialization failed; using SmilesDrawer fallback:",error&&error.message?error.message:error);
+  renderWithSmilesDrawer(target,smilesValue,width,height,renderKey);
  });
 }
 function renderSearchResults(){
