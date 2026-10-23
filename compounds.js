@@ -119,7 +119,7 @@ function sortCompounds(list){
 function renderList(){
  var query=String(search.value||"").trim().toLocaleLowerCase();
  var filtered=compounds.filter(function(c){
-  return !query||[c.name,c.pubchemName,c.formula,c.family,c.desc,c.feature].some(function(v){return String(v||"").toLocaleLowerCase().indexOf(query)>=0;});
+  return !query||[c.name,c.pubchemName,c.formula,c.family,c.desc,c.feature].concat(c.aliases||[]).some(function(v){return String(v||"").toLocaleLowerCase().indexOf(query)>=0;});
  });
  var ordered=sortCompounds(filtered);
  root.innerHTML=ordered.map(cardHtml).join("");
