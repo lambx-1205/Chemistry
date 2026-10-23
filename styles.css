@@ -459,3 +459,5 @@ a{color:inherit}
  .isomer-thumb{height:82px;}
  .isomer-card-copy{padding:8px;}
 }
+
+.molecule3d-fallback[hidden]{display:none;}
