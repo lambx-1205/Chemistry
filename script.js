@@ -169,6 +169,10 @@ function renderSearchResults(){
 function fact(label,value){
  return '<div class="fact"><span class="fact-label">'+esc(label)+'</span><span class="fact-value">'+esc(value||"—")+'</span></div>';
 }
+function is3DRestrictedCompound(c){
+ var identity=(String(c&&c.name||"")+" "+String(c&&c.pubchemName||"")).toLocaleLowerCase();
+ return Boolean(c&&c.id==="tnt")||identity.indexOf("trinitrotoluene")>=0||identity.indexOf(" tnt")>=0||identity.trim()==="tnt";
+}
 function renderCompound(c){
  currentCompound=c;
  document.title=c.name+" — Organic Atlas";
@@ -191,7 +195,7 @@ function renderCompound(c){
  renderOneStep(c);
  renderIsomerGroups(c);
  var modelButton=document.getElementById("open-3d-model");
- if(modelButton)modelButton.disabled=Boolean(c.id==="tnt"||/trinitrotoluene|(^|\W)tnt($|\W)/i.test(String(c.name||"")+" "+String(c.pubchemName||"")));
+ if(modelButton)modelButton.disabled=is3DRestrictedCompound(c);
 }
 function renderReactionCard(edge,direction){
  var from=byId[edge.from];
@@ -366,6 +370,7 @@ async function open3DMolecule(){
   setStatus("この化合物の3D表示は利用できません。","error");return;
  }
  var token=++molecule3dRequest;
+ molecule3dSpacefillButton.classList.add("is-active");molecule3dBallstickButton.classList.remove("is-active");
  if(activeMolecule3D&&typeof activeMolecule3D.dispose==="function"){activeMolecule3D.dispose();activeMolecule3D=null;}
  molecule3dTitle.textContent=c.name+" の3D分子模型";
  molecule3dStage.hidden=false;molecule3dFallback.hidden=true;
