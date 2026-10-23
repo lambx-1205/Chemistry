@@ -30,3 +30,62 @@
 .compound-color.color-diazonium { background: #9c8bb8; }
 .compound-color.color-phenol { background: #689b83; }
 .compound-color.color-chlorobenzene { background: #c49b64; }
+
+/* Molecular structure cards rendered by SmilesDrawer inside the reaction map. */
+.map-canvas .node-card-foreign { overflow: visible; pointer-events: auto; }
+.map-canvas .compound-node-card {
+  width: 136px;
+  height: 108px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 5px 6px 6px;
+  overflow: hidden;
+  border: 1px solid #dce6d9;
+  border-top: 3px solid #9db8a0;
+  border-radius: 14px;
+  background: rgba(255,255,255,.97);
+  box-shadow: 0 5px 13px rgba(25,44,32,.075);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color .16s, box-shadow .16s, background .16s;
+}
+.map-canvas .compound-node-card.color-ethane { border-top-color:#7b9fa8; }
+.map-canvas .compound-node-card.color-chloroethane { border-top-color:#d1a15b; }
+.map-canvas .compound-node-card.color-ethanol { border-top-color:#5f9c72; }
+.map-canvas .compound-node-card.color-ethene { border-top-color:#6499ad; }
+.map-canvas .compound-node-card.color-dibromoethane { border-top-color:#d1a15b; }
+.map-canvas .compound-node-card.color-polyethylene { border-top-color:#8799a9; }
+.map-canvas .compound-node-card.color-acetaldehyde { border-top-color:#c58b62; }
+.map-canvas .compound-node-card.color-acetic-acid { border-top-color:#bd8075; }
+.map-canvas .compound-node-card.color-ethyl-acetate { border-top-color:#9b8bb7; }
+.map-canvas .compound-node-card.color-benzene { border-top-color:#639b9a; }
+.map-canvas .compound-node-card.color-nitrobenzene { border-top-color:#b8899c; }
+.map-canvas .compound-node-card.color-aniline { border-top-color:#b8899c; }
+.map-canvas .compound-node-card.color-diazonium { border-top-color:#9c8bb8; }
+.map-canvas .compound-node-card.color-phenol { border-top-color:#689b83; }
+.map-canvas .compound-node-card.color-chlorobenzene { border-top-color:#c49b64; }
+.map-canvas .map-node:hover .compound-node-card { border-color:#8fb096; box-shadow:0 8px 19px rgba(25,44,32,.13); }
+.map-canvas .map-node.selected .compound-node-card {
+  border-color:#3d745d;
+  background:#fbfffb;
+  box-shadow:0 0 0 2px rgba(61,116,93,.16),0 8px 19px rgba(25,44,32,.12);
+}
+.map-canvas .map-node.in-route .compound-node-card { box-shadow:0 0 0 1.5px rgba(214,126,70,.68),0 5px 13px rgba(25,44,32,.075); }
+.map-canvas .map-node.dimmed { opacity:.3; }
+.map-canvas .map-node:focus-visible .compound-node-card { outline:3px solid #9dc8ac; outline-offset:2px; }
+.node-structure-frame { width:122px; height:54px; flex:none; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+.node-structure { width:122px; height:54px; display:block; overflow:visible; }
+.compound-node-name { display:block; width:100%; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; color:#293b30; font-size:10px; line-height:15px; font-weight:800; }
+.compound-node-formula { display:block; color:#829087; font-family:"SFMono-Regular",Consolas,monospace; font-size:9px; line-height:13px; white-space:nowrap; }
+.detail-structure-box { margin-top:14px; border:1px solid #e2e9df; border-radius:11px; background:rgba(255,255,255,.9); padding:10px; }
+.detail-structure-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; color:#819087; font-size:9px; font-weight:800; letter-spacing:1px; }
+.structure-source { color:#8a958c; font-size:9px; font-weight:600; letter-spacing:0; text-align:right; }
+.detail-structure-svg { display:block; width:100%; height:112px; margin:5px 0 2px; overflow:visible; }
+.pubchem-link { display:flex; justify-content:center; align-items:center; gap:5px; border-top:1px solid #edf1eb; padding-top:9px; margin-top:2px; color:#3d745d; font-size:10px; font-weight:800; text-decoration:none; }
+.pubchem-link:hover { color:#28523f; text-decoration:underline; }
+@media(max-width:780px) {
+  .map-canvas .compound-node-card { width:136px; height:108px; }
+  .detail-structure-svg { height:112px; }
+}
