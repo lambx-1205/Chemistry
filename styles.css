@@ -3,3 +3,30 @@
 @media(max-width:1250px){.app{grid-template-columns:290px minmax(360px,1fr);height:auto;max-height:none}.rightbar{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;align-items:start;gap:16px}.rightbar .detail-top,.rightbar .right-foot{grid-column:1/-1}.detail-reactions{grid-column:2;grid-row:2/5}.map-panel,.map-canvas{min-height:680px}.top-right{min-width:unset}.brand{min-width:unset}}
 @media(max-width:780px){.topbar{height:auto;min-height:66px;padding:12px 15px;gap:12px;flex-wrap:wrap}.brand-mark{width:34px;height:34px}.brand-name{font-size:14px}.brand-sub{font-size:8px}.topnav{order:3;width:100%;overflow:auto}.nav-btn{padding:8px 10px;white-space:nowrap}.nav-btn.quiz{margin-left:auto}.top-right{margin-left:auto}.curriculum{font-size:9px;padding:7px 8px}.app{display:flex;flex-direction:column;padding:9px;gap:10px;height:auto;min-height:calc(100vh - 100px)}.sidebar{overflow:visible;padding:18px 15px;gap:18px}.map-panel{min-height:570px;order:2}.map-canvas{min-height:570px}.rightbar{display:flex;order:3;padding:17px}.map-top{top:12px;left:12px;right:12px}.map-heading{padding:10px 12px}.map-heading h1{font-size:15px}.map-heading p{font-size:9px}.map-tools{gap:4px}.map-tool{width:32px;height:32px}.map-caption{bottom:10px;left:10px;right:10px;align-items:flex-start;flex-direction:column}.legend{gap:6px}.legend-item{font-size:8px}.map-hint{font-size:9px}.rightbar .detail-top,.rightbar .right-foot,.detail-reactions{grid-column:auto;grid-row:auto}}
 @media(max-width:420px){.top-right .curriculum{display:none}.brand{gap:8px}.map-panel,.map-canvas{min-height:510px}.map-heading .eyebrow{letter-spacing:1px}.map-tools .map-tool:nth-child(3){display:none}.legend{max-width:100%}.legend-item:nth-child(4),.legend-item:nth-child(5){display:none}}
+
+/* Layout helpers kept here so markup and application logic stay presentation-free. */
+.swap-row { justify-content: center; margin: -2px 0 8px; }
+.route-divider { height: 1px; background: #e5ebe3; flex: 1; }
+.explore-eyebrow { margin-bottom: 10px; }
+.detail-actions-spaced { margin-top: 14px; }
+.substitution-legend { background: #7fa789; }
+.oxidation-legend { background: #c5a17b; }
+.addition-legend { background: #85a9b5; }
+.elimination-legend { background: #b4a4c8; }
+.polymerization-legend { background: #8ba7bc; }
+.compound-color { flex: none; }
+.compound-color.color-ethane { background: #7b9fa8; }
+.compound-color.color-chloroethane { background: #d1a15b; }
+.compound-color.color-ethanol { background: #5f9c72; }
+.compound-color.color-ethene { background: #6499ad; }
+.compound-color.color-dibromoethane { background: #d1a15b; }
+.compound-color.color-polyethylene { background: #8799a9; }
+.compound-color.color-acetaldehyde { background: #c58b62; }
+.compound-color.color-acetic-acid { background: #bd8075; }
+.compound-color.color-ethyl-acetate { background: #9b8bb7; }
+.compound-color.color-benzene { background: #639b9a; }
+.compound-color.color-nitrobenzene { background: #b8899c; }
+.compound-color.color-aniline { background: #b8899c; }
+.compound-color.color-diazonium { background: #9c8bb8; }
+.compound-color.color-phenol { background: #689b83; }
+.compound-color.color-chlorobenzene { background: #c49b64; }
