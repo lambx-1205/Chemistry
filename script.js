@@ -191,7 +191,7 @@ function renderCompound(c){
  renderOneStep(c);
  renderIsomerGroups(c);
  var modelButton=document.getElementById("open-3d-model");
- if(modelButton)modelButton.disabled=Boolean(c.id==="tnt"||/trinitrotoluene|(^|\\W)tnt($|\\W)/i.test(String(c.name||"")+" "+String(c.pubchemName||"")));
+ if(modelButton)modelButton.disabled=Boolean(c.id==="tnt"||/trinitrotoluene|(^|\W)tnt($|\W)/i.test(String(c.name||"")+" "+String(c.pubchemName||"")));
 }
 function renderReactionCard(edge,direction){
  var from=byId[edge.from];
@@ -292,7 +292,7 @@ function renderIsomerGroups(c){
    var member=byId[id];if(!member)return "";
    var selected=member.id===c.id;
    return '<button class="isomer-card'+(selected?' is-current':'')+'" type="button" data-isomer-id="'+esc(member.id)+'" '+(selected?'aria-current="true"':'')+'>'+
-    '<span class="isomer-thumb" data-isomer-thumb="'+esc(group.id+"-"+member.id)+'" role="img" aria-label="'+esc(member.name)+'の構造式"><span class="structure-loading">構造式</span></span>'+
+    '<span class="isomer-thumb" data-isomer-thumb="'+esc(group.id+"|"+member.id)+'" role="img" aria-label="'+esc(member.name)+'の構造式"><span class="structure-loading">構造式</span></span>'+
     '<span class="isomer-card-copy"><span class="isomer-card-name">'+esc(member.name)+'</span><span class="isomer-card-formula">'+formulaHtml(member.formula)+'</span><span class="isomer-card-state">'+(selected?'表示中':'切り替えて表示 ↗')+'</span></span>'+
    '</button>';
   }).join("");
@@ -312,7 +312,7 @@ function renderIsomerGroups(c){
  });
  isomerGroupsRoot.querySelectorAll("[data-isomer-thumb]").forEach(function(host){
   var key=host.getAttribute("data-isomer-thumb");
-  var id=host.getAttribute("data-isomer-compound");
+  var id=key.slice(key.lastIndexOf("|")+1);
   var target=byId[id];
   if(target)drawStructure(host,target.smiles,200,84,"isomer-"+key,target.pubchemFormula||target.formula);
  });
@@ -362,7 +362,7 @@ function show3DFallback(c,message,token){
 async function open3DMolecule(){
  var c=currentCompound;
  if(!c||!molecule3dDialog)return;
- if(c.id==="tnt"||/trinitrotoluene|(^|\\W)tnt($|\\W)/i.test(String(c.name||"")+" "+String(c.pubchemName||""))){
+ if(c.id==="tnt"||/trinitrotoluene|(^|\W)tnt($|\W)/i.test(String(c.name||"")+" "+String(c.pubchemName||""))){
   setStatus("この化合物の3D表示は利用できません。","error");return;
  }
  var token=++molecule3dRequest;
