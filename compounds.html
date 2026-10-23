@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f5f6f2">
+<meta name="description" content="登録された有機化合物を構造式サムネイルで一覧表示し、分類や分子量で並べ替える。">
+<title>化合物一覧 — Organic Atlas</title>
+<link rel="preconnect" href="https://pubchem.ncbi.nlm.nih.gov">
+<link rel="stylesheet" href="styles.css?v=20261024-list2">
+<link rel="stylesheet" href="compounds.css?v=20261024-list1">
+<script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js" defer></script>
+<script src="chemistry-data.js?v=20261024-shared1" defer></script>
+<script src="compounds.js?v=20261024-list1" defer></script>
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="./" aria-label="Organic Atlas 検索ページへ">
+    <span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 32 32" width="27" height="27" fill="none"><path d="M6 20.5 13 7l13 5-7 13-13-4.5Z" stroke="currentColor" stroke-width="1.6"/><circle cx="13" cy="7" r="2" fill="currentColor"/><circle cx="26" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="25" r="2" fill="currentColor"/><circle cx="6" cy="20.5" r="2" fill="currentColor"/></svg></span>
+    <span class="brand-wordmark"><strong>Organic Atlas</strong><span>HIGH SCHOOL ORGANIC CHEMISTRY</span></span>
+  </a>
+  <a class="header-label" href="./" aria-label="化合物検索ページへ"><span class="header-dot"></span>検索ページへ ↗</a>
+</header>
+<main class="compound-list-page">
+  <div class="list-page-heading">
+    <span class="section-eyebrow">COMPOUND LIBRARY</span>
+    <h1>化合物一覧</h1>
+    <p>構造式から化合物を探し、反応経路へ移動できます。</p>
+  </div>
+  <section class="list-controls" aria-label="一覧の検索と並べ替え">
+    <label class="list-search-label" for="list-search">化合物を検索</label>
+    <input id="list-search" type="search" placeholder="名前・分子式・分類で絞り込む" autocomplete="off">
+    <div class="sort-row">
+      <label for="list-sort">並び替え</label>
+      <select id="list-sort">
+        <option value="name">名前順</option>
+        <option value="family">分類順</option>
+        <option value="weight-asc">分子量が小さい順</option>
+        <option value="weight-desc">分子量が大きい順</option>
+      </select>
+      <span class="list-count" id="list-count" aria-live="polite">化合物を読み込み中…</span>
+    </div>
+  </section>
+  <div class="list-status" id="list-status" role="status" aria-live="polite">構造式の描画エンジンを読み込んでいます…</div>
+  <section class="compound-list-grid" id="compound-list" aria-label="化合物一覧"></section>
+  <div class="list-empty" id="list-empty" hidden>該当する化合物がありません。</div>
+  <footer class="list-page-foot"><span>ORGANIC ATLAS</span><span>構造データ · RDKit.js</span></footer>
+</main>
+</body>
+</html>
