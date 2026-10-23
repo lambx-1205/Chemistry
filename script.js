@@ -58,7 +58,7 @@ function setLoading(loading){
 }
 function fillSuggestions(){suggestions.innerHTML="";suggestions.hidden=true;}
 
-var restrictedLookupPattern=/(trinitrotoluene|(^|\\W)tnt($|\\W)|nitroglycerin|nitroglycerine|methamphetamine|amphetamine|cocaine|heroin|fentanyl|mdma|ecstasy|oxycodone|hydrocodone|carfentanil|ricin|sarin|vx nerve agent|cyanide|hydrazoic acid|rdx|pentaerythritol tetranitrate|petn)/i;
+var restrictedLookupPattern=/(trinitrotoluene|(^|\W)tnt($|\W)|nitroglycerin|nitroglycerine|methamphetamine|amphetamine|cocaine|heroin|fentanyl|mdma|ecstasy|oxycodone|hydrocodone|carfentanil|ricin|sarin|vx nerve agent|cyanide|hydrazoic acid|rdx|pentaerythritol tetranitrate|petn)/i;
 function isRestrictedLookupTerm(value){return restrictedLookupPattern.test(String(value||""));}
 function showCandidateMenu(items,query,loading){
  activeCandidates=items.slice();
@@ -111,6 +111,7 @@ function localCandidateMatches(query){
  var q=String(query||"").trim().toLocaleLowerCase();
  if(q.length<1)return [];
  var matches=compounds.filter(function(c){
+  if(isRestrictedLookupTerm(c.name)||isRestrictedLookupTerm(c.pubchemName)||(c.aliases||[]).some(isRestrictedLookupTerm))return false;
   return [c.name,c.pubchemName,c.formula,c.family].concat(c.aliases||[]).some(function(v){return String(v||"").toLocaleLowerCase().indexOf(q)>=0;});
  });
  matches.sort(function(a,b){
@@ -268,6 +269,7 @@ function drawStructure(target,smilesValue,width,height,key,formula){
   console.error("RDKit initialization failed:",error&&error.message?error.message:error);
  });
 }
+document.getElementById("local-count").textContent=String(compounds.length);
 function renderSearchResults(){
  var optionCount=compounds.length;
  document.getElementById("local-count").textContent=String(optionCount).padStart(2,"0");
@@ -530,6 +532,7 @@ function renderExternalCompound(c){
  c.kind="external";c.family=c.family||"PubChem";
  c.state=c.state||"—";c.structureSource="PubChem";
  c.name=c.name||c.iupacName||c.pubchemName||"化合物";
+ if(!c.pubchemFormula)c.pubchemFormula=c.formula||"—";
  renderCompound(c);
 }
 async function fetchCompound(query){
@@ -643,15 +646,15 @@ function init(){
   if(!input.value.trim())setStatus("","");
  });
  document.getElementById("clear-search").addEventListener("click",function(){
-  input.value="";setStatus("","");input.focus();
+  input.value="";suggestionSequence++;activeCandidates=[];suggestions.hidden=true;input.setAttribute("aria-expanded","false");window.clearTimeout(suggestionTimer);setStatus("","");input.focus();
  });
  document.getElementById("home-link").addEventListener("click",function(ev){
-  ev.preventDefault();input.value="エタノール";renderCompound(byId.ethanol);resolveStructure(byId.ethanol);setStatus("","");
+  ev.preventDefault();suggestionSequence++;suggestions.hidden=true;input.setAttribute("aria-expanded","false");input.value="エタノール";renderCompound(byId.ethanol);resolveStructure(byId.ethanol);setStatus("","");
  });
  document.getElementById("starter-compounds").querySelectorAll("[data-preset]").forEach(function(btn){
   btn.addEventListener("click",function(){
    var c=byId[btn.getAttribute("data-preset")];
-   if(c){input.value=c.name;renderCompound(c);resolveStructure(c);setStatus("","");}
+   if(c){suggestionSequence++;suggestions.hidden=true;input.setAttribute("aria-expanded","false");input.value=c.name;renderCompound(c);resolveStructure(c);setStatus("","");}
   });
  });
  var params=new URLSearchParams(window.location.search);
