@@ -24,7 +24,7 @@ compounds.forEach((c, i) => {
 
 const NODE_W = 360;
 const NODE_H = 280;
-const CELL = 650;
+const CELL = 120;
 const MAP_PAD = 100;
 const SVG_NS = "http://www.w3.org/2000/svg";
 const equations = {
@@ -190,12 +190,12 @@ function makeComponent(nodes){
   const current=queue.shift(),here=local[current];
   const unseen=graph.adj[current].filter(n=>nodeSet.has(n)&&!local[n]).sort((a,b)=>graph.adj[b].length-graph.adj[a].length||compoundOrder[a]-compoundOrder[b]);
   if(!unseen.length)continue;
-  const available=DIRECTIONS.filter(d=>!occupied[cellKey(here.x+d.dx,here.y+d.dy)]).map(d=>d.index);
+  const available=DIRECTIONS.filter(d=>!occupied[cellKey(here.x+d.dx*6,here.y+d.dy*6)]).map(d=>d.index);
   const back=parent[current]?directionForDelta(local[parent[current]].x-here.x,local[parent[current]].y-here.y):undefined;
   const chosen=chooseSpreadDirections(available,Math.min(unseen.length,available.length),back);
   unseen.forEach((next,i)=>{
    const d=i<chosen.length?DIRECTIONS[chosen[i]]:null;
-   const p=d?{x:here.x+d.dx,y:here.y+d.dy}:nearestFreeCell(here.x,here.y,occupied);
+   const p=d?{x:here.x+d.dx*6,y:here.y+d.dy*6}:nearestFreeCell(here.x,here.y,occupied);
    local[next]={x:p.x,y:p.y};occupied[cellKey(p.x,p.y)]=next;parent[next]=current;queue.push(next);
   });
  }
@@ -224,7 +224,7 @@ function buildLayout(){
   comp.nodes.forEach(id=>{
    const p=comp.positions[id],gx=p.x+originGX,gy=p.y+originGY;
    nodeGridPositions[id]={x:gx,y:gy};nodePositions[id]={x:MAP_PAD+(gx-1)*CELL,y:MAP_PAD+(gy-1)*CELL};
-   gridOccupancy[cellKey(gx,gy)]=id;componentOf[id]=index;maxGX=Math.max(maxGX,gx);maxGY=Math.max(maxGY,gy);
+   for(let ox=-1;ox<=1;ox++)for(let oy=-1;oy<=1;oy++)gridOccupancy[cellKey(gx+ox,gy+oy)]=id;componentOf[id]=index;maxGX=Math.max(maxGX,gx);maxGY=Math.max(maxGY,gy);
   });
   const ps=comp.nodes.map(id=>nodeGridPositions[id]);
   componentBounds[index]={minX:Math.min(...ps.map(p=>p.x))-10,maxX:Math.max(...ps.map(p=>p.x))+10,minY:Math.min(...ps.map(p=>p.y))-10,maxY:Math.max(...ps.map(p=>p.y))+10};
@@ -237,9 +237,9 @@ function buildLayout(){
   title.style.left=MAP_PAD+"px";title.style.top=(MAP_PAD+(cursorGY-1)*CELL-42)+"px";title.textContent="反応経路が未登録の化合物";groupLayer.appendChild(title);
   const cols=6;
   isolated.forEach((c,i)=>{
-   const gx=cursorGX+i%cols,gy=cursorGY+Math.floor(i/cols);
+   const gx=cursorGX+(i%cols)*6,gy=cursorGY+Math.floor(i/cols)*6;
    nodeGridPositions[c.id]={x:gx,y:gy};nodePositions[c.id]={x:MAP_PAD+(gx-1)*CELL,y:MAP_PAD+(gy-1)*CELL};
-   gridOccupancy[cellKey(gx,gy)]=c.id;maxGX=Math.max(maxGX,gx);maxGY=Math.max(maxGY,gy);
+   for(let ox=-1;ox<=1;ox++)for(let oy=-1;oy<=1;oy++)gridOccupancy[cellKey(gx+ox,gy+oy)]=c.id;maxGX=Math.max(maxGX,gx);maxGY=Math.max(maxGY,gy);
   });
  }
  const primary=components[0]||{nodes:compounds.map(c=>c.id),root:compounds[0]&&compounds[0].id};
@@ -258,8 +258,14 @@ function segmentKey(a,b){const x=cellKey(a.x,a.y),y=cellKey(b.x,b.y);return x<y?
 function diagonalInfo(a,b){const dx=b.x-a.x,dy=b.y-a.y;if(Math.abs(dx)!==1||Math.abs(dy)!==1)return null;return {square:Math.min(a.x,b.x)+","+Math.min(a.y,b.y),orientation:dx*dy>0?1:-1}}
 function octileDistance(a,b){const dx=Math.abs(a.x-b.x),dy=Math.abs(a.y-b.y),di=Math.min(dx,dy),st=Math.max(dx,dy)-di;return di*14+st*10}
 function findGridRoute(edge,recoveryMode){
- const start=nodeGridPositions[edge.from],goal=nodeGridPositions[edge.to];if(!start||!goal)return [];
- const coreBounds=componentBounds[componentOf[edge.from]]||{minX:start.x-10,maxX:start.x+10,minY:start.y-10,maxY:start.y+10};
+ const nodeStart=nodeGridPositions[edge.from],nodeGoal=nodeGridPositions[edge.to];if(!nodeStart||!nodeGoal)return [];
+ const direction=DIRECTIONS[directionForDelta(nodeGoal.x-nodeStart.x,nodeGoal.y-nodeStart.y)];
+ // Start/end search outside the rectangular card footprint; the drawing is
+ // clipped back to the card border after a collision-free route is found.
+ const portRadius=2;
+ const start={x:nodeStart.x+direction.dx*portRadius,y:nodeStart.y+direction.dy*portRadius};
+ const goal={x:nodeGoal.x-direction.dx*portRadius,y:nodeGoal.y-direction.dy*portRadius};
+ const coreBounds=componentBounds[componentOf[edge.from]]||{minX:nodeStart.x-10,maxX:nodeStart.x+10,minY:nodeStart.y-10,maxY:nodeStart.y+10};
  const margin=recoveryMode?10:0;
  const bounds={minX:coreBounds.minX-margin,maxX:coreBounds.maxX+margin,minY:coreBounds.minY-margin,maxY:coreBounds.maxY+margin};
  const pair=pairKey(edge.from,edge.to),startKey=start.x+","+start.y+",-1";
@@ -273,7 +279,7 @@ function findGridRoute(edge,recoveryMode){
   DIRECTIONS.forEach(d=>{
    const nx=cur.x+d.dx,ny=cur.y+d.dy;
    if(nx<bounds.minX||nx>bounds.maxX||ny<bounds.minY||ny>bounds.maxY)return;
-   const nk=cellKey(nx,ny),blocked=gridOccupancy[nk];if(blocked&&blocked!==edge.from&&blocked!==edge.to)return;
+   const nk=cellKey(nx,ny),blocked=gridOccupancy[nk];if(blocked)return;
    const next={x:nx,y:ny},sk=segmentKey(cur,next),owners=routedSegments[sk]||[];
    const segmentConflict=owners.some(p=>p!==pair);
    const diag=diagonalInfo(cur,next);
@@ -293,7 +299,7 @@ function findGridRoute(edge,recoveryMode){
  if(!endState){
   const path=[{x:start.x,y:start.y}];let x=start.x,y=start.y;
   while(x!==goal.x||y!==goal.y){const dx=Math.sign(goal.x-x),dy=Math.sign(goal.y-y);if(dx&&dy){x+=dx;y+=dy}else if(dx)x+=dx;else y+=dy;path.push({x,y});if(path.length>1000)break}
-  return path;
+  return [nodeStart].concat(path,[nodeGoal]);
  }
  const path=[];let key=endState.key;
  while(key){const s=states.get(key);path.push({x:s.x,y:s.y});key=previous.get(key)||""}
@@ -304,7 +310,7 @@ function findGridRoute(edge,recoveryMode){
   const diag=diagonalInfo(a,b);if(diag){const dk=diag.square+"|"+diag.orientation,dl=routedDiagonals[dk]||(routedDiagonals[dk]=[]);if(!dl.includes(p))dl.push(p)}
  }
  path.slice(1,-1).forEach(p=>{const k=cellKey(p.x,p.y),owners=routedGridPoints[k]||(routedGridPoints[k]=[]);if(!owners.includes(pair))owners.push(pair)});
- return path;
+ return [nodeStart].concat(path,[nodeGoal]);
 }
 
 function createNode(c) {
