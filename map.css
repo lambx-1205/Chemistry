@@ -88,3 +88,21 @@
  .reaction-detail-grid{grid-template-columns:1fr;margin:12px 17px 0}
  .reaction-dialog-actions{padding:15px 17px 18px}
 }
+
+/* Larger reaction-map cards and cleaner lane-based arrows */
+.map-node{width:280px;height:220px;padding:10px 12px;grid-template-rows:20px 42px 1fr 19px;gap:3px;border-radius:13px}
+.map-node-family{font-size:10px;line-height:20px}
+.map-node-name{font-size:15px;line-height:1.35}
+.map-node-formula{font-size:11px;line-height:19px}
+.map-node-structure svg{width:100%!important;height:100%!important;max-width:100%;max-height:100%}
+.map-edge-visible{stroke-width:2.5;stroke-linejoin:round;stroke-linecap:butt;opacity:.9}
+.map-edge-hitbox{stroke-width:22}
+.map-edge-label-bg{stroke-width:1}
+.map-edge-label-text{font-size:12px}
+.map-edge:hover .map-edge-visible,.map-edge:focus .map-edge-visible{stroke-width:3.8}
+.map-group-title{font-size:14px}
+@media(max-width:600px){
+ .map-node{width:280px;height:220px}
+ .map-node-name{font-size:15px}
+ .map-edge-label-text{font-size:12px}
+}
