@@ -7,7 +7,7 @@
 <meta name="description" content="登録された有機化合物を構造式サムネイルで一覧表示し、分類や分子量で並べ替える。">
 <title>化合物一覧 — Organic Atlas</title>
 <link rel="preconnect" href="https://pubchem.ncbi.nlm.nih.gov">
-<link rel="stylesheet" href="styles.css?v=20261024-english-search1">
+<link rel="stylesheet" href="styles.css?v=20261024-map-nav1">
 <link rel="stylesheet" href="compounds.css?v=20261024-english-search1">
 <script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js" defer></script>
 <script src="chemistry-data.js?v=20261024-unknown-search1" defer></script>
@@ -19,7 +19,7 @@
     <span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 32 32" width="27" height="27" fill="none"><path d="M6 20.5 13 7l13 5-7 13-13-4.5Z" stroke="currentColor" stroke-width="1.6"/><circle cx="13" cy="7" r="2" fill="currentColor"/><circle cx="26" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="25" r="2" fill="currentColor"/><circle cx="6" cy="20.5" r="2" fill="currentColor"/></svg></span>
     <span class="brand-wordmark"><strong>Organic Atlas</strong><span>HIGH SCHOOL ORGANIC CHEMISTRY</span></span>
   </a>
-  <a class="header-label" href="./" aria-label="化合物検索ページへ"><span class="header-dot"></span>検索ページへ ↗</a>
+  <nav class="header-actions" aria-label="ページ移動"><a class="header-label" href="./"><span class="header-dot"></span>検索ページ ↗</a><a class="header-label" href="map.html"><span class="header-dot"></span>化合物map ↗</a></nav>
 </header>
 <main class="compound-list-page">
   <div class="list-page-heading">
@@ -50,6 +50,7 @@
   <details class="site-update-history">
     <summary>更新履歴</summary>
     <ul>
+      <li><time datetime="2026-10-24">2026-10-24</time> 化合物mapを新設。反応系統図・構造式リンク・矢印から反応式を確認</li>
       <li><time datetime="2026-10-24">2026-10-24</time> PubChem候補は日本語名のみ表示し、右側の化合物名も日本語化</li>
       <li><time datetime="2026-10-24">2026-10-24</time> 未登録化合物の候補検索・構造表示、3D結合表示の改善</li>
       <li><time datetime="2026-10-24">2026-10-24</time> 3D分子模型と異性体比較機能を追加</li>
