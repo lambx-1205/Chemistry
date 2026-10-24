@@ -60,6 +60,16 @@ function fillSuggestions(){suggestions.innerHTML="";suggestions.hidden=true;}
 
 var restrictedLookupPattern=/(trinitrotoluene|(^|\W)tnt($|\W)|nitroglycerin|nitroglycerine|methamphetamine|amphetamine|cocaine|heroin|fentanyl|mdma|ecstasy|oxycodone|hydrocodone|carfentanil|ricin|sarin|vx nerve agent|cyanide|hydrazoic acid|rdx|pentaerythritol tetranitrate|petn|トリニトロトルエン|ニトログリセリン|メタンフェタミン|覚醒剤|コカイン|ヘロイン|フェンタニル|エクスタシー|モルヒネ|オキシコドン|リシン|サリン|シアン化物|青酸|爆薬|爆発物|神経剤)/i;
 function isRestrictedLookupTerm(value){return restrictedLookupPattern.test(String(value||""));}
+function isPubChemEnrichmentCandidate(c){
+ if(!c||!c.id||!c.smiles||String(c.smiles).indexOf("*")>=0)return false;
+ var identity=[c.id,c.name,c.pubchemName].join(" ");
+ var category=[c.family,c.mapGroup,c.formula].join(" ");
+ if(isRestrictedLookupTerm(identity))return false;
+ if(/高分子|polymer|ニトロ|nitro|過酸化物|peroxide|爆発|explosive/i.test(category))return false;
+ if(/cellulose|starch|natural-rubber/i.test(String(c.id)))return false;
+ if(/ₙ/.test(String(c.formula||"")))return false;
+ return true;
+}
 var japaneseNameCache=Object.create(null);
 var knownJapaneseCompoundNames={
  "ethanol":"エタノール","ethyl alcohol":"エタノール","methanol":"メタノール","methyl alcohol":"メタノール",
@@ -416,21 +426,29 @@ function renderCompound(c){
  document.getElementById("compound-formula").innerHTML=formulaHtml(c.pubchemFormula||c.formula);
  mainStructure.setAttribute("aria-label",c.name+"の構造式");
  drawStructure(mainStructure,c.smiles,440,270,"main-"+c.id+"-"+c.smiles,c.pubchemFormula||c.formula);
- mainPubchemLink.href=pubchemUrl(c);
- mainPubchemLink.setAttribute("aria-label",c.name+"をPubChemで開く");
+ var pubchemEligible=isPubChemEnrichmentCandidate(c);
+ mainPubchemLink.hidden=!pubchemEligible;
+ if(pubchemEligible){
+  mainPubchemLink.href=pubchemUrl(c);
+  mainPubchemLink.setAttribute("aria-label",c.name+"をPubChemで開く");
+ }else{
+  mainPubchemLink.removeAttribute("href");
+  mainPubchemLink.removeAttribute("aria-label");
+ }
  mainStructureSource.textContent=c.structureSource==="PubChem"?"PUBCHEM DATA · RDKIT SVG":"RDKIT SVG";
  document.getElementById("compound-facts").innerHTML=
   fact("分類",c.family||"—")+
-  (c.iupacName?fact("IUPAC名",c.iupacName):"")+
+
   fact("分子量",c.molecularWeight?(Number(c.molecularWeight).toFixed(2)+" g/mol"):"—")+
   fact("状態",c.state||"—")+
+  fact("PubChem CID",c.pubchemCid||"—")+
   fact("InChIKey",c.inchiKey||"—");
  var registrationNote=document.getElementById("registration-note");
  if(registrationNote)registrationNote.hidden=c.kind!=="external";
  renderOneStep(c);
  renderIsomerGroups(c);
  var modelButton=document.getElementById("open-3d-model");
- if(modelButton)modelButton.disabled=is3DRestrictedCompound(c);
+ if(modelButton)modelButton.disabled=!isPubChemEnrichmentCandidate(c)||is3DRestrictedCompound(c);
 }
 function renderReactionCard(edge,direction){
  var from=byId[edge.from];
@@ -634,6 +652,7 @@ function show3DFallback(c,message,token){
 async function open3DMolecule(){
  var c=currentCompound;
  if(!c)return;
+ if(!isPubChemEnrichmentCandidate(c)){setStatus("この化合物は単一構造のPubChem 3D表示に対応していません。","error");return;}
  if(c.id==="lactic-acid"){
   setStatus("乳酸は立体配置未指定です。3D模型は異性体カードからL-乳酸またはD-乳酸を選んで表示してください。","error");return;
  }
@@ -725,6 +744,7 @@ async function fetchCompound(query){
 var structureRequest={};
 async function resolveStructure(c){
  if(!c||c.structureSource==="PubChem"||structureRequest[c.id])return;
+ if(!isPubChemEnrichmentCandidate(c))return;
  if(!c.pubchemName&&!c.smiles)return;
  var token=(structureRequest[c.id]||0)+1;
  structureRequest[c.id]=token;
