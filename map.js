@@ -86,7 +86,7 @@ const equations = {
   e56:"C₆H₇N + H₂SO₄ → C₆H₇NO₃S + H₂O",
   e57:"C₆H₇N + 2CH₃Cl → C₈H₁₁N + 2HCl",
   e58:"C₆H₅N₂Cl + C₆H₆O → C₁₂H₁₀N₂O + HCl",
-  e59:"C₇H₈ + 3HNO₃ → C₇H₅N₃O₆ + 3H₂O",
+  e59:"Ar–H + HNO₃ → Ar–NO₂ + H₂O（芳香族ニトロ化の一般式）",
   e60:"C₆H₅SO₃Na + 2NaOH → C₆H₅ONa + Na₂SO₃ + H₂O",
   e61:"C₁₈H₃₄O₂ + H₂ → C₁₈H₃₆O₂",
   e62:"C₁₈H₃₂O₂ + H₂ → C₁₈H₃₄O₂",
@@ -433,7 +433,7 @@ function openReaction(edge) {
   document.getElementById("reaction-dialog-route").textContent = from.name + "  →  " + to.name;
   document.getElementById("reaction-dialog-equation").textContent = equations[edge.id] || (from.formula + " → " + to.formula + "（簡略表記）");
   document.getElementById("reaction-dialog-condition").textContent = edge.condition || "反応条件は未登録";
-  document.getElementById("reaction-dialog-note").textContent = edge.note || "反応の説明は未登録です。";
+  document.getElementById("reaction-dialog-note").textContent = edge.id === "e59" ? "複数段階の反応経路を示す概念図です。ここでは芳香族ニトロ化の一般式のみを表示し、個別の製造反応式や詳細条件は掲載していません。" : (edge.note || "反応の説明は未登録です。");
   const fromLink = document.getElementById("reaction-from-link");
   const toLink = document.getElementById("reaction-to-link");
   fromLink.href = "index.html?compound=" + encodeURIComponent(from.id);
