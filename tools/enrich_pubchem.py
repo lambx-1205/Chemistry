@@ -33,39 +33,41 @@ def normalize_formula(value: object) -> str:
     return re.sub(r"\s+", "", str(value or "")).translate(SUBSCRIPT)
 
 
+RESTRICTED_PATTERN = re.compile(
+    r"(trinitrotoluene|(^|\\W)tnt($|\\W)|nitroglycerin|nitroglycerine|"
+    r"methamphetamine|amphetamine|cocaine|heroin|fentanyl|mdma|ecstasy|"
+    r"oxycodone|hydrocodone|carfentanil|ricin|sarin|vx nerve agent|cyanide|"
+    r"hydrazoic acid|\\brdx\\b|pentaerythritol tetranitrate|\\bpetn\\b|"
+    r"トリニトロトルエン|ニトログリセリン|メタンフェタミン|覚醒剤|コカイン|"
+    r"ヘロイン|フェンタニル|エクスタシー|モルヒネ|オキシコドン|リシン|"
+    r"サリン|シアン化物|青酸|爆薬|爆発物|神経剤)",
+    re.IGNORECASE,
+)
+
+
 def is_eligible(compound: dict) -> bool:
-    """Only query discrete, non-excluded structures."""
+    """Resolve every discrete structure except records excluded by the UI guard."""
     smiles = str(compound.get("smiles") or "").strip()
+    formula = str(compound.get("formula") or "")
     if not smiles or "*" in smiles:
+        return False
+    if not formula or "ₙ" in formula:
         return False
 
     identity = " ".join(
         str(compound.get(key) or "")
         for key in ("id", "name", "pubchemName")
     )
-    category = " ".join(
-        str(compound.get(key) or "")
-        for key in ("family", "mapGroup", "formula")
-    )
-
-    # Match the UI's existing exclusion policy without exposing excluded entries
-    # to the external identity-resolution service.
-    if re.search(
-        r"ニトロ|nitro|過酸化物|peroxide|高分子|polymer|爆発|explosive",
-        category,
-        re.IGNORECASE,
-    ):
+    family = str(compound.get("family") or "")
+    # Polymers/repeating materials do not have one discrete molecular structure.
+    if re.search(r"高分子|polymer", family, re.IGNORECASE):
         return False
-    if re.search(r"ₙ|\bpolymer\b", category, re.IGNORECASE):
+    if re.search(r"cellulose|starch|natural-rubber|polyethylene|polystyrene|"
+                 r"polypropylene|polyvinyl|polyacrylonitrile|polybutadiene|"
+                 r"nylon-66|^ptfe$", str(compound.get("id") or ""), re.IGNORECASE):
         return False
-    if re.search(r"cellulose|starch|natural-rubber", str(compound.get("id") or ""), re.I):
+    if RESTRICTED_PATTERN.search(identity):
         return False
-    if not compound.get("formula") or "ₙ" in str(compound.get("formula")):
-        return False
-
-    # The live UI has a more complete restricted-lookup guard. Use broad
-    # category exclusions here, and do not query entries with no discrete structure.
-    del identity
     return True
 
 
@@ -139,12 +141,12 @@ def enrich(compound: dict) -> bool:
 
     expected_formula = compound.get("formula")
     row = None
-    errors: list[Exception] = []
+    errors: list[str] = []
 
     try:
         row = select_formula_match(query_smiles(compound["smiles"]), expected_formula)
     except (NoRecordFound, urllib.error.URLError, TimeoutError, RuntimeError, ValueError) as exc:
-        errors.append(exc)
+        errors.append(f"{type(exc).__name__}: {exc}")
 
     # Name fallback is only accepted when the returned molecular formula agrees
     # with the Japanese dataset's curated formula.
@@ -156,6 +158,11 @@ def enrich(compound: dict) -> bool:
             errors.append(exc)
 
     if row is None:
+        compound["pubchemLookupStatus"] = "unresolved"
+        compound["pubchemLookupReason"] = (
+            "No PubChem record with a matching molecular formula was returned."
+            + ((" Lookup errors: " + "; ".join(str(err) for err in errors)) if errors else "")
+        )
         return False
 
     cid = int(row["CID"])
@@ -218,8 +225,12 @@ def main() -> int:
                 updated += 1
             else:
                 unresolved += 1
-        except Exception:
+                print(f"UNRESOLVED {compound.get('id')} | {compound.get('name')} | {compound.get('pubchemLookupReason', 'No formula-matched record')}")
+        except Exception as exc:
             unresolved += 1
+            compound["pubchemLookupStatus"] = "unresolved"
+            compound["pubchemLookupReason"] = f"{type(exc).__name__}: {exc}"
+            print(f"ERROR {compound.get('id')} | {compound.get('name')} | {exc}")
         if index < len(eligible):
             time.sleep(REQUEST_DELAY_SECONDS)
 

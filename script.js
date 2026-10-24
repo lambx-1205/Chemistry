@@ -63,10 +63,10 @@ function isRestrictedLookupTerm(value){return restrictedLookupPattern.test(Strin
 function isPubChemEnrichmentCandidate(c){
  if(!c||!c.id||!c.smiles||String(c.smiles).indexOf("*")>=0)return false;
  var identity=[c.id,c.name,c.pubchemName].join(" ");
- var category=[c.family,c.mapGroup,c.formula].join(" ");
+ var category=[c.family,c.formula].join(" ");
  if(isRestrictedLookupTerm(identity))return false;
- if(/高分子|polymer|ニトロ|nitro|過酸化物|peroxide|爆発|explosive/i.test(category))return false;
- if(/cellulose|starch|natural-rubber/i.test(String(c.id)))return false;
+ if(/高分子|polymer/i.test(category))return false;
+ if(/cellulose|starch|natural-rubber|polyethylene|polystyrene|polypropylene|polyvinyl|polyacrylonitrile|polybutadiene|nylon-66|^ptfe$/i.test(String(c.id)))return false;
  if(/ₙ/.test(String(c.formula||"")))return false;
  return true;
 }
