@@ -197,3 +197,11 @@
 .legend-other{color:#688b70}
 .map-legend .legend-note{margin-left:2px;font-size:10px;color:#a02f2b;font-weight:850;white-space:nowrap}
 .map-legend .legend-note::before{width:11px;height:11px;border:3px solid #d83b36}
+
+
+/* Long repeat-unit notation needs extra room inside the brackets. */
+.map-node[data-compound-id="pet-polymer"] .map-polymer-unit,
+.map-node[data-compound-id="nylon-66"] .map-polymer-unit{font-size:12px!important;letter-spacing:-.07em}
+.map-node[data-compound-id="polyvinyl-acetate"] .map-polymer-unit{font-size:15px!important}
+.map-node[data-compound-id="natural-rubber"] .map-polymer-unit,
+.map-node[data-compound-id="polybutadiene"] .map-polymer-unit{font-size:15px!important}
