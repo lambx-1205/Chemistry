@@ -64,8 +64,7 @@ function isPubChemEnrichmentCandidate(c){
  if(!c||!c.id||!c.smiles||String(c.smiles).indexOf("*")>=0)return false;
  var identity=[c.id,c.name,c.pubchemName].join(" ");
  var category=[c.family,c.formula].join(" ");
- if(isRestrictedLookupTerm(identity))return false;
- if(c.id==="diazonium"||is3DRestrictedCompound(c))return false;
+ if(isRestrictedLookupTerm(identity)&&["diazonium","cumene-hydroperoxide","tnt"].indexOf(c.id)<0)return false;
  if(/高分子|polymer/i.test(category))return false;
  if(/cellulose|starch|natural-rubber|polyethylene|polystyrene|polypropylene|polyvinyl|polyacrylonitrile|polybutadiene|nylon-66|^ptfe$/i.test(String(c.id)))return false;
  if(/ₙ/.test(String(c.formula||"")))return false;
@@ -431,7 +430,7 @@ function fact(label,value){
 }
 function is3DRestrictedCompound(c){
  var identity=(String(c&&c.name||"")+" "+String(c&&c.pubchemName||"")).toLocaleLowerCase();
- return Boolean(c&&(c.id==="tnt"||c.id==="cumene-hydroperoxide"))||identity.indexOf("trinitrotoluene")>=0||identity.indexOf("cumene hydroperoxide")>=0||identity.indexOf(" tnt")>=0||identity.trim()==="tnt";
+ return Boolean(c&&(c.id==="tnt"||c.id==="cumene-hydroperoxide"||c.id==="diazonium"))||identity.indexOf("trinitrotoluene")>=0||identity.indexOf("cumene hydroperoxide")>=0||identity.indexOf(" tnt")>=0||identity.trim()==="tnt";
 }
 function renderCompound(c){
  currentCompound=c;
