@@ -505,3 +505,8 @@ a{color:inherit}
 .header-actions .header-label{letter-spacing:.8px;text-decoration:none}
 .header-actions .header-label:hover{color:#315f46;text-decoration:underline;text-underline-offset:4px}
 @media(max-width:620px){.header-actions{gap:9px}.header-actions .header-label{font-size:8px;letter-spacing:.1px;gap:5px}}
+
+
+/* Shared equation field for reactions added to the reaction database. */
+.reaction-detail-equation{grid-column:1/-1}
+.reaction-detail-equation p{margin-top:8px;color:#304a35;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;line-height:1.8;overflow-wrap:anywhere;white-space:normal}
