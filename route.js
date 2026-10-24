@@ -313,7 +313,7 @@ function openReaction(edge){
  const from=byId[edge.from],to=byId[edge.to];if(!from||!to)return;
  document.getElementById("route-dialog-title").textContent=edge.name||edge.label||"反応の詳細";
  document.getElementById("route-dialog-path").textContent=from.name+" → "+to.name;
- document.getElementById("route-dialog-equation").textContent=equations[edge.id]||(from.formula||from.name)+" → "+(to.formula||to.name)+"（化合物データからの簡略表記）";
+ document.getElementById("route-dialog-equation").textContent=edge.equation||equations[edge.id]||(from.formula||from.name)+" → "+(to.formula||to.name)+"（化合物データからの簡略表記）";
  document.getElementById("route-dialog-condition").textContent=edge.condition||"試薬・反応条件は未登録です。";
  document.getElementById("route-dialog-note").textContent=edge.note||"反応の概要は未登録です。登録データが増えると詳細も拡張できます。";
  const fromLink=document.getElementById("route-dialog-from-link"),toLink=document.getElementById("route-dialog-to-link");
