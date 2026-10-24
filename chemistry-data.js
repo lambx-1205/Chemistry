@@ -164,6 +164,7 @@ var edges = [
 {"id":"e78","from":"palmitic-acid","to":"sodium-palmitate","type":"other","label":"中和","condition":"NaOH","name":"パルミチン酸の中和","note":"パルミチン酸を中和してパルミチン酸ナトリウムを得る。"},
 {"id":"e79","from":"stearic-acid","to":"methyl-stearate","type":"other","label":"エステル化","condition":"メタノール・酸触媒","name":"ステアリン酸のエステル化","note":"ステアリン酸とメタノールからステアリン酸メチルが得られる。"},
 {"id":"e80","from":"tristearin","to":"glycerol","type":"other","label":"けん化","condition":"NaOH水溶液・加熱","name":"油脂のけん化","note":"トリグリセリドの塩基性加水分解ではグリセリンと脂肪酸塩が生じる。ここでは主要な構成成分を示す。"},
+{"id":"e81","from":"benzene","to":"cumene","type":"substitution","label":"プロピル化","condition":"プロペン・酸触媒（工業的クメン法）","name":"ベンゼンのクメン化","note":"ベンゼンにプロペンを付加してイソプロピル基を導入し、クメン（イソプロピルベンゼン）を得る。クメン法では、この後の酸化・酸分解によってフェノールとアセトンを製造する。"},
 {"id":"e61","from":"oleic-acid","to":"stearic-acid","type":"other","label":"水素添加","condition":"H₂・触媒","name":"オレイン酸の水素添加","note":"オレイン酸の二重結合に水素が付加し、飽和脂肪酸のステアリン酸になる。"},
 {"id":"e62","from":"linoleic-acid","to":"oleic-acid","type":"other","label":"部分水素添加","condition":"水素・触媒（選択的条件）","name":"リノール酸の部分水素添加","note":"二重結合の一部を水素添加すると、二重結合が1つ残るオレイン酸型の脂肪酸になる場合がある。"},
 {"id":"e63","from":"linolenic-acid","to":"linoleic-acid","type":"other","label":"部分水素添加","condition":"水素・触媒（選択的条件）","name":"α-リノレン酸の部分水素添加","note":"二重結合の一部を水素添加すると、二重結合が2つ残る脂肪酸になる場合がある。"},
