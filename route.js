@@ -293,7 +293,6 @@ document.querySelectorAll("[data-route-example]").forEach(button=>button.addEven
  const values=button.dataset.routeExample.split("|");startInput.value=values[0];endInput.value=values[1];runSearch();
 }));
 function init(){
- compounds.forEach(c=>{const option=document.createElement("option");option.value=c.name;datalist.appendChild(option);});
  if(new URLSearchParams(window.location.search).has("start")&&new URLSearchParams(window.location.search).has("end")){
   const params=new URLSearchParams(window.location.search);startInput.value=params.get("start")||"";endInput.value=params.get("end")||"";runSearch();
  }
