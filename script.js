@@ -724,24 +724,42 @@ async function fetchCompound(query){
 }
 var structureRequest={};
 async function resolveStructure(c){
- if(!c||!c.pubchemName||c.structureSource==="PubChem"||structureRequest[c.id])return;
+ if(!c||c.structureSource==="PubChem"||structureRequest[c.id])return;
+ if(!c.pubchemName&&!c.smiles)return;
  var token=(structureRequest[c.id]||0)+1;
  structureRequest[c.id]=token;
  try{
-  var loaded=await fetchCompound(c.pubchemName);
-  if(currentCompound&&currentCompound.id===c.id){
-   c.smiles=loaded.smiles;c.pubchemCid=loaded.pubchemCid;c.pubchemFormula=loaded.pubchemFormula;
-   c.molecularWeight=loaded.molecularWeight;c.inchiKey=loaded.inchiKey;c.iupacName=loaded.iupacName;c.structureSource="PubChem";
+  var loaded;
+  if(c.pubchemName){
+   try{
+    loaded=await fetchCompound(c.pubchemName);
+   }catch(nameError){
+    // English synonyms are preferred; if no name resolves, query the curated structure.
+    if(!c.smiles)throw nameError;
+    loaded=await fetchCompoundBySmiles(c.smiles);
+   }
+  }else{
+   loaded=await fetchCompoundBySmiles(c.smiles);
+  }
+  if(currentCompound&&currentCompound.id===c.id&&structureRequest[c.id]===token){
+   c.smiles=loaded.smiles||c.smiles;
+   c.pubchemCid=loaded.pubchemCid||c.pubchemCid||null;
+   c.pubchemName=c.pubchemName||loaded.pubchemName||null;
+   c.pubchemFormula=loaded.pubchemFormula||c.pubchemFormula||null;
+   c.molecularWeight=loaded.molecularWeight||c.molecularWeight||null;
+   c.inchiKey=loaded.inchiKey||c.inchiKey||null;
+   c.iupacName=loaded.iupacName||c.iupacName||null;
+   c.structureSource="PubChem";
    renderCompound(c);
   }
  }catch(error){
   c.structureSource="fallback";
-  if(currentCompound&&currentCompound.id===c.id){
+  if(currentCompound&&currentCompound.id===c.id&&structureRequest[c.id]===token){
    mainStructureSource.textContent="LOCAL STRUCTURE";
    mainPubchemLink.href=pubchemUrl(c);
   }
  }finally{
-  delete structureRequest[c.id];
+  if(structureRequest[c.id]===token)delete structureRequest[c.id];
  }
 }
 async function searchCompound(){
