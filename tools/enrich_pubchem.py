@@ -33,6 +33,19 @@ def normalize_formula(value: object) -> str:
     return re.sub(r"\s+", "", str(value or "")).translate(SUBSCRIPT)
 
 
+def formula_signature(value: object) -> tuple[tuple[str, int], ...] | None:
+    """Compare formula atom counts independent of element ordering (Hill vs. teaching notation)."""
+    formula = normalize_formula(value).replace("−", "-")
+    formula = re.sub(r"[+-]+$", "", formula)
+    tokens = re.findall(r"([A-Z][a-z]?)(\d*)", formula)
+    if not tokens or "".join(element + count for element, count in tokens) != formula:
+        return None
+    counts: dict[str, int] = {}
+    for element, count in tokens:
+        counts[element] = counts.get(element, 0) + int(count or "1")
+    return tuple(sorted(counts.items()))
+
+
 RESTRICTED_PATTERN = re.compile(
     r"(trinitrotoluene|tnt|nitroglycerin|nitroglycerine|"
     r"methamphetamine|amphetamine|cocaine|heroin|fentanyl|mdma|ecstasy|"
@@ -131,10 +144,10 @@ def query_name(name: str) -> list[dict]:
 
 
 def select_formula_match(rows: list[dict], expected_formula: str) -> dict | None:
-    expected = normalize_formula(expected_formula)
+    expected = formula_signature(expected_formula)
     for row in rows:
-        actual = normalize_formula(row.get("MolecularFormula"))
-        if row.get("CID") and actual and actual == expected:
+        actual = formula_signature(row.get("MolecularFormula"))
+        if row.get("CID") and actual and expected and actual == expected:
             return row
     return None
 
