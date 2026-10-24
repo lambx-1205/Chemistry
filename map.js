@@ -22,10 +22,10 @@ compounds.forEach((c, i) => {
   if (c.pubchemName) nameMap[String(c.pubchemName).toLocaleLowerCase()] = c;
 });
 
-const NODE_W = 280;
-const NODE_H = 220;
-const COL_STEP = 560;
-const ROW_STEP = 285;
+const NODE_W = 360;
+const NODE_H = 280;
+const CELL = 650;
+const MAP_PAD = 100;
 const SVG_NS = "http://www.w3.org/2000/svg";
 const equations = {
   e1:"C₂H₆ + Cl₂ → C₂H₅Cl + HCl",
@@ -128,160 +128,175 @@ function groupTitle(comp) {
   if (/炭化水素|アルカン|アルケン|アルコール|アルデヒド/.test(joined)) return "脂肪族化合物の反応系統";
   return byId[comp.nodes[0]].name + "を含む反応系統";
 }
-function buildAdjacency() {
-  const adj = Object.create(null);
-  const inDeg = Object.create(null);
-  const outDeg = Object.create(null);
-  compounds.forEach((c) => { adj[c.id] = []; inDeg[c.id] = 0; outDeg[c.id] = 0; });
-  edges.forEach((e) => {
-    if (!adj[e.from] || !adj[e.to]) return;
-    adj[e.from].push(e.to);
-    adj[e.to].push(e.from);
-    outDeg[e.from] += 1;
-    inDeg[e.to] += 1;
-  });
-  return { adj, inDeg, outDeg };
+const DIRECTIONS=[
+ {dx:0,dy:-1,index:0},{dx:1,dy:-1,index:1},{dx:1,dy:0,index:2},{dx:1,dy:1,index:3},
+ {dx:0,dy:1,index:4},{dx:-1,dy:1,index:5},{dx:-1,dy:0,index:6},{dx:-1,dy:-1,index:7}
+];
+const nodeGridPositions=Object.create(null),componentOf=Object.create(null),componentBounds=Object.create(null);
+const gridOccupancy=Object.create(null),routedSegments=Object.create(null),routedDiagonals=Object.create(null),routedGridPoints=Object.create(null);
+function cellKey(x,y){return x+","+y}
+function pairKey(a,b){return [a,b].sort().join("|")}
+function circularDistance(a,b){const d=Math.abs(a-b)%8;return Math.min(d,8-d)}
+function directionForDelta(dx,dy){
+ if(!dx&&!dy)return -1;
+ if(Math.abs(dx)>2*Math.abs(dy))return dx>0?2:6;
+ if(Math.abs(dy)>2*Math.abs(dx))return dy>0?4:0;
+ if(dx>0&&dy<0)return 1;if(dx>0&&dy>0)return 3;if(dx<0&&dy>0)return 5;return 7;
 }
-const graph = buildAdjacency();
-
-function makeComponent(nodes) {
-  const nodeSet = new Set(nodes);
-  const root = nodes.slice().sort((a, b) => {
-    const sa = (graph.inDeg[a] === 0 ? 100 : 0) + graph.outDeg[a] * 5 - graph.inDeg[a] * 2 + graph.adj[a].length;
-    const sb = (graph.inDeg[b] === 0 ? 100 : 0) + graph.outDeg[b] * 5 - graph.inDeg[b] * 2 + graph.adj[b].length;
-    return sb - sa || compoundOrder[a] - compoundOrder[b];
-  })[0];
-  const depth = Object.create(null);
-  const queue = [root];
-  depth[root] = 0;
-  while (queue.length) {
-    const cur = queue.shift();
-    graph.adj[cur].forEach((next) => {
-      if (nodeSet.has(next) && depth[next] === undefined) {
-        depth[next] = depth[cur] + 1;
-        queue.push(next);
-      }
-    });
-  }
-  const maxDepth = Math.max.apply(null, nodes.map((id) => depth[id] || 0));
-  const layers = Array.from({length:maxDepth + 1}, () => []);
-  nodes.forEach((id) => layers[depth[id] || 0].push(id));
-  layers.forEach((layer) => layer.sort((a,b) => compoundOrder[a] - compoundOrder[b]));
-
-  for (let pass = 0; pass < 3; pass += 1) {
-    for (let d = 1; d < layers.length; d += 1) {
-      const prevIndex = Object.create(null);
-      layers[d - 1].forEach((id, i) => { prevIndex[id] = i; });
-      layers[d].sort((a,b) => {
-        const mean = (id) => {
-          const links = graph.adj[id].filter((n) => prevIndex[n] !== undefined);
-          return links.length ? links.reduce((sum,n) => sum + prevIndex[n],0) / links.length : compoundOrder[id];
-        };
-        return mean(a) - mean(b) || compoundOrder[a] - compoundOrder[b];
-      });
-    }
-    for (let d = layers.length - 2; d >= 0; d -= 1) {
-      const nextIndex = Object.create(null);
-      layers[d + 1].forEach((id, i) => { nextIndex[id] = i; });
-      layers[d].sort((a,b) => {
-        const mean = (id) => {
-          const links = graph.adj[id].filter((n) => nextIndex[n] !== undefined);
-          return links.length ? links.reduce((sum,n) => sum + nextIndex[n],0) / links.length : compoundOrder[id];
-        };
-        return mean(a) - mean(b) || compoundOrder[a] - compoundOrder[b];
-      });
-    }
-  }
-
-  const maxRows = Math.max.apply(null, layers.map((layer) => layer.length));
-  return {
-    nodes:nodes,
-    root:root,
-    layers:layers,
-    width:90 + maxDepth * COL_STEP + NODE_W,
-    height:72 + maxRows * ROW_STEP,
-    positions:Object.create(null)
-  };
+function directionRank(i){return [0,2,4,6,1,3,5,7].indexOf(i)}
+function chooseSpreadDirections(available,count,parentDirection){
+ const remaining=available.slice(),chosen=[];
+ while(chosen.length<count&&remaining.length){
+  let best=0,bestScore=-Infinity;
+  remaining.forEach((dir,i)=>{
+   const score=chosen.length===0
+    ?(parentDirection===undefined?(dir===0?1:0):circularDistance(dir,parentDirection)*2)
+    :Math.min.apply(null,chosen.map(p=>circularDistance(dir,p)))*10+(parentDirection===undefined?0:circularDistance(dir,parentDirection)*.35);
+   if(score>bestScore){bestScore=score;best=i}
+  });
+  chosen.push(remaining.splice(best,1)[0]);
+ }
+ return chosen.sort((x,y)=>directionRank(x)-directionRank(y));
 }
-
-function buildLayout() {
-  const visited = new Set();
-  const components = [];
-  compounds.forEach((c) => {
-    if (visited.has(c.id)) return;
-    const queue = [c.id];
-    const nodes = [];
-    visited.add(c.id);
-    while (queue.length) {
-      const id = queue.shift();
-      nodes.push(id);
-      graph.adj[id].forEach((n) => {
-        if (!visited.has(n)) { visited.add(n); queue.push(n); }
-      });
-    }
-    if (nodes.length > 1) components.push(makeComponent(nodes));
-  });
-  components.sort((a,b) => b.nodes.length - a.nodes.length);
-
-  let cursorX = 80, cursorY = 70, rowHeight = 0, maxX = 0, maxY = 0;
-  const rowLimit = 3150;
-  components.forEach((comp) => {
-    const compHeight = comp.height + 34;
-    if (cursorX > 80 && cursorX + comp.width + 80 > rowLimit) {
-      cursorX = 80;
-      cursorY += rowHeight + 95;
-      rowHeight = 0;
-    }
-    comp.originX = cursorX;
-    comp.originY = cursorY;
-    const title = document.createElement("div");
-    title.className = "map-group-title";
-    title.style.left = cursorX + "px";
-    title.style.top = cursorY + "px";
-    title.textContent = groupTitle(comp);
-    groupLayer.appendChild(title);
-
-    const maxRows = Math.max.apply(null, comp.layers.map((layer) => layer.length));
-    comp.layers.forEach((layer, depth) => {
-      const yOffset = (maxRows - layer.length) * ROW_STEP / 2;
-      layer.forEach((id, i) => {
-        comp.positions[id] = {
-          x:cursorX + 42 + depth * COL_STEP,
-          y:cursorY + 37 + yOffset + i * ROW_STEP
-        };
-        nodePositions[id] = comp.positions[id];
-      });
-    });
-    cursorX += comp.width + 112;
-    rowHeight = Math.max(rowHeight, compHeight);
-    maxX = Math.max(maxX, cursorX);
-    maxY = Math.max(maxY, cursorY + compHeight);
-  });
-
-  const isolated = compounds.filter((c) => graph.adj[c.id].length === 0);
-  if (isolated.length) {
-    const startY = maxY + 85;
-    const title = document.createElement("div");
-    title.className = "map-group-title";
-    title.style.left = "80px";
-    title.style.top = startY + "px";
-    title.textContent = "反応経路が未登録の化合物";
-    groupLayer.appendChild(title);
-    const cols = 7;
-    isolated.sort((a,b) => compoundOrder[a.id] - compoundOrder[b.id]).forEach((c, i) => {
-      const col = i % cols;
-      const row = Math.floor(i / cols);
-      nodePositions[c.id] = {x:80 + col * 320, y:startY + 36 + row * 250};
-    });
-    maxX = Math.max(maxX, 80 + Math.min(cols, isolated.length) * 320);
-    maxY = Math.max(maxY, startY + 36 + Math.ceil(isolated.length / cols) * 250 + NODE_H);
+function nearestFreeCell(x,y,occupied,preferredDirection){
+ for(let radius=1;radius<=14;radius++){
+  const candidates=[];
+  for(let dy=-radius;dy<=radius;dy++)for(let dx=-radius;dx<=radius;dx++){
+   if(Math.max(Math.abs(dx),Math.abs(dy))!==radius||occupied[cellKey(x+dx,y+dy)])continue;
+   const dir=directionForDelta(dx,dy);
+   candidates.push({x:x+dx,y:y+dy,score:radius*20+(preferredDirection===undefined?0:circularDistance(dir,preferredDirection)*3)});
   }
-
-  return {
-    width:Math.max(2850, maxX + 80),
-    height:Math.max(1100, maxY + 70),
-    primaryNodes:components.length ? components[0].nodes : compounds.map((c) => c.id)
-  };
+  if(candidates.length){candidates.sort((p,q)=>p.score-q.score||p.y-q.y||p.x-q.x);return candidates[0]}
+ }
+ return {x:x+15,y:y+15};
+}
+function buildAdjacency(){
+ const adj=Object.create(null),inDeg=Object.create(null),outDeg=Object.create(null);
+ compounds.forEach(c=>{adj[c.id]=[];inDeg[c.id]=0;outDeg[c.id]=0});
+ edges.forEach(e=>{
+  if(!adj[e.from]||!adj[e.to])return;
+  if(!adj[e.from].includes(e.to))adj[e.from].push(e.to);
+  if(!adj[e.to].includes(e.from))adj[e.to].push(e.from);
+  outDeg[e.from]++;inDeg[e.to]++;
+ });
+ return {adj,inDeg,outDeg};
+}
+const graph=buildAdjacency();
+function makeComponent(nodes){
+ const nodeSet=new Set(nodes),local=Object.create(null),occupied=Object.create(null),parent=Object.create(null);
+ const root=nodes.slice().sort((a,b)=>graph.adj[b].length-graph.adj[a].length||compoundOrder[a]-compoundOrder[b])[0];
+ const queue=[root];local[root]={x:0,y:0};occupied[cellKey(0,0)]=root;
+ while(queue.length){
+  const current=queue.shift(),here=local[current];
+  const unseen=graph.adj[current].filter(n=>nodeSet.has(n)&&!local[n]).sort((a,b)=>graph.adj[b].length-graph.adj[a].length||compoundOrder[a]-compoundOrder[b]);
+  if(!unseen.length)continue;
+  const available=DIRECTIONS.filter(d=>!occupied[cellKey(here.x+d.dx,here.y+d.dy)]).map(d=>d.index);
+  const back=parent[current]?directionForDelta(local[parent[current]].x-here.x,local[parent[current]].y-here.y):undefined;
+  const chosen=chooseSpreadDirections(available,Math.min(unseen.length,available.length),back);
+  unseen.forEach((next,i)=>{
+   const d=i<chosen.length?DIRECTIONS[chosen[i]]:null;
+   const p=d?{x:here.x+d.dx,y:here.y+d.dy}:nearestFreeCell(here.x,here.y,occupied);
+   local[next]={x:p.x,y:p.y};occupied[cellKey(p.x,p.y)]=next;parent[next]=current;queue.push(next);
+  });
+ }
+ nodes.forEach(id=>{if(!local[id]){const p=nearestFreeCell(0,0,occupied);local[id]={x:p.x,y:p.y};occupied[cellKey(p.x,p.y)]=id}});
+ const xs=nodes.map(id=>local[id].x),ys=nodes.map(id=>local[id].y);
+ const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
+ return {nodes,root,positions:local,minX,maxX,minY,maxY,width:maxX-minX+1,height:maxY-minY+1};
+}
+function buildLayout(){
+ const visited=new Set(),components=[];
+ compounds.forEach(c=>{
+  if(visited.has(c.id))return;
+  const q=[c.id],nodes=[];visited.add(c.id);
+  while(q.length){const id=q.shift();nodes.push(id);graph.adj[id].forEach(n=>{if(!visited.has(n)){visited.add(n);q.push(n)}})}
+  if(nodes.length>1)components.push(makeComponent(nodes));
+ });
+ components.sort((a,b)=>b.nodes.length-a.nodes.length||a.width-b.width);
+ let cursorGX=1,cursorGY=1,rowHeight=0,maxGX=1,maxGY=1;
+ const rowLimit=27;
+ components.forEach((comp,index)=>{
+  if(cursorGX>1&&cursorGX+comp.width+1>rowLimit){cursorGX=1;cursorGY+=rowHeight+3;rowHeight=0}
+  const originGX=cursorGX-comp.minX,originGY=cursorGY-comp.minY;
+  const title=document.createElement("div");title.className="map-group-title";
+  title.style.left=(MAP_PAD+(cursorGX-1)*CELL)+"px";title.style.top=Math.max(8,MAP_PAD+(cursorGY-1)*CELL-42)+"px";
+  title.textContent=groupTitle(comp);groupLayer.appendChild(title);
+  comp.nodes.forEach(id=>{
+   const p=comp.positions[id],gx=p.x+originGX,gy=p.y+originGY;
+   nodeGridPositions[id]={x:gx,y:gy};nodePositions[id]={x:MAP_PAD+(gx-1)*CELL,y:MAP_PAD+(gy-1)*CELL};
+   gridOccupancy[cellKey(gx,gy)]=id;componentOf[id]=index;maxGX=Math.max(maxGX,gx);maxGY=Math.max(maxGY,gy);
+  });
+  const ps=comp.nodes.map(id=>nodeGridPositions[id]);
+  componentBounds[index]={minX:Math.min(...ps.map(p=>p.x))-5,maxX:Math.max(...ps.map(p=>p.x))+5,minY:Math.min(...ps.map(p=>p.y))-5,maxY:Math.max(...ps.map(p=>p.y))+5};
+  cursorGX+=comp.width+2;rowHeight=Math.max(rowHeight,comp.height);
+ });
+ const isolated=compounds.filter(c=>graph.adj[c.id].length===0);
+ if(isolated.length){
+  cursorGX=1;cursorGY+=rowHeight+4;
+  const title=document.createElement("div");title.className="map-group-title";
+  title.style.left=MAP_PAD+"px";title.style.top=(MAP_PAD+(cursorGY-1)*CELL-42)+"px";title.textContent="反応経路が未登録の化合物";groupLayer.appendChild(title);
+  const cols=6;
+  isolated.forEach((c,i)=>{
+   const gx=cursorGX+i%cols,gy=cursorGY+Math.floor(i/cols);
+   nodeGridPositions[c.id]={x:gx,y:gy};nodePositions[c.id]={x:MAP_PAD+(gx-1)*CELL,y:MAP_PAD+(gy-1)*CELL};
+   gridOccupancy[cellKey(gx,gy)]=c.id;maxGX=Math.max(maxGX,gx);maxGY=Math.max(maxGY,gy);
+  });
+ }
+ const primary=components[0]||{nodes:compounds.map(c=>c.id),root:compounds[0]&&compounds[0].id};
+ return {width:MAP_PAD*2+maxGX*CELL+NODE_W,height:MAP_PAD*2+maxGY*CELL+NODE_H,primaryNodes:primary.nodes,primaryRoot:primary.root,components};
+}
+function heapPush(heap,item){
+ heap.push(item);let i=heap.length-1;
+ while(i>0){const p=(i-1)>>1;if(heap[p].f<=heap[i].f)break;[heap[p],heap[i]]=[heap[i],heap[p]];i=p}
+}
+function heapPop(heap){
+ if(!heap.length)return null;const first=heap[0],last=heap.pop();
+ if(heap.length){heap[0]=last;let i=0;for(;;){const l=i*2+1,r=l+1;let m=i;if(l<heap.length&&heap[l].f<heap[m].f)m=l;if(r<heap.length&&heap[r].f<heap[m].f)m=r;if(m===i)break;[heap[i],heap[m]]=[heap[m],heap[i]];i=m}}
+ return first;
+}
+function segmentKey(a,b){const x=cellKey(a.x,a.y),y=cellKey(b.x,b.y);return x<y?x+"~"+y:y+"~"+x}
+function diagonalInfo(a,b){const dx=b.x-a.x,dy=b.y-a.y;if(Math.abs(dx)!==1||Math.abs(dy)!==1)return null;return {square:Math.min(a.x,b.x)+","+Math.min(a.y,b.y),orientation:dx*dy>0?1:-1}}
+function octileDistance(a,b){const dx=Math.abs(a.x-b.x),dy=Math.abs(a.y-b.y),di=Math.min(dx,dy),st=Math.max(dx,dy)-di;return di*14+st*10}
+function findGridRoute(edge){
+ const start=nodeGridPositions[edge.from],goal=nodeGridPositions[edge.to];if(!start||!goal)return [];
+ const bounds=componentBounds[componentOf[edge.from]]||{minX:start.x-5,maxX:start.x+5,minY:start.y-5,maxY:start.y+5};
+ const pair=pairKey(edge.from,edge.to),startKey=start.x+","+start.y+",-1";
+ const open=[],best=new Map(),previous=new Map(),states=new Map();
+ const first={x:start.x,y:start.y,dir:-1,g:0,f:octileDistance(start,goal),key:startKey};
+ best.set(startKey,0);states.set(startKey,first);heapPush(open,first);
+ let endState=null,iterations=0;
+ while(open.length&&iterations<30000){
+  iterations++;const cur=heapPop(open);if(cur.g!==best.get(cur.key))continue;
+  if(cur.x===goal.x&&cur.y===goal.y){endState=cur;break}
+  DIRECTIONS.forEach(d=>{
+   const nx=cur.x+d.dx,ny=cur.y+d.dy;
+   if(nx<bounds.minX||nx>bounds.maxX||ny<bounds.minY||ny>bounds.maxY)return;
+   const nk=cellKey(nx,ny),blocked=gridOccupancy[nk];if(blocked&&blocked!==edge.from&&blocked!==edge.to)return;
+   const next={x:nx,y:ny},sk=segmentKey(cur,next),owners=routedSegments[sk]||[];
+   let penalty=owners.some(p=>p!==pair)?12000:0;
+   const diag=diagonalInfo(cur,next);
+   if(diag&&(routedDiagonals[diag.square+"|"+(-diag.orientation)]||[]).some(p=>p!==pair))penalty+=12000;
+   if(!(nx===goal.x&&ny===goal.y)&&!(nx===start.x&&ny===start.y)&&(routedGridPoints[nk]||[]).some(p=>p!==pair))penalty+=12000;
+   const ng=cur.g+((d.dx===0||d.dy===0)?10:14)+(cur.dir!==-1&&cur.dir!==d.index?4:0)+penalty;
+   const key=nx+","+ny+","+d.index;
+   if(!best.has(key)||ng<best.get(key)){const state={x:nx,y:ny,dir:d.index,g:ng,f:ng+octileDistance(next,goal),key};best.set(key,ng);previous.set(key,cur.key);states.set(key,state);heapPush(open,state)}
+  });
+ }
+ if(!endState){
+  const path=[{x:start.x,y:start.y}];let x=start.x,y=start.y;
+  while(x!==goal.x||y!==goal.y){const dx=Math.sign(goal.x-x),dy=Math.sign(goal.y-y);if(dx&&dy){x+=dx;y+=dy}else if(dx)x+=dx;else y+=dy;path.push({x,y});if(path.length>1000)break}
+  return path;
+ }
+ const path=[];let key=endState.key;
+ while(key){const s=states.get(key);path.push({x:s.x,y:s.y});key=previous.get(key)||""}
+ path.reverse();
+ for(let i=1;i<path.length;i++){
+  const p=pairKey(edge.from,edge.to),a=path[i-1],b=path[i],sk=segmentKey(a,b),list=routedSegments[sk]||(routedSegments[sk]=[]);
+  if(!list.includes(p))list.push(p);
+  const diag=diagonalInfo(a,b);if(diag){const dk=diag.square+"|"+diag.orientation,dl=routedDiagonals[dk]||(routedDiagonals[dk]=[]);if(!dl.includes(p))dl.push(p)}
+ }
+ path.slice(1,-1).forEach(p=>{const k=cellKey(p.x,p.y),owners=routedGridPoints[k]||(routedGridPoints[k]=[]);if(!owners.includes(pair))owners.push(pair)});
+ return path;
 }
 
 function createNode(c) {
@@ -310,160 +325,52 @@ function createNode(c) {
   nodeLayer.appendChild(node);
 }
 
-function drawEdges(dimensions) {
-  linesSvg.setAttribute("width", dimensions.width);
-  linesSvg.setAttribute("height", dimensions.height);
-  linesSvg.setAttribute("viewBox", "0 0 " + dimensions.width + " " + dimensions.height);
-  linesSvg.style.width = dimensions.width + "px";
-  linesSvg.style.height = dimensions.height + "px";
-
-  const defs = svgEl("defs");
-  const marker = svgEl("marker", {
-    id:"map-arrow-head", markerWidth:"9", markerHeight:"9",
-    refX:"7.4", refY:"4.5", orient:"auto", markerUnits:"userSpaceOnUse"
-  });
-  marker.appendChild(svgEl("path",{d:"M0,0 L9,4.5 L0,9 Z",fill:"#628d6a"}));
-  defs.appendChild(marker);
-  linesSvg.appendChild(defs);
-
-  // Route every arrow with 0°/90° segments only. The final segment is
-  // horizontal, and every edge gets separate card ports and a separate lane.
-  const specs = edges.map((edge) => {
-    const fromPos = nodePositions[edge.from];
-    const toPos = nodePositions[edge.to];
-    if (!fromPos || !toPos) return null;
-    const sameColumn = Math.abs(fromPos.x - toPos.x) < 1;
-    let startSide, endSide, gapStart, laneDirection;
-    if (sameColumn) {
-      startSide = "right";
-      endSide = "right";
-      gapStart = fromPos.x + NODE_W;
-      laneDirection = "right";
-    } else if (fromPos.x < toPos.x) {
-      startSide = "right";
-      endSide = "left";
-      gapStart = fromPos.x + NODE_W;
-      laneDirection = "right";
-    } else {
-      startSide = "left";
-      endSide = "right";
-      gapStart = toPos.x + NODE_W;
-      laneDirection = "left";
-    }
-    return {edge,fromPos,toPos,sameColumn,startSide,endSide,gapStart,laneDirection};
-  }).filter(Boolean);
-
-  // Spread attachment points along each card edge, ordered by destination.
-  const portGroups = Object.create(null);
-  specs.forEach((spec) => {
-    [
-      {id:spec.edge.from,side:spec.startSide,other:spec.toPos,where:"start"},
-      {id:spec.edge.to,side:spec.endSide,other:spec.fromPos,where:"end"}
-    ].forEach((item) => {
-      const key = item.id + "|" + item.side;
-      (portGroups[key] ||= []).push({spec,where:item.where,other:item.other});
-    });
-  });
-  const ports = Object.create(null);
-  Object.keys(portGroups).forEach((key) => {
-    const entries = portGroups[key].sort((a,b) => {
-      const av = a.other.y + NODE_H / 2;
-      const bv = b.other.y + NODE_H / 2;
-      return av - bv || String(a.spec.edge.id).localeCompare(String(b.spec.edge.id));
-    });
-    const maxSpread = NODE_H * 0.42;
-    entries.forEach((entry,i) => {
-      const offset = entries.length <= 1 ? 0 : -maxSpread + (2 * maxSpread * i / (entries.length - 1));
-      const pos = entry.where === "start" ? entry.spec.fromPos : entry.spec.toPos;
-      let point;
-      if (entry.where === "start") {
-        if (entry.spec.startSide === "right") point = {x:pos.x + NODE_W,y:pos.y + NODE_H/2 + offset};
-        else if (entry.spec.startSide === "left") point = {x:pos.x,y:pos.y + NODE_H/2 + offset};
-        else if (entry.spec.startSide === "bottom") point = {x:pos.x + NODE_W/2 + offset,y:pos.y + NODE_H};
-        else point = {x:pos.x + NODE_W/2 + offset,y:pos.y};
-      } else {
-        if (entry.spec.endSide === "right") point = {x:pos.x + NODE_W,y:pos.y + NODE_H/2 + offset};
-        else if (entry.spec.endSide === "left") point = {x:pos.x,y:pos.y + NODE_H/2 + offset};
-        else if (entry.spec.endSide === "bottom") point = {x:pos.x + NODE_W/2 + offset,y:pos.y + NODE_H};
-        else point = {x:pos.x + NODE_W/2 + offset,y:pos.y};
-      }
-      ports[entry.spec.edge.id + "|" + entry.where] = point;
-      if (entry.where === "start") entry.spec.portOrder = i;
-    });
-  });
-
-  // Keep lanes on the destination half of each gap. This makes the source
-  // segment long enough for the reaction label, while lane x-coordinates stay
-  // unique so two arrows cannot lie on top of one another.
-  const gapGroups = Object.create(null);
-  specs.forEach((spec) => {
-    const key = spec.gapStart + "|" + spec.laneDirection;
-    (gapGroups[key] ||= []).push(spec);
-  });
-  Object.keys(gapGroups).forEach((key) => {
-    const group = gapGroups[key].sort((a,b) => {
-      const ay = ports[a.edge.id + "|start"].y;
-      const by = ports[b.edge.id + "|start"].y;
-      return ay - by || String(a.edge.id).localeCompare(String(b.edge.id));
-    });
-    const gapStart = group[0].gapStart;
-    const gapWidth = COL_STEP - NODE_W;
-    const mid = gapStart + gapWidth / 2;
-    const outerMargin = 24;
-    const innerMargin = 12;
-    const left = gapStart + outerMargin;
-    const right = gapStart + gapWidth - outerMargin;
-    const laneMin = group[0].laneDirection === "right" ? mid + innerMargin : left;
-    const laneMax = group[0].laneDirection === "right" ? right : mid - innerMargin;
-    const span = Math.max(8,laneMax-laneMin);
-    group.forEach((spec,i) => {
-      spec.laneX = group.length === 1 ? (laneMin+laneMax)/2 : laneMin + span*i/(group.length-1);
-      // Alternate label spacing to keep crowded branches from colliding.
-      spec.labelTier = (spec.portOrder || 0) % 2;
-    });
-  });
-
-  specs.forEach((spec) => {
-    const edge = spec.edge;
-    const startPoint = ports[edge.id + "|start"];
-    const endPoint = ports[edge.id + "|end"];
-    const gapStart = spec.gapStart;
-    const gapWidth = COL_STEP - NODE_W;
-    const midX = gapStart + gapWidth/2;
-    const points = [
-      startPoint,
-      {x:midX,y:startPoint.y},
-      {x:spec.laneX,y:startPoint.y},
-      {x:spec.laneX,y:endPoint.y},
-      endPoint
-    ];
-    const compact = points.filter((point,i) => i===0 || point.x!==points[i-1].x || point.y!==points[i-1].y);
-    const pathD = compact.map((point,i) => (i===0?"M":"L")+point.x.toFixed(1)+","+point.y.toFixed(1)).join(" ");
-    const arrowPointsLeft = spec.laneDirection === "left" || spec.sameColumn;
-    const labelText = edge.label || edge.name || "反応";
-    const labelWidth = Math.min(180,Math.max(56,labelText.length*12+20));
-    const labelX = midX;
-    const labelY = startPoint.y + (arrowPointsLeft ? 1 : -1) * (18 + 12*spec.labelTier);
-    const group = svgEl("g",{
-      class:"map-edge",tabindex:"0",role:"button","data-edge-id":edge.id,
-      "aria-label":(edge.name || edge.label)+"。反応式を表示"
-    });
-    const hit = svgEl("path",{class:"map-edge-hitbox",d:pathD});
-    const visible = svgEl("path",{class:"map-edge-visible",d:pathD,"marker-end":"url(#map-arrow-head)"});
-    const labelBg = svgEl("rect",{
-      class:"map-edge-label-bg",
-      x:(labelX-labelWidth/2).toFixed(1),y:(labelY-11).toFixed(1),
-      width:labelWidth,height:22,rx:7
-    });
-    const label = svgEl("text",{class:"map-edge-label-text",x:labelX.toFixed(1),y:labelY.toFixed(1)});
-    label.textContent = labelText;
-    group.append(hit,visible,labelBg,label);
-    group.addEventListener("click",() => openReaction(edge));
-    group.addEventListener("keydown",(event) => {
-      if(event.key==="Enter"||event.key===" "){event.preventDefault();openReaction(edge);}
-    });
-    linesSvg.appendChild(group);
-  });
+function drawEdges(dimensions){
+ linesSvg.setAttribute("width",dimensions.width);linesSvg.setAttribute("height",dimensions.height);linesSvg.setAttribute("viewBox","0 0 "+dimensions.width+" "+dimensions.height);linesSvg.style.width=dimensions.width+"px";linesSvg.style.height=dimensions.height+"px";
+ const defs=svgEl("defs"),marker=svgEl("marker",{id:"map-arrow-head",markerWidth:"11",markerHeight:"11",refX:"9.2",refY:"5.5",orient:"auto",markerUnits:"userSpaceOnUse"});
+ marker.appendChild(svgEl("path",{d:"M0,0 L11,5.5 L0,11 Z",fill:"#628d6a"}));defs.appendChild(marker);linesSvg.appendChild(defs);
+ const pairCounts=Object.create(null),pairIndexes=Object.create(null),paths=Object.create(null);
+ edges.forEach(e=>{const p=pairKey(e.from,e.to);pairCounts[p]=(pairCounts[p]||0)+1});
+ const ordered=edges.slice().sort((a,b)=>{
+  const pa=nodeGridPositions[a.from],qa=nodeGridPositions[a.to],pb=nodeGridPositions[b.from],qb=nodeGridPositions[b.to];
+  const da=Math.max(Math.abs(pa.x-qa.x),Math.abs(pa.y-qa.y)),db=Math.max(Math.abs(pb.x-qb.x),Math.abs(pb.y-qb.y));
+  return da-db||(graph.adj[b.from].length+graph.adj[b.to].length)-(graph.adj[a.from].length+graph.adj[a.to].length)||String(a.id).localeCompare(String(b.id));
+ });
+ ordered.forEach(e=>{paths[e.id]=findGridRoute(e)});
+ function center(id){const p=nodePositions[id];return {x:p.x+NODE_W/2,y:p.y+NODE_H/2}}
+ function borderPoint(c,dir){
+  const tx=dir.x===0?Infinity:(NODE_W/2)/Math.abs(dir.x),ty=dir.y===0?Infinity:(NODE_H/2)/Math.abs(dir.y),t=Math.min(tx,ty);
+  return {x:c.x+dir.x*t,y:c.y+dir.y*t};
+ }
+ function shift(points,offset,a,b){
+  if(Math.abs(offset)<.1)return points;
+  const dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy)||1,nx=-dy/len,ny=dx/len;
+  return points.map(p=>({x:p.x+nx*offset,y:p.y+ny*offset}));
+ }
+ edges.forEach(edge=>{
+  const gridPath=paths[edge.id];if(!gridPath||gridPath.length<2)return;
+  const first={x:gridPath[1].x-gridPath[0].x,y:gridPath[1].y-gridPath[0].y};
+  const last={x:gridPath[gridPath.length-2].x-gridPath[gridPath.length-1].x,y:gridPath[gridPath.length-2].y-gridPath[gridPath.length-1].y};
+  const fromCenter=center(edge.from),toCenter=center(edge.to),points=[borderPoint(fromCenter,first)];
+  for(let i=1;i<gridPath.length-1;i++)points.push({x:MAP_PAD+(gridPath[i].x-1)*CELL+NODE_W/2,y:MAP_PAD+(gridPath[i].y-1)*CELL+NODE_H/2});
+  points.push(borderPoint(toCenter,last));
+  const pair=pairKey(edge.from,edge.to),idx=pairIndexes[pair]||0;pairIndexes[pair]=idx+1;
+  const offset=(idx-(pairCounts[pair]-1)/2)*20,visiblePoints=shift(points,offset,fromCenter,toCenter);
+  const pathD=visiblePoints.map((p,i)=>(i===0?"M":"L")+p.x.toFixed(1)+","+p.y.toFixed(1)).join(" ");
+  let bestSeg=0,bestLength=-1;
+  for(let i=1;i<visiblePoints.length;i++){const len=Math.hypot(visiblePoints[i].x-visiblePoints[i-1].x,visiblePoints[i].y-visiblePoints[i-1].y);if(len>bestLength){bestLength=len;bestSeg=i-1}}
+  const p1=visiblePoints[bestSeg],p2=visiblePoints[bestSeg+1],len=Math.hypot(p2.x-p1.x,p2.y-p1.y)||1;
+  const nx=-(p2.y-p1.y)/len,ny=(p2.x-p1.x)/len,sign=toCenter.x>=fromCenter.x?-1:1;
+  const labelX=(p1.x+p2.x)/2+nx*sign*31,labelY=(p1.y+p2.y)/2+ny*sign*31;
+  const text=edge.label||edge.name||"反応",labelWidth=Math.min(300,Math.max(78,text.length*17+28));
+  const group=svgEl("g",{class:"map-edge",tabindex:"0",role:"button","data-edge-id":edge.id,"aria-label":(edge.name||edge.label)+"。反応式を表示"});
+  const hit=svgEl("path",{class:"map-edge-hitbox",d:pathD}),line=svgEl("path",{class:"map-edge-visible",d:pathD,"marker-end":"url(#map-arrow-head)"});
+  const bg=svgEl("rect",{class:"map-edge-label-bg",x:(labelX-labelWidth/2).toFixed(1),y:(labelY-17).toFixed(1),width:labelWidth,height:34,rx:8});
+  const label=svgEl("text",{class:"map-edge-label-text",x:labelX.toFixed(1),y:labelY.toFixed(1)});label.textContent=text;
+  group.append(hit,line,bg,label);group.addEventListener("click",()=>openReaction(edge));
+  group.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();openReaction(edge)}});
+  linesSvg.appendChild(group);
+ });
 }
 let rdkitPromise = null;
 function getRDKit() {
@@ -489,7 +396,7 @@ async function renderStructures() {
       try {
         mol = rdkit.get_mol(compound.smiles);
         if (!mol) throw new Error("SMILES parse failed");
-        const opts = {width:260,height:126,bondLineWidth:1.65,scaleBondWidth:true,multipleBondOffset:0.15,padding:0.035,minFontSize:7,maxFontSize:17,annotationFontScale:0.58};
+        const opts = {width:330,height:154,bondLineWidth:1.8,scaleBondWidth:true,multipleBondOffset:0.16,padding:0.03,minFontSize:8,maxFontSize:20,annotationFontScale:0.62};
         const svg = mol.get_svg_with_highlights(JSON.stringify(opts));
         if (!svg || !/<svg[\s>]/i.test(svg)) throw new Error("No SVG");
         host.innerHTML = svg;
@@ -648,18 +555,10 @@ function init() {
   countEl.textContent = compounds.length + "化合物・" + edges.length + "反応";
   applyTransform();
   requestAnimationFrame(() => {
-    const primary = dimensions.primaryNodes.map((id) => nodePositions[id]).filter(Boolean);
-    const minX = Math.min.apply(null, primary.map((p) => p.x));
-    const minY = Math.min.apply(null, primary.map((p) => p.y));
-    const maxX = Math.max.apply(null, primary.map((p) => p.x + NODE_W));
-    const maxY = Math.max.apply(null, primary.map((p) => p.y + NODE_H));
-    const regionW = maxX - minX;
-    const regionH = maxY - minY;
-    scale = Math.min(0.68, Math.max(0.56, (viewport.clientWidth - 40) / regionW));
-    // Keep the main reaction group comfortably readable; the user can pan to
-    // other groups or use "全体表示" when they need the complete atlas.
-    panX = (viewport.clientWidth - regionW * scale) / 2 - minX * scale;
-    panY = (viewport.clientHeight - Math.min(regionH, viewport.clientHeight / scale) * scale) / 2 - minY * scale;
+    const root=nodePositions[dimensions.primaryRoot]||nodePositions[dimensions.primaryNodes[0]];
+    scale=Math.min(0.74,Math.max(0.66,viewport.clientWidth/1700));
+    panX=viewport.clientWidth/2-(root.x+NODE_W/2)*scale;
+    panY=viewport.clientHeight/2-(root.y+NODE_H/2)*scale;
     applyTransform();
   });
   renderStructures();
