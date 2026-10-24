@@ -325,19 +325,15 @@ function findGridRoute(edge,recoveryLevel=0){
  const nodeStart=nodeGridPositions[edge.from],nodeGoal=nodeGridPositions[edge.to];
  if(!nodeStart||!nodeGoal)return [];
  const ports=edgePorts[edge.id]||{from:directionForDelta(nodeGoal.x-nodeStart.x,nodeGoal.y-nodeStart.y),to:directionForDelta(nodeStart.x-nodeGoal.x,nodeStart.y-nodeGoal.y)};
- const fromDirection=DIRECTIONS[ports.from]||DIRECTIONS[2];
- const toDirection=DIRECTIONS[ports.to]||DIRECTIONS[6];
- const portRadius=2;
- const start={x:nodeStart.x+fromDirection.dx*portRadius,y:nodeStart.y+fromDirection.dy*portRadius};
- const goal={x:nodeGoal.x+toDirection.dx*portRadius,y:nodeGoal.y+toDirection.dy*portRadius};
+ const fromDirection=DIRECTIONS[ports.from]||DIRECTIONS[2],toDirection=DIRECTIONS[ports.to]||DIRECTIONS[6];
+ const fromPort=ports.fromPort||{x:nodeStart.x+fromDirection.dx*2,y:nodeStart.y+fromDirection.dy*2};
+ const toPort=ports.toPort||{x:nodeGoal.x+toDirection.dx*2,y:nodeGoal.y+toDirection.dy*2};
+ const start=ports.fromEscape||fromPort,goal=ports.toEscape||toPort;
  const coreBounds=componentBounds[componentOf[edge.from]]||{minX:nodeStart.x-10,maxX:nodeStart.x+10,minY:nodeStart.y-10,maxY:nodeStart.y+10};
  const margins=[0,8,18,35,60];
  const margin=margins[Math.min(recoveryLevel,margins.length-1)];
  const bounds={minX:coreBounds.minX-margin,maxX:coreBounds.maxX+margin,minY:coreBounds.minY-margin,maxY:coreBounds.maxY+margin};
- const routeId=String(edge.id);
- // Source and target connectors are pre-reserved before any main route is
- // searched; this stops an early route from cutting off a later arrow port.
- const startKey=start.x+","+start.y+",-1";
+ const routeId=String(edge.id),startKey=start.x+","+start.y+",-1";
  const open=[],best=new Map(),previous=new Map(),states=new Map();
  const first={x:start.x,y:start.y,dir:-1,g:0,f:octileDistance(start,goal),key:startKey};
  best.set(startKey,0);states.set(startKey,first);heapPush(open,first);
@@ -354,9 +350,6 @@ function findGridRoute(edge,recoveryLevel=0){
    const diag=diagonalInfo(cur,next);
    const diagonalConflict=!!(diag&&(routedDiagonals[diag.square+"|"+(-diag.orientation)]||[]).some(p=>p!==routeId));
    const pointConflict=(routedGridPoints[nk]||[]).some(p=>p!==routeId);
-   // Every segment, crossing diagonal and grid junction is reserved. This
-   // permits a diagonal exit from a congested card port while still preventing
-   // arrows from crossing or sharing the same track.
    if(segmentConflict||diagonalConflict||pointConflict)return;
    const ng=cur.g+((d.dx===0||d.dy===0)?10:14)+(cur.dir!==-1&&cur.dir!==d.index?5:0);
    const key=nx+","+ny+","+d.index;
@@ -381,12 +374,14 @@ function findGridRoute(edge,recoveryLevel=0){
   const k=cellKey(point.x,point.y),owners=routedGridPoints[k]||(routedGridPoints[k]=[]);
   if(!owners.includes(routeId))owners.push(routeId);
  });
- return [nodeStart].concat(path,[nodeGoal]);
+ // The first and last points are protected escape cells placed just outside
+ // each node's port. Keep those short connectors in the visible polyline.
+ return [nodeStart,fromPort].concat(path,[toPort,nodeGoal]);
 }
 function assignEdgePorts(edgeList){
  const usedDirections=Object.create(null),usedPortCells=Object.create(null);
  compounds.forEach(c=>{usedDirections[c.id]=new Set()});
- const radius=2;
+ const radius=2,escapeOrder=[0,2,4,6,1,3,5,7];
  function portPoint(nodeId,dir){
   const p=nodeGridPositions[nodeId],d=DIRECTIONS[dir];
   return {x:p.x+d.dx*radius,y:p.y+d.dy*radius};
@@ -415,11 +410,24 @@ function assignEdgePorts(edgeList){
   }
   return true;
  }
+ function findEscape(port,routeId){
+  for(const dir of escapeOrder){
+   const d=DIRECTIONS[dir],point={x:port.x+d.dx,y:port.y+d.dy},key=cellKey(point.x,point.y);
+   if(gridOccupancy[key])continue;
+   if((routedGridPoints[key]||[]).some(owner=>owner!==routeId))continue;
+   const sk=segmentKey(port,point);
+   if((routedSegments[sk]||[]).some(owner=>owner!==routeId))continue;
+   const diag=diagonalInfo(port,point);
+   if(diag&&(routedDiagonals[diag.square+"|"+(-diag.orientation)]||[]).some(owner=>owner!==routeId))continue;
+   return point;
+  }
+  return null;
+ }
  edgeList.forEach(edge=>{
   const a=nodeGridPositions[edge.from],b=nodeGridPositions[edge.to];
   if(!a||!b)return;
-  const desiredFrom=directionForDelta(b.x-a.x,b.y-a.y);
-  const desiredTo=directionForDelta(a.x-b.x,a.y-b.y);
+  const routeId=String(edge.id);
+  const desiredFrom=directionForDelta(b.x-a.x,b.y-a.y),desiredTo=directionForDelta(a.x-b.x,a.y-b.y);
   const candidates=[];
   for(const fromDir of DIRECTIONS.map(d=>d.index)){
    if(usedDirections[edge.from].has(fromDir))continue;
@@ -427,54 +435,42 @@ function assignEdgePorts(edgeList){
    for(const toDir of DIRECTIONS.map(d=>d.index)){
     if(usedDirections[edge.to].has(toDir))continue;
     const pb=portPoint(edge.to,toDir),kb=cellKey(pb.x,pb.y);
-    const sharedPort=ka===kb;
     if(usedPortCells[ka]||usedPortCells[kb])continue;
+    const sharedPort=ka===kb;
     if(!clearConnector(edge.from,fromDir,edge.to,sharedPort)||!clearConnector(edge.to,toDir,edge.from,sharedPort))continue;
-    if(!portPathClear(edge.from,fromDir,String(edge.id))||!portPathClear(edge.to,toDir,String(edge.id)))continue;
+    if(!portPathClear(edge.from,fromDir,routeId)||!portPathClear(edge.to,toDir,routeId))continue;
+    const fromEscape=findEscape(pa,routeId),toEscape=findEscape(pb,routeId);
+    if(!fromEscape||!toEscape)continue;
+    const fromEscapeKey=cellKey(fromEscape.x,fromEscape.y),toEscapeKey=cellKey(toEscape.x,toEscape.y);
+    if((usedPortCells[fromEscapeKey]&&fromEscapeKey!==kb)||(usedPortCells[toEscapeKey]&&toEscapeKey!==ka))continue;
     const score=circularDistance(fromDir,desiredFrom)*100+circularDistance(toDir,desiredTo)*100
       +(sharedPort?-12:0)+directionRank(fromDir)*.01+directionRank(toDir)*.001;
-    candidates.push({fromDir,toDir,pa,pb,ka,kb,score});
+    candidates.push({fromDir,toDir,pa,pb,ka,kb,fromEscape,toEscape,score});
    }
   }
   candidates.sort((x,y)=>x.score-y.score);
   let chosen=candidates[0];
   if(!chosen){
-   let fallback=[];
-   for(const fromDir of DIRECTIONS.map(d=>d.index)){
-    if(usedDirections[edge.from].has(fromDir))continue;
-    const pa=portPoint(edge.from,fromDir),ka=cellKey(pa.x,pa.y);
-    if(usedPortCells[ka])continue;
-    for(const toDir of DIRECTIONS.map(d=>d.index)){
-     if(usedDirections[edge.to].has(toDir))continue;
-     const pb=portPoint(edge.to,toDir),kb=cellKey(pb.x,pb.y);
-     if(usedPortCells[kb]||ka===kb)continue;
-     const same=ka===kb;
-     if(!clearConnector(edge.from,fromDir,edge.to,same)||!clearConnector(edge.to,toDir,edge.from,same))continue;
-     if(!portPathClear(edge.from,fromDir,String(edge.id))||!portPathClear(edge.to,toDir,String(edge.id)))continue;
-     fallback.push({fromDir,toDir,pa,pb,ka,kb,score:circularDistance(fromDir,desiredFrom)*100+circularDistance(toDir,desiredTo)*100});
-    }
-   }
-   fallback.sort((x,y)=>x.score-y.score);chosen=fallback[0];
-  }
-  if(!chosen){
-   // Retain a deterministic port even in exceptional high-degree layouts.
+   // Deterministic fallback still reserves a local escape before any main route.
    const fromDir=DIRECTIONS.map(d=>d.index).find(d=>!usedDirections[edge.from].has(d));
    const toDir=DIRECTIONS.map(d=>d.index).find(d=>!usedDirections[edge.to].has(d));
    if(fromDir===undefined||toDir===undefined)return;
    const pa=portPoint(edge.from,fromDir),pb=portPoint(edge.to,toDir);
-   chosen={fromDir,toDir,pa,pb,ka:cellKey(pa.x,pa.y),kb:cellKey(pb.x,pb.y)};
+   const fromEscape=findEscape(pa,routeId)||pa,toEscape=findEscape(pb,routeId)||pb;
+   chosen={fromDir,toDir,pa,pb,ka:cellKey(pa.x,pa.y),kb:cellKey(pb.x,pb.y),fromEscape,toEscape};
   }
   usedDirections[edge.from].add(chosen.fromDir);
   usedDirections[edge.to].add(chosen.toDir);
   if(!edgePorts[edge.id])edgePorts[edge.id]={};
-  edgePorts[edge.id].from=chosen.fromDir;edgePorts[edge.id].to=chosen.toDir;
+  Object.assign(edgePorts[edge.id],{from:chosen.fromDir,to:chosen.toDir,fromPort:chosen.pa,toPort:chosen.pb,fromEscape:chosen.fromEscape,toEscape:chosen.toEscape});
   (usedPortCells[chosen.ka]||(usedPortCells[chosen.ka]=[])).push({edgeId:edge.id,nodeId:edge.from,role:"from"});
   (usedPortCells[chosen.kb]||(usedPortCells[chosen.kb]=[])).push({edgeId:edge.id,nodeId:edge.to,role:"to"});
-  reserveGridSegment(nodeGridPositions[edge.from],chosen.pa,String(edge.id));
-  reserveGridSegment(chosen.pb,nodeGridPositions[edge.to],String(edge.id));
+  reserveGridSegment(a,chosen.pa,routeId);
+  reserveGridSegment(chosen.pb,b,routeId);
+  reserveGridSegment(chosen.pa,chosen.fromEscape,routeId);
+  reserveGridSegment(chosen.pb,chosen.toEscape,routeId);
  });
 }
-
 function createNode(c) {
   const pos = nodePositions[c.id];
   const node = document.createElement("a");
