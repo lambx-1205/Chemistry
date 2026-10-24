@@ -22,10 +22,10 @@ compounds.forEach((c, i) => {
   if (c.pubchemName) nameMap[String(c.pubchemName).toLocaleLowerCase()] = c;
 });
 
-const NODE_W = 190;
-const NODE_H = 150;
-const COL_STEP = 250;
-const ROW_STEP = 175;
+const NODE_W = 280;
+const NODE_H = 220;
+const COL_STEP = 560;
+const ROW_STEP = 285;
 const SVG_NS = "http://www.w3.org/2000/svg";
 const equations = {
   e1:"C₂H₆ + Cl₂ → C₂H₅Cl + HCl",
@@ -267,14 +267,14 @@ function buildLayout() {
     title.style.top = startY + "px";
     title.textContent = "反応経路が未登録の化合物";
     groupLayer.appendChild(title);
-    const cols = 9;
+    const cols = 7;
     isolated.sort((a,b) => compoundOrder[a.id] - compoundOrder[b.id]).forEach((c, i) => {
       const col = i % cols;
       const row = Math.floor(i / cols);
-      nodePositions[c.id] = {x:80 + col * 225, y:startY + 36 + row * 170};
+      nodePositions[c.id] = {x:80 + col * 320, y:startY + 36 + row * 250};
     });
-    maxX = Math.max(maxX, 80 + Math.min(cols, isolated.length) * 225);
-    maxY = Math.max(maxY, startY + 36 + Math.ceil(isolated.length / cols) * 170 + NODE_H);
+    maxX = Math.max(maxX, 80 + Math.min(cols, isolated.length) * 320);
+    maxY = Math.max(maxY, startY + 36 + Math.ceil(isolated.length / cols) * 250 + NODE_H);
   }
 
   return {
@@ -310,71 +310,150 @@ function createNode(c) {
   nodeLayer.appendChild(node);
 }
 
-function clippedPoint(centerX, centerY, dx, dy) {
-  const rx = (NODE_W / 2) / Math.max(Math.abs(dx), 0.001);
-  const ry = (NODE_H / 2) / Math.max(Math.abs(dy), 0.001);
-  const factor = Math.min(rx, ry);
-  return {x:centerX + dx * factor, y:centerY + dy * factor};
-}
 function drawEdges(dimensions) {
   linesSvg.setAttribute("width", dimensions.width);
   linesSvg.setAttribute("height", dimensions.height);
   linesSvg.setAttribute("viewBox", "0 0 " + dimensions.width + " " + dimensions.height);
   linesSvg.style.width = dimensions.width + "px";
   linesSvg.style.height = dimensions.height + "px";
+
   const defs = svgEl("defs");
-  const marker = svgEl("marker", {id:"map-arrow-head",markerWidth:"8",markerHeight:"8",refX:"6.8",refY:"4",orient:"auto",markerUnits:"strokeWidth"});
-  marker.appendChild(svgEl("path",{d:"M0,0 L8,4 L0,8 Z",fill:"#6d9a76"}));
-  const markerActive = svgEl("marker", {id:"map-arrow-head-active",markerWidth:"8",markerHeight:"8",refX:"6.8",refY:"4",orient:"auto",markerUnits:"strokeWidth"});
-  markerActive.appendChild(svgEl("path",{d:"M0,0 L8,4 L0,8 Z",fill:"#c77b4e"}));
-  defs.append(marker, markerActive);
+  const marker = svgEl("marker", {
+    id:"map-arrow-head", markerWidth:"9", markerHeight:"9",
+    refX:"7.4", refY:"4.5", orient:"auto", markerUnits:"userSpaceOnUse"
+  });
+  marker.appendChild(svgEl("path",{d:"M0,0 L9,4.5 L0,9 Z",fill:"#628d6a"}));
+  defs.appendChild(marker);
   linesSvg.appendChild(defs);
 
-  const pairSeen = Object.create(null);
-  const pairCounts = Object.create(null);
-  edges.forEach((e) => {
-    const pair = [e.from,e.to].sort().join("|");
-    pairCounts[pair] = (pairCounts[pair] || 0) + 1;
-  });
-  edges.forEach((edge) => {
+  // All route segments are strictly horizontal or vertical, so every segment
+  // has an angle that is a multiple of 45 degrees. Each edge receives its own
+  // port on a node and its own lane in the gap between columns.
+  const specs = edges.map((edge) => {
     const fromPos = nodePositions[edge.from];
     const toPos = nodePositions[edge.to];
-    if (!fromPos || !toPos) return;
-    const from = byId[edge.from], to = byId[edge.to];
-    const ax = fromPos.x + NODE_W / 2, ay = fromPos.y + NODE_H / 2;
-    const bx = toPos.x + NODE_W / 2, by = toPos.y + NODE_H / 2;
-    const dx = bx - ax, dy = by - ay;
-    const start = clippedPoint(ax, ay, dx, dy);
-    const end = clippedPoint(bx, by, -dx, -dy);
-    const goesRight = bx >= ax;
-    const pair = [edge.from,edge.to].sort().join("|");
-    const laneIndex = pairSeen[pair] || 0;
-    pairSeen[pair] = laneIndex + 1;
-    const laneOffset = (laneIndex - (pairCounts[pair] - 1) / 2) * 20;
-    const bend = (goesRight ? -1 : 1) * 43 + laneOffset;
-    const midX = (start.x + end.x) / 2;
-    const midY = (start.y + end.y) / 2;
-    const controlY = midY + bend;
-    const pathD = "M" + start.x.toFixed(1) + "," + start.y.toFixed(1) + " Q" + midX.toFixed(1) + "," + controlY.toFixed(1) + " " + end.x.toFixed(1) + "," + end.y.toFixed(1);
+    if (!fromPos || !toPos) return null;
+    const sameColumn = Math.abs(fromPos.x - toPos.x) < 1;
+    let startSide, endSide, gapStart;
+    if (sameColumn) {
+      // For links within the same layer, use the free corridor to the right.
+      startSide = "right";
+      endSide = "right";
+      gapStart = fromPos.x + NODE_W;
+    } else if (fromPos.x < toPos.x) {
+      startSide = "right";
+      endSide = "left";
+      gapStart = fromPos.x + NODE_W;
+    } else {
+      startSide = "left";
+      endSide = "right";
+      gapStart = toPos.x + NODE_W;
+    }
+    return {edge,fromPos,toPos,sameColumn,startSide,endSide,gapStart};
+  }).filter(Boolean);
+
+  // Assign distinct attachment ports around each card.
+  const portGroups = Object.create(null);
+  specs.forEach((spec) => {
+    [
+      {id:spec.edge.from,side:spec.startSide,other:spec.toPos,where:"start"},
+      {id:spec.edge.to,side:spec.endSide,other:spec.fromPos,where:"end"}
+    ].forEach((item) => {
+      const key = item.id + "|" + item.side;
+      (portGroups[key] ||= []).push({spec,where:item.where,other:item.other});
+    });
+  });
+  const ports = Object.create(null);
+  Object.keys(portGroups).forEach((key) => {
+    const entries = portGroups[key].sort((a,b) => {
+      const av = (a.other.y + NODE_H / 2);
+      const bv = (b.other.y + NODE_H / 2);
+      return av - bv || String(a.spec.edge.id).localeCompare(String(b.spec.edge.id));
+    });
+    const maxSpread = NODE_H * 0.42;
+    entries.forEach((entry,i) => {
+      const offset = entries.length <= 1 ? 0 : -maxSpread + (2 * maxSpread * i / (entries.length - 1));
+      const pos = entry.where === "start" ? entry.spec.fromPos : entry.spec.toPos;
+      let point;
+      if (entry.where === "start") {
+        if (entry.spec.startSide === "right") point = {x:pos.x + NODE_W,y:pos.y + NODE_H/2 + offset};
+        else if (entry.spec.startSide === "left") point = {x:pos.x,y:pos.y + NODE_H/2 + offset};
+        else if (entry.spec.startSide === "bottom") point = {x:pos.x + NODE_W/2 + offset,y:pos.y + NODE_H};
+        else point = {x:pos.x + NODE_W/2 + offset,y:pos.y};
+      } else {
+        if (entry.spec.endSide === "right") point = {x:pos.x + NODE_W,y:pos.y + NODE_H/2 + offset};
+        else if (entry.spec.endSide === "left") point = {x:pos.x,y:pos.y + NODE_H/2 + offset};
+        else if (entry.spec.endSide === "bottom") point = {x:pos.x + NODE_W/2 + offset,y:pos.y + NODE_H};
+        else point = {x:pos.x + NODE_W/2 + offset,y:pos.y};
+      }
+      ports[entry.spec.edge.id + "|" + entry.where] = point;
+    });
+  });
+
+  // Reserve a non-overlapping lane for every edge within each column gap.
+  const gapGroups = Object.create(null);
+  specs.forEach((spec) => (gapGroups[spec.gapStart] ||= []).push(spec));
+  Object.keys(gapGroups).forEach((key) => {
+    const group = gapGroups[key].sort((a,b) => {
+      const ay = (a.fromPos.y + a.toPos.y) / 2;
+      const by = (b.fromPos.y + b.toPos.y) / 2;
+      return ay - by || String(a.edge.id).localeCompare(String(b.edge.id));
+    });
+    group.forEach((spec,i) => {
+      spec.laneIndex = i;
+      const gapStart = Number(key);
+      const gapWidth = COL_STEP - NODE_W;
+      const inset = Math.min(72, Math.max(24, gapWidth * 0.25));
+      const usable = Math.max(12, gapWidth - 2 * inset);
+      spec.laneX = gapStart + inset + (group.length === 1 ? usable/2 : usable * i/(group.length-1));
+    });
+  });
+
+  specs.forEach((spec) => {
+    const edge = spec.edge;
+    const startPoint = ports[edge.id + "|start"];
+    const endPoint = ports[edge.id + "|end"];
+    const laneX = spec.laneX;
+    const points = [
+      startPoint,
+      {x:laneX,y:startPoint.y},
+      {x:laneX,y:endPoint.y},
+      endPoint
+    ];
+    const compact = points.filter((point,i) => i===0 || point.x!==points[i-1].x || point.y!==points[i-1].y);
+    const pathD = compact.map((point,i) => (i===0?"M":"L")+point.x.toFixed(1)+","+point.y.toFixed(1)).join(" ");
+    const fromIsLeft = spec.fromPos.x < spec.toPos.x;
+    const fromIsRight = spec.fromPos.x > spec.toPos.x;
+    const arrowPointsLeft = fromIsRight || spec.sameColumn;
     const labelText = edge.label || edge.name || "反応";
-    const labelWidth = Math.min(174, Math.max(50, labelText.length * 11 + 20));
-    const labelX = midX;
-    const labelY = midY + (goesRight ? -1 : 1) * 34 + laneOffset;
-    const group = svgEl("g",{class:"map-edge",tabindex:"0",role:"button","data-edge-id":edge.id,"aria-label":(edge.name || edge.label) + "。反応式を表示"});
+    const labelWidth = Math.min(190,Math.max(56,labelText.length*12+20));
+    const midpointX = (spec.fromPos.x + spec.toPos.x + NODE_W)/2;
+    const midpointY = (startPoint.y + endPoint.y)/2;
+    const labelY = midpointY + (arrowPointsLeft ? 1 : -1) * 18;
+    const labelX = midpointX;
+    const group = svgEl("g",{
+      class:"map-edge",tabindex:"0",role:"button","data-edge-id":edge.id,
+      "aria-label":(edge.name || edge.label)+"。反応式を表示"
+    });
     const hit = svgEl("path",{class:"map-edge-hitbox",d:pathD});
     const visible = svgEl("path",{class:"map-edge-visible",d:pathD,"marker-end":"url(#map-arrow-head)"});
-    const labelBg = svgEl("rect",{class:"map-edge-label-bg",x:(labelX-labelWidth/2).toFixed(1),y:(labelY-10).toFixed(1),width:labelWidth,height:20,rx:7});
-    const label = svgEl("text",{class:"map-edge-label-text",x:labelX.toFixed(1),y:labelY.toFixed(1)});
+    const labelBg = svgEl("rect",{
+      class:"map-edge-label-bg",
+      x:(labelX-labelWidth/2).toFixed(1),y:(labelY-12).toFixed(1),
+      width:labelWidth,height:24,rx:7
+    });
+    const label = svgEl("text",{
+      class:"map-edge-label-text",x:labelX.toFixed(1),y:labelY.toFixed(1)
+    });
     label.textContent = labelText;
-    group.append(hit, visible, labelBg, label);
+    group.append(hit,visible,labelBg,label);
     group.addEventListener("click",() => openReaction(edge));
     group.addEventListener("keydown",(event) => {
-      if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openReaction(edge); }
+      if(event.key==="Enter"||event.key===" "){event.preventDefault();openReaction(edge);}
     });
     linesSvg.appendChild(group);
   });
 }
-
 let rdkitPromise = null;
 function getRDKit() {
   if (rdkitPromise) return rdkitPromise;
@@ -399,7 +478,7 @@ async function renderStructures() {
       try {
         mol = rdkit.get_mol(compound.smiles);
         if (!mol) throw new Error("SMILES parse failed");
-        const opts = {width:174,height:68,bondLineWidth:1.45,scaleBondWidth:true,multipleBondOffset:0.13,padding:0.035,minFontSize:6,maxFontSize:13,annotationFontScale:0.55};
+        const opts = {width:260,height:126,bondLineWidth:1.65,scaleBondWidth:true,multipleBondOffset:0.15,padding:0.035,minFontSize:7,maxFontSize:17,annotationFontScale:0.58};
         const svg = mol.get_svg_with_highlights(JSON.stringify(opts));
         if (!svg || !/<svg[\s>]/i.test(svg)) throw new Error("No SVG");
         host.innerHTML = svg;
@@ -564,9 +643,12 @@ function init() {
     const maxX = Math.max.apply(null, primary.map((p) => p.x + NODE_W));
     const maxY = Math.max.apply(null, primary.map((p) => p.y + NODE_H));
     const regionW = maxX - minX;
-    scale = Math.min(0.76, Math.max(0.42, (viewport.clientWidth - 54) / regionW));
+    const regionH = maxY - minY;
+    scale = Math.min(0.62, Math.max(0.48, (viewport.clientWidth - 40) / regionW));
+    // Keep the main reaction group comfortably readable; the user can pan to
+    // other groups or use "全体表示" when they need the complete atlas.
     panX = (viewport.clientWidth - regionW * scale) / 2 - minX * scale;
-    panY = (viewport.clientHeight - (maxY - minY) * scale) / 2 - minY * scale;
+    panY = (viewport.clientHeight - Math.min(regionH, viewport.clientHeight / scale) * scale) / 2 - minY * scale;
     applyTransform();
   });
   renderStructures();
