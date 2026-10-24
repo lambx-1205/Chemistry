@@ -68,7 +68,9 @@ def is_eligible(compound: dict) -> bool:
                  r"polypropylene|polyvinyl|polyacrylonitrile|polybutadiene|"
                  r"nylon-66|^ptfe$", str(compound.get("id") or ""), re.IGNORECASE):
         return False
-    if RESTRICTED_PATTERN.search(identity):
+    # Resolve public identity metadata for the three existing discrete entries.
+    # Their separate 3D-view restrictions in the UI remain in place.
+    if RESTRICTED_PATTERN.search(identity) and compound.get("id") not in {"diazonium", "cumene-hydroperoxide", "tnt"}:
         return False
     return True
 
