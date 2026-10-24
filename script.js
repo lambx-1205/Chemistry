@@ -429,6 +429,7 @@ function fact(label,value){
  return '<div class="fact"><span class="fact-label">'+esc(label)+'</span><span class="fact-value">'+esc(value||"—")+'</span></div>';
 }
 function is3DRestrictedCompound(c){
+ if(c&&c.pubchemLookupStatus==="verified"&&c.pubchemCid)return false;
  var identity=(String(c&&c.name||"")+" "+String(c&&c.pubchemName||"")).toLocaleLowerCase();
  return Boolean(c&&(c.id==="tnt"||c.id==="cumene-hydroperoxide"||c.id==="diazonium"))||identity.indexOf("trinitrotoluene")>=0||identity.indexOf("cumene hydroperoxide")>=0||identity.indexOf(" tnt")>=0||identity.trim()==="tnt";
 }
