@@ -260,14 +260,14 @@ function octileDistance(a,b){const dx=Math.abs(a.x-b.x),dy=Math.abs(a.y-b.y),di=
 function findGridRoute(edge,recoveryMode){
  const start=nodeGridPositions[edge.from],goal=nodeGridPositions[edge.to];if(!start||!goal)return [];
  const coreBounds=componentBounds[componentOf[edge.from]]||{minX:start.x-10,maxX:start.x+10,minY:start.y-10,maxY:start.y+10};
- const margin=recoveryMode?4:0;
+ const margin=recoveryMode?10:0;
  const bounds={minX:coreBounds.minX-margin,maxX:coreBounds.maxX+margin,minY:coreBounds.minY-margin,maxY:coreBounds.maxY+margin};
  const pair=pairKey(edge.from,edge.to),startKey=start.x+","+start.y+",-1";
  const open=[],best=new Map(),previous=new Map(),states=new Map();
  const first={x:start.x,y:start.y,dir:-1,g:0,f:octileDistance(start,goal),key:startKey};
  best.set(startKey,0);states.set(startKey,first);heapPush(open,first);
  let endState=null,iterations=0;
- while(open.length&&iterations<30000){
+ while(open.length&&iterations<250000){
   iterations++;const cur=heapPop(open);if(cur.g!==best.get(cur.key))continue;
   if(cur.x===goal.x&&cur.y===goal.y){endState=cur;break}
   DIRECTIONS.forEach(d=>{
