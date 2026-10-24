@@ -79,11 +79,12 @@ function updatePubChemSyncStatus(){
   return !!(c.pubchemCid&&c.pubchemFormula&&c.molecularWeight&&c.inchiKey&&c.structureSource==="PubChem");
  }).length;
  var total=eligible.length;
+ var excluded=compounds.length-total;
  if(total&&verified===total){
-  el.textContent="PubChem照合完了："+verified+" / "+total+" 件。";
+  el.textContent="PubChem照合完了："+verified+" / "+total+" 件。対象外："+excluded+" 件（高分子・安全上の制限）。";
   el.classList.add("is-complete");
  }else{
-  el.textContent="PubChem照合状況："+verified+" / "+total+" 件。残りはID・構造の照合が必要です。";
+  el.textContent="PubChem照合状況："+verified+" / "+total+" 件。未照合："+(total-verified)+" 件。対象外："+excluded+" 件。";
   el.classList.remove("is-complete");
  }
 }
