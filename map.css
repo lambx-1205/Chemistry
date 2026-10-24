@@ -106,3 +106,7 @@
  .map-node-name{font-size:15px}
  .map-edge-label-text{font-size:12px}
 }
+
+/* Keep reaction-name labels readable where several branches leave one card. */
+.map-edge-label-bg{height:22px}
+.map-edge-label-text{font-size:12px}
