@@ -381,34 +381,75 @@ function findGridRoute(edge,recoveryLevel=0){
  return [nodeStart].concat(path,[nodeGoal]);
 }
 function assignEdgePorts(edgeList){
- const incidents=Object.create(null);
- compounds.forEach(c=>{incidents[c.id]=[]});
+ const usedDirections=Object.create(null),usedPortCells=Object.create(null);
+ compounds.forEach(c=>{usedDirections[c.id]=new Set()});
+ const radius=2;
+ function portPoint(nodeId,dir){
+  const p=nodeGridPositions[nodeId],d=DIRECTIONS[dir];
+  return {x:p.x+d.dx*radius,y:p.y+d.dy*radius};
+ }
+ function clearConnector(nodeId,dir,targetId,sharedPort){
+  const p=nodeGridPositions[nodeId],d=DIRECTIONS[dir];
+  for(let step=1;step<=3;step++){
+   if(sharedPort&&step===3)continue;
+   const x=p.x+d.dx*step,y=p.y+d.dy*step,occupied=gridOccupancy[cellKey(x,y)];
+   if(occupied&&occupied!==nodeId)return false;
+  }
+  return true;
+ }
  edgeList.forEach(edge=>{
   const a=nodeGridPositions[edge.from],b=nodeGridPositions[edge.to];
   if(!a||!b)return;
-  incidents[edge.from].push({edgeId:edge.id,role:"from",other:edge.to,desired:directionForDelta(b.x-a.x,b.y-a.y)});
-  incidents[edge.to].push({edgeId:edge.id,role:"to",other:edge.from,desired:directionForDelta(a.x-b.x,a.y-b.y)});
- });
- Object.keys(incidents).forEach(id=>{
-  const entries=incidents[id];
-  entries.sort((a,b)=>a.desired-b.desired||String(a.edgeId).localeCompare(String(b.edgeId)));
-  const used=new Set();
-  entries.forEach(entry=>{
-   let candidates=DIRECTIONS.map(d=>d.index);
-   candidates.sort((a,b)=>{
-    const scoreA=circularDistance(a,entry.desired)*100+(used.has(a)?10000:0)+directionRank(a);
-    const scoreB=circularDistance(b,entry.desired)*100+(used.has(b)?10000:0)+directionRank(b);
-    return scoreA-scoreB;
-   });
-   let chosen=candidates[0];
-   if(used.size>=DIRECTIONS.length){
-    // For very high degree, prefer an occupied port on a different lane side.
-    chosen=candidates.slice().sort((a,b)=>circularDistance(a,entry.desired)-circularDistance(b,entry.desired)||a-b)[0];
+  const desiredFrom=directionForDelta(b.x-a.x,b.y-a.y);
+  const desiredTo=directionForDelta(a.x-b.x,a.y-b.y);
+  const candidates=[];
+  for(const fromDir of DIRECTIONS.map(d=>d.index)){
+   if(usedDirections[edge.from].has(fromDir))continue;
+   const pa=portPoint(edge.from,fromDir),ka=cellKey(pa.x,pa.y);
+   for(const toDir of DIRECTIONS.map(d=>d.index)){
+    if(usedDirections[edge.to].has(toDir))continue;
+    const pb=portPoint(edge.to,toDir),kb=cellKey(pb.x,pb.y);
+    const sharedPort=ka===kb;
+    if((usedPortCells[ka]||usedPortCells[kb])&&!(sharedPort&&!usedPortCells[ka]&&!usedPortCells[kb]))continue;
+    if(!clearConnector(edge.from,fromDir,edge.to,sharedPort)||!clearConnector(edge.to,toDir,edge.from,sharedPort))continue;
+    const score=circularDistance(fromDir,desiredFrom)*100+circularDistance(toDir,desiredTo)*100
+      +(sharedPort?-12:0)+directionRank(fromDir)*.01+directionRank(toDir)*.001;
+    candidates.push({fromDir,toDir,pa,pb,ka,kb,score});
    }
-   used.add(chosen);
-   if(!edgePorts[entry.edgeId])edgePorts[entry.edgeId]={};
-   edgePorts[entry.edgeId][entry.role]=chosen;
-  });
+  }
+  candidates.sort((x,y)=>x.score-y.score);
+  let chosen=candidates[0];
+  if(!chosen){
+   let fallback=[];
+   for(const fromDir of DIRECTIONS.map(d=>d.index)){
+    if(usedDirections[edge.from].has(fromDir))continue;
+    const pa=portPoint(edge.from,fromDir),ka=cellKey(pa.x,pa.y);
+    if(usedPortCells[ka])continue;
+    for(const toDir of DIRECTIONS.map(d=>d.index)){
+     if(usedDirections[edge.to].has(toDir))continue;
+     const pb=portPoint(edge.to,toDir),kb=cellKey(pb.x,pb.y);
+     if(usedPortCells[kb])continue;
+     const same=ka===kb;
+     if(!clearConnector(edge.from,fromDir,edge.to,same)||!clearConnector(edge.to,toDir,edge.from,same))continue;
+     fallback.push({fromDir,toDir,pa,pb,ka,kb,score:circularDistance(fromDir,desiredFrom)*100+circularDistance(toDir,desiredTo)*100});
+    }
+   }
+   fallback.sort((x,y)=>x.score-y.score);chosen=fallback[0];
+  }
+  if(!chosen){
+   // Retain a deterministic port even in exceptional high-degree layouts.
+   const fromDir=DIRECTIONS.map(d=>d.index).find(d=>!usedDirections[edge.from].has(d));
+   const toDir=DIRECTIONS.map(d=>d.index).find(d=>!usedDirections[edge.to].has(d));
+   if(fromDir===undefined||toDir===undefined)return;
+   const pa=portPoint(edge.from,fromDir),pb=portPoint(edge.to,toDir);
+   chosen={fromDir,toDir,pa,pb,ka:cellKey(pa.x,pa.y),kb:cellKey(pb.x,pb.y)};
+  }
+  usedDirections[edge.from].add(chosen.fromDir);
+  usedDirections[edge.to].add(chosen.toDir);
+  if(!edgePorts[edge.id])edgePorts[edge.id]={};
+  edgePorts[edge.id].from=chosen.fromDir;edgePorts[edge.id].to=chosen.toDir;
+  (usedPortCells[chosen.ka]||(usedPortCells[chosen.ka]=[])).push({edgeId:edge.id,nodeId:edge.from,role:"from"});
+  (usedPortCells[chosen.kb]||(usedPortCells[chosen.kb]=[])).push({edgeId:edge.id,nodeId:edge.to,role:"to"});
  });
 }
 
