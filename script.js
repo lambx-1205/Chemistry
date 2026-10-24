@@ -495,6 +495,7 @@ function openReactionDetails(edgeId){
   '<div class="reaction-detail-grid">'+
    '<section class="reaction-detail-block"><span class="detail-label">反応の種類・名称</span><strong>'+esc(edge.label||"—")+'</strong><p>'+esc(edge.name||"—")+'</p></section>'+
    '<section class="reaction-detail-block"><span class="detail-label">反応条件</span><strong>'+esc(edge.condition||"条件の登録なし")+'</strong></section>'+
+   (edge.equation?'<section class="reaction-detail-block reaction-detail-equation"><span class="detail-label">反応式・概念式</span><p>'+esc(edge.equation)+'</p></section>':'')+
    '<section class="reaction-detail-block reaction-detail-explanation"><span class="detail-label">反応の概要</span><p>'+esc(edge.note||"この反応についての説明はまだ登録されていません。")+'</p></section>'+
   '</div>'+
   '<p class="reaction-detail-caveat">ここでは反応前後の化合物と登録済みの条件・概要を示しています。表示は反応経路の概略であり、副生成物や係数まで含めた平衡化済み反応式ではありません。</p>';
