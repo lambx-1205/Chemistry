@@ -10,8 +10,8 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="styles.css?v=20261024-carbonyl1">
 <script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js" defer></script>
-<script src="chemistry-data.js?v=20261024-pubchemfix1" defer></script>
-<script src="script.js?v=20261024-pubchemfix1" defer></script>
+<script src="chemistry-data.js?v=20261024-pubchembatch2" defer></script>
+<script src="script.js?v=20261024-pubchembatch2" defer></script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"}}</script>
 <script type="module" src="molecule3d.js?v=20261024-unknown-search1"></script>
 </head>
@@ -29,7 +29,7 @@
     <form class="search-bar" id="search-form" role="search" autocomplete="off">
       <svg class="search-icon" viewBox="0 0 24 24" width="21" height="21" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
       <label class="visually-hidden" for="compound-search">化合物名・英語名・化学キーワードで検索</label>
-      <input id="compound-search" name="compound" autocomplete="off" spellcheck="false" aria-autocomplete="list" aria-controls="compound-suggestions-list" aria-expanded="false" placeholder="Type a compound name in English or Japanese">
+      <input id="compound-search" name="compound" autocomplete="off" spellcheck="false" aria-autocomplete="list" aria-controls="compound-suggestions-list" aria-expanded="false" placeholder="化合物名・別名・化学キーワードを入力">
       <button class="clear-search" type="button" id="clear-search" aria-label="検索欄をクリア">×</button>
       <button class="search-submit" id="search-button" type="submit" aria-label="検索"><span>検索</span><span aria-hidden="true">↵</span></button>
     </form>
@@ -39,6 +39,7 @@
     <span class="search-status" id="search-status" aria-live="polite"></span>
     <span class="local-index">LOCAL INDEX <b id="local-count">15</b></span>
   </div>
+  <div class="pubchem-sync-status" id="pubchem-sync-status" aria-live="polite">PubChem照合データを準備しています。</div>
 
   <section class="compound-main" id="compound-main" aria-live="polite" hidden>
     <div class="compound-overview">
