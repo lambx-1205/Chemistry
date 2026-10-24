@@ -216,7 +216,7 @@ function buildLayout(){
  let cursorGX=1,cursorGY=1,rowHeight=0,maxGX=1,maxGY=1;
  const rowLimit=27;
  components.forEach((comp,index)=>{
-  if(cursorGX>1&&cursorGX+comp.width+1>rowLimit){cursorGX=1;cursorGY+=rowHeight+3;rowHeight=0}
+  if(cursorGX>1&&cursorGX+comp.width+1>rowLimit){cursorGX=1;cursorGY+=rowHeight+14;rowHeight=0}
   const originGX=cursorGX-comp.minX,originGY=cursorGY-comp.minY;
   const title=document.createElement("div");title.className="map-group-title";
   title.style.left=(MAP_PAD+(cursorGX-1)*CELL)+"px";title.style.top=Math.max(8,MAP_PAD+(cursorGY-1)*CELL-42)+"px";
@@ -227,12 +227,12 @@ function buildLayout(){
    gridOccupancy[cellKey(gx,gy)]=id;componentOf[id]=index;maxGX=Math.max(maxGX,gx);maxGY=Math.max(maxGY,gy);
   });
   const ps=comp.nodes.map(id=>nodeGridPositions[id]);
-  componentBounds[index]={minX:Math.min(...ps.map(p=>p.x))-5,maxX:Math.max(...ps.map(p=>p.x))+5,minY:Math.min(...ps.map(p=>p.y))-5,maxY:Math.max(...ps.map(p=>p.y))+5};
-  cursorGX+=comp.width+2;rowHeight=Math.max(rowHeight,comp.height);
+  componentBounds[index]={minX:Math.min(...ps.map(p=>p.x))-6,maxX:Math.max(...ps.map(p=>p.x))+6,minY:Math.min(...ps.map(p=>p.y))-6,maxY:Math.max(...ps.map(p=>p.y))+6};
+  cursorGX+=comp.width+14;rowHeight=Math.max(rowHeight,comp.height);
  });
  const isolated=compounds.filter(c=>graph.adj[c.id].length===0);
  if(isolated.length){
-  cursorGX=1;cursorGY+=rowHeight+4;
+  cursorGX=1;cursorGY+=rowHeight+14;
   const title=document.createElement("div");title.className="map-group-title";
   title.style.left=MAP_PAD+"px";title.style.top=(MAP_PAD+(cursorGY-1)*CELL-42)+"px";title.textContent="反応経路が未登録の化合物";groupLayer.appendChild(title);
   const cols=6;
@@ -243,7 +243,7 @@ function buildLayout(){
   });
  }
  const primary=components[0]||{nodes:compounds.map(c=>c.id),root:compounds[0]&&compounds[0].id};
- return {width:MAP_PAD*2+maxGX*CELL+NODE_W,height:MAP_PAD*2+maxGY*CELL+NODE_H,primaryNodes:primary.nodes,primaryRoot:primary.root,components};
+ return {width:MAP_PAD*2+(maxGX+7)*CELL+NODE_W,height:MAP_PAD*2+(maxGY+7)*CELL+NODE_H,primaryNodes:primary.nodes,primaryRoot:primary.root,components};
 }
 function heapPush(heap,item){
  heap.push(item);let i=heap.length-1;
@@ -273,10 +273,10 @@ function findGridRoute(edge){
    if(nx<bounds.minX||nx>bounds.maxX||ny<bounds.minY||ny>bounds.maxY)return;
    const nk=cellKey(nx,ny),blocked=gridOccupancy[nk];if(blocked&&blocked!==edge.from&&blocked!==edge.to)return;
    const next={x:nx,y:ny},sk=segmentKey(cur,next),owners=routedSegments[sk]||[];
-   let penalty=owners.some(p=>p!==pair)?12000:0;
+   let penalty=owners.some(p=>p!==pair)?100000:0;
    const diag=diagonalInfo(cur,next);
-   if(diag&&(routedDiagonals[diag.square+"|"+(-diag.orientation)]||[]).some(p=>p!==pair))penalty+=12000;
-   if(!(nx===goal.x&&ny===goal.y)&&!(nx===start.x&&ny===start.y)&&(routedGridPoints[nk]||[]).some(p=>p!==pair))penalty+=12000;
+   if(diag&&(routedDiagonals[diag.square+"|"+(-diag.orientation)]||[]).some(p=>p!==pair))penalty+=100000;
+   if(!(nx===goal.x&&ny===goal.y)&&!(nx===start.x&&ny===start.y)&&(routedGridPoints[nk]||[]).some(p=>p!==pair))penalty+=100000;
    const ng=cur.g+((d.dx===0||d.dy===0)?10:14)+(cur.dir!==-1&&cur.dir!==d.index?4:0)+penalty;
    const key=nx+","+ny+","+d.index;
    if(!best.has(key)||ng<best.get(key)){const state={x:nx,y:ny,dir:d.index,g:ng,f:ng+octileDistance(next,goal),key};best.set(key,ng);previous.set(key,cur.key);states.set(key,state);heapPush(open,state)}
