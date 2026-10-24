@@ -154,3 +154,30 @@
  .map-node-formula{font-size:14px}
  .map-edge-label-text{font-size:16px}
 }
+
+
+/* Restore the larger metro-map nodes: only a clear compound name and its structure. */
+.map-node{width:360px;height:280px;padding:13px 15px;grid-template-rows:auto minmax(0,1fr);gap:6px;border-radius:15px}
+.map-node-family,.map-node-formula{display:none!important}
+.map-node-name{display:flex;align-items:center;justify-content:center;min-height:31px;max-height:62px;margin:0;overflow:hidden;font-size:24px;line-height:1.25;text-align:center;font-weight:900;overflow-wrap:anywhere;-webkit-line-clamp:2}
+.map-node-structure{display:flex;align-items:center;justify-content:center;min-width:0;min-height:0;width:100%;height:100%;overflow:hidden}
+.map-node-structure svg{display:block;width:92%!important;height:88%!important;max-width:100%;max-height:100%;overflow:visible}
+.map-node.is-key-compound{border:4px solid #d83b36;box-shadow:0 0 0 3px rgba(216,59,54,.13),0 5px 14px rgba(31,49,35,.08);padding:10px 12px}
+.map-node.is-key-compound::after{content:none!important;display:none!important}
+.map-polymer-structure{display:flex;align-items:center;justify-content:center;gap:4px;width:100%;height:100%;overflow:hidden;white-space:nowrap;color:#294b35;font-weight:700;font-size:21px;letter-spacing:-.04em}
+.map-polymer-unit{display:inline-block;max-width:calc(100% - 58px);overflow:hidden;text-overflow:clip;white-space:nowrap;font-size:clamp(12px,1.55vw,21px);line-height:1.4;letter-spacing:-.045em}
+.map-polymer-bracket{font-family:Georgia,serif;font-size:72px;font-weight:300;line-height:1;color:#57755d}
+.map-polymer-n{align-self:center;margin-top:30px;font-size:22px;font-weight:800}
+.map-edge-visible{stroke-width:5.2;stroke-linejoin:round;stroke-linecap:round;opacity:.93}
+.map-edge-hitbox{stroke-width:30}
+.map-edge-label-bg{height:34px;fill:#fffdf8;stroke-width:1.5}
+.map-edge-label-text{font-size:18px;font-weight:900;paint-order:stroke;stroke:#fffdf8;stroke-width:1.6px;stroke-linejoin:round}
+.map-edge:hover .map-edge-visible,.map-edge:focus .map-edge-visible{stroke-width:6.8}
+.map-group-title{font-size:16px;font-weight:900;color:#687f69}
+@media(max-width:600px){
+ .map-node{width:360px;height:280px}
+ .map-node-name{font-size:24px}
+ .map-polymer-unit{font-size:15px}
+ .map-polymer-bracket{font-size:60px}
+ .map-edge-label-text{font-size:17px}
+}
