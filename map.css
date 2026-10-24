@@ -181,3 +181,19 @@
  .map-polymer-bracket{font-size:60px}
  .map-edge-label-text{font-size:17px}
 }
+
+
+/* Color key for the subway-style reaction network. */
+.map-legend{justify-content:flex-start;flex-wrap:wrap;gap:7px 10px;white-space:normal}
+.legend-caption{font-size:10px;color:#657767;font-weight:800}
+.legend-key{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;color:#647468;white-space:nowrap}
+.legend-key::before{content:"";display:inline-block;width:20px;height:0;border-top:4px solid currentColor;border-radius:4px}
+.legend-substitution{color:#8a61bd}
+.legend-addition{color:#1688a8}
+.legend-oxidation{color:#d97736}
+.legend-reduction{color:#3b73a8}
+.legend-elimination{color:#26988b}
+.legend-polymerization{color:#c35383}
+.legend-other{color:#688b70}
+.map-legend .legend-note{margin-left:2px;font-size:10px;color:#a02f2b;font-weight:850;white-space:nowrap}
+.map-legend .legend-note::before{width:11px;height:11px;border:3px solid #d83b36}
