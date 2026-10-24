@@ -151,7 +151,7 @@ def enrich(compound: dict) -> bool:
     time.sleep(REQUEST_DELAY_SECONDS)
     if row is None and compound.get("pubchemName"):
         try:
-            row = select_formula_match(query_name(str(compound["pubchemName"]), expected_formula)
+            row = select_formula_match(query_name(str(compound["pubchemName"])), expected_formula)
         except (NoRecordFound, urllib.error.URLError, TimeoutError, RuntimeError, ValueError) as exc:
             errors.append(exc)
 
