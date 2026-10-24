@@ -205,3 +205,28 @@
 .map-node[data-compound-id="polyvinyl-acetate"] .map-polymer-unit{font-size:15px!important}
 .map-node[data-compound-id="natural-rubber"] .map-polymer-unit,
 .map-node[data-compound-id="polybutadiene"] .map-polymer-unit{font-size:15px!important}
+
+
+/* Compact lanes and a searchable reaction inventory below the map. */
+.reaction-registry{margin-top:18px;border:1px solid #dfe6dc;border-radius:14px;background:#fffefa;overflow:hidden}
+.reaction-registry>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;cursor:pointer;font-size:15px;font-weight:900;color:#35563d;list-style:none}
+.reaction-registry>summary::-webkit-details-marker{display:none}
+.reaction-registry>summary::after{content:"＋";margin-left:auto;color:#658268;font-size:19px}
+.reaction-registry[open]>summary::after{content:"−"}
+.reaction-registry-count{margin-left:auto;padding:4px 8px;border-radius:6px;background:#eef4eb;color:#55745a;font-size:11px;font-weight:850;white-space:nowrap}
+.reaction-registry-intro{margin:0;padding:0 18px 14px;color:#788578;font-size:11px;line-height:1.7}
+.reaction-registry-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:0 14px 16px}
+.reaction-registry-group{min-width:0;border:1px solid #e7ece3;border-radius:10px;overflow:hidden}
+.reaction-registry-group-title{margin:0;padding:10px 12px;background:#f4f7f1;color:#435e48;font-size:12px;font-weight:900}
+.reaction-registry-items{display:grid;grid-template-columns:minmax(0,1fr)}
+.reaction-registry-item{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;padding:8px 10px;border:0;border-top:1px solid #edf0e9;background:#fff;text-align:left;cursor:pointer}
+.reaction-registry-item:hover{background:#f5f8f2}
+.reaction-registry-route{min-width:0;color:#344b39;font-size:11px;font-weight:750;line-height:1.45;overflow-wrap:anywhere}
+.reaction-registry-label{flex:none;max-width:42%;padding:3px 6px;border-radius:5px;background:#edf4eb;color:#58725b;font-size:10px;font-weight:800;white-space:normal;text-align:center}
+@media(max-width:760px){.reaction-registry-list{grid-template-columns:1fr}.reaction-registry>summary{padding:14px}.reaction-registry-intro{padding:0 14px 12px}}
+/* Denser metro-map spacing while retaining enough border-to-border clearance. */
+.map-node{width:360px;height:280px}
+.map-edge-visible{stroke-width:5.2}
+.map-edge-label-bg{height:30px}
+.map-edge-label-text{font-size:16px}
+.map-edge:hover .map-edge-visible,.map-edge:focus .map-edge-visible{stroke-width:6.8}
