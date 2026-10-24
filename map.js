@@ -22,8 +22,8 @@ compounds.forEach((c, i) => {
   if (c.pubchemName) nameMap[String(c.pubchemName).toLocaleLowerCase()] = c;
 });
 
-const NODE_W = 240;
-const NODE_H = 112;
+const NODE_W = 360;
+const NODE_H = 280;
 const CELL = 120;
 const MAP_PAD = 100;
 const SVG_NS = "http://www.w3.org/2000/svg";
@@ -104,7 +104,29 @@ const equations = {
   e81:"C₆H₆ + CH₂=CHCH₃ → C₆H₅CH(CH₃)₂",
   e82:"C₆H₅Cl + NaOH → C₆H₅OH + NaCl",
   e83:"C₆H₆O + Zn → C₆H₆ + ZnO",
-  e84:"C₆H₅N₂Cl + H₃PO₂ + H₂O → C₆H₆ + N₂ + H₃PO₃ + HCl"
+  e84:"C₆H₅N₂Cl + H₃PO₂ + H₂O → C₆H₆ + N₂ + H₃PO₃ + HCl",
+  e85:"C₁₂H₂₂O₁₁ + H₂O → C₆H₁₂O₆ + C₆H₁₂O₆",
+  e86:"C₁₂H₂₂O₁₁ + H₂O → C₆H₁₂O₆ + C₆H₁₂O₆",
+  e87:"C₁₂H₂₂O₁₁ + H₂O → 2C₆H₁₂O₆",
+  e88:"C₁₂H₂₂O₁₁ + H₂O → C₆H₁₂O₆ + C₆H₁₂O₆",
+  e89:"C₁₂H₂₂O₁₁ + H₂O → C₆H₁₂O₆ + C₆H₁₂O₆",
+  e90:"(C₆H₁₀O₅)ₙ + nH₂O → nC₆H₁₂O₆",
+  e91:"(C₆H₁₀O₅)ₙ + nH₂O → nC₆H₁₂O₆",
+  e92:"nCH₂=CHCH₃ → [−CH₂−CH(CH₃)−]ₙ",
+  e93:"nCH₂=CHCl → [−CH₂−CHCl−]ₙ",
+  e94:"nCF₂=CF₂ → [−CF₂−CF₂−]ₙ",
+  e95:"nCH₂=CHOCOCH₃ → [−CH₂−CH(OCOCH₃)−]ₙ",
+  e96:"[−CH₂−CH(OCOCH₃)−]ₙ → [−CH₂−CH(OH)−]ₙ",
+  e97:"nCH₂=CHCN → [−CH₂−CH(CN)−]ₙ",
+  e98:"エチレングリコール＋テレフタル酸 → PET",
+  e99:"エチレングリコール＋テレフタル酸 → PET",
+  e100:"ヘキサメチレンジアミン＋アジピン酸 → ナイロン66",
+  e101:"ヘキサメチレンジアミン＋アジピン酸 → ナイロン66",
+  e102:"nC₅H₈ → [−CH₂−C(CH₃)=CH−CH₂−]ₙ",
+  e103:"nCH₂=CH−CH=CH₂ → [−CH₂−CH=CH−CH₂−]ₙ",
+  e104:"CH₂=CHOH ⇌ CH₃CHO",
+  e105:"CH₂=C(OH)CH₃ ⇌ CH₃COCH₃",
+  e106:"CH₃C(OH)=CHCH₃ ⇌ CH₃COCH₂CH₃"
 };
 
 const viewport = document.getElementById("map-viewport");
@@ -132,6 +154,7 @@ function groupTitle(comp) {
   if (/炭化水素|アルカン|アルケン|アルコール|アルデヒド/.test(joined)) return "脂肪族化合物の反応系統";
   return byId[comp.nodes[0]].name + "を含む反応系統";
 }
+const EDGE_COLORS={addition:"#1688a8",substitution:"#8a61bd",oxidation:"#d97736",reduction:"#3b73a8",elimination:"#26988b",polymerization:"#c35383",other:"#688b70"};
 const DIRECTIONS=[
  {dx:0,dy:-1,index:0},{dx:1,dy:-1,index:1},{dx:1,dy:0,index:2},{dx:1,dy:1,index:3},
  {dx:0,dy:1,index:4},{dx:-1,dy:1,index:5},{dx:-1,dy:0,index:6},{dx:-1,dy:-1,index:7}
@@ -194,12 +217,12 @@ function makeComponent(nodes){
   const current=queue.shift(),here=local[current];
   const unseen=graph.adj[current].filter(n=>nodeSet.has(n)&&!local[n]).sort((a,b)=>graph.adj[b].length-graph.adj[a].length||compoundOrder[a]-compoundOrder[b]);
   if(!unseen.length)continue;
-  const available=DIRECTIONS.filter(d=>!occupied[cellKey(here.x+d.dx*4,here.y+d.dy*4)]).map(d=>d.index);
+  const available=DIRECTIONS.filter(d=>!occupied[cellKey(here.x+d.dx*6,here.y+d.dy*6)]).map(d=>d.index);
   const back=parent[current]?directionForDelta(local[parent[current]].x-here.x,local[parent[current]].y-here.y):undefined;
   const chosen=chooseSpreadDirections(available,Math.min(unseen.length,available.length),back);
   unseen.forEach((next,i)=>{
    const d=i<chosen.length?DIRECTIONS[chosen[i]]:null;
-   const p=d?{x:here.x+d.dx*4,y:here.y+d.dy*4}:nearestFreeCell(here.x,here.y,occupied);
+   const p=d?{x:here.x+d.dx*6,y:here.y+d.dy*6}:nearestFreeCell(here.x,here.y,occupied);
    local[next]={x:p.x,y:p.y};occupied[cellKey(p.x,p.y)]=next;parent[next]=current;queue.push(next);
   });
  }
@@ -218,9 +241,9 @@ function buildLayout(){
  });
  components.sort((a,b)=>b.nodes.length-a.nodes.length||a.width-b.width);
  let cursorGX=1,cursorGY=1,rowHeight=0,maxGX=1,maxGY=1;
- const rowLimit=36;
+ const rowLimit=27;
  components.forEach((comp,index)=>{
-  if(cursorGX>1&&cursorGX+comp.width+5>rowLimit){cursorGX=1;cursorGY+=rowHeight+8;rowHeight=0}
+  if(cursorGX>1&&cursorGX+comp.width+1>rowLimit){cursorGX=1;cursorGY+=rowHeight+30;rowHeight=0}
   const originGX=cursorGX-comp.minX,originGY=cursorGY-comp.minY;
   const title=document.createElement("div");title.className="map-group-title";
   title.style.left=(MAP_PAD+(cursorGX-1)*CELL)+"px";title.style.top=Math.max(8,MAP_PAD+(cursorGY-1)*CELL-42)+"px";
@@ -231,19 +254,26 @@ function buildLayout(){
    for(let ox=-1;ox<=1;ox++)for(let oy=-1;oy<=1;oy++)gridOccupancy[cellKey(gx+ox,gy+oy)]=id;componentOf[id]=index;maxGX=Math.max(maxGX,gx);maxGY=Math.max(maxGY,gy);
   });
   const ps=comp.nodes.map(id=>nodeGridPositions[id]);
-  componentBounds[index]={minX:Math.min(...ps.map(p=>p.x))-3,maxX:Math.max(...ps.map(p=>p.x))+3,minY:Math.min(...ps.map(p=>p.y))-3,maxY:Math.max(...ps.map(p=>p.y))+3};
-  cursorGX+=comp.width+5;rowHeight=Math.max(rowHeight,comp.height);
+  componentBounds[index]={minX:Math.min(...ps.map(p=>p.x))-10,maxX:Math.max(...ps.map(p=>p.x))+10,minY:Math.min(...ps.map(p=>p.y))-10,maxY:Math.max(...ps.map(p=>p.y))+10};
+  cursorGX+=comp.width+30;rowHeight=Math.max(rowHeight,comp.height);
  });
  const isolated=compounds.filter(c=>graph.adj[c.id].length===0);
  if(isolated.length){
-  cursorGX=1;cursorGY+=rowHeight+6;
-  const title=document.createElement("div");title.className="map-group-title";
-  title.style.left=MAP_PAD+"px";title.style.top=(MAP_PAD+(cursorGY-1)*CELL-42)+"px";title.textContent="反応経路が未登録の化合物";groupLayer.appendChild(title);
-  const cols=6;
-  isolated.forEach((c,i)=>{
-   const gx=cursorGX+(i%cols)*6,gy=cursorGY+Math.floor(i/cols)*6;
-   nodeGridPositions[c.id]={x:gx,y:gy};nodePositions[c.id]={x:MAP_PAD+(gx-1)*CELL,y:MAP_PAD+(gy-1)*CELL};
-   for(let ox=-1;ox<=1;ox++)for(let oy=-1;oy<=1;oy++)gridOccupancy[cellKey(gx+ox,gy+oy)]=c.id;maxGX=Math.max(maxGX,gx);maxGY=Math.max(maxGY,gy);
+  const buckets=Object.create(null);
+  isolated.forEach(c=>{const key=c.mapGroup||c.family||"その他";(buckets[key]||(buckets[key]=[])).push(c);});
+  let isolatedY=cursorGY+rowHeight+14;
+  const cols=4;
+  Object.keys(buckets).sort((a,b)=>buckets[b].length-buckets[a].length||a.localeCompare(b,"ja")).forEach(groupName=>{
+   const list=buckets[groupName];
+   const title=document.createElement("div");title.className="map-group-title";
+   title.style.left=MAP_PAD+"px";title.style.top=(MAP_PAD+(isolatedY-1)*CELL-42)+"px";title.textContent=groupName;groupLayer.appendChild(title);
+   list.forEach((c,i)=>{
+    const gx=1+(i%cols)*6,gy=isolatedY+Math.floor(i/cols)*6;
+    nodeGridPositions[c.id]={x:gx,y:gy};nodePositions[c.id]={x:MAP_PAD+(gx-1)*CELL,y:MAP_PAD+(gy-1)*CELL};
+    for(let ox=-1;ox<=1;ox++)for(let oy=-1;oy<=1;oy++)gridOccupancy[cellKey(gx+ox,gy+oy)]=c.id;
+    maxGX=Math.max(maxGX,gx);maxGY=Math.max(maxGY,gy);
+   });
+   isolatedY+=Math.ceil(list.length/cols)*6+4;
   });
  }
  const primary=components[0]||{nodes:compounds.map(c=>c.id),root:compounds[0]&&compounds[0].id};
@@ -341,15 +371,12 @@ function createNode(c) {
   const pos = nodePositions[c.id];
   const node = document.createElement("a");
   node.className = "map-node";
-  if (["benzene","ethene","ethanol","toluene","phenol","aniline","acetic-acid","glucose","propene","cumene"].includes(c.id)) node.classList.add("is-key-compound");
+  if (["benzene","ethene","ethanol","toluene","phenol","aniline","acetic-acid","glucose","propene","cumene","pyridine","sucrose","polyethylene","cellulose"].includes(c.id)) node.classList.add("is-key-compound");
   node.href = "index.html?compound=" + encodeURIComponent(c.id);
   node.dataset.compoundId = c.id;
   node.style.left = pos.x + "px";
   node.style.top = pos.y + "px";
   node.setAttribute("aria-label", c.name + "の詳細ページを開く");
-  const family = document.createElement("span");
-  family.className = "map-node-family";
-  family.textContent = niceFamily(c);
   const name = document.createElement("span");
   name.className = "map-node-name";
   name.textContent = c.name;
@@ -357,17 +384,18 @@ function createNode(c) {
   structure.className = "map-node-structure";
   structure.dataset.structureId = c.id;
   structure.setAttribute("aria-label", c.name + "の構造式");
-  const formula = document.createElement("span");
-  formula.className = "map-node-formula";
-  formula.textContent = c.formula || "分子式未登録";
-  node.append(family, name, structure, formula);
+  node.append(name, structure);
   nodeLayer.appendChild(node);
 }
 
 function drawEdges(dimensions){
  linesSvg.setAttribute("width",dimensions.width);linesSvg.setAttribute("height",dimensions.height);linesSvg.setAttribute("viewBox","0 0 "+dimensions.width+" "+dimensions.height);linesSvg.style.width=dimensions.width+"px";linesSvg.style.height=dimensions.height+"px";
- const defs=svgEl("defs"),marker=svgEl("marker",{id:"map-arrow-head",markerWidth:"11",markerHeight:"11",refX:"9.2",refY:"5.5",orient:"auto",markerUnits:"userSpaceOnUse"});
- marker.appendChild(svgEl("path",{d:"M0,0 L11,5.5 L0,11 Z",fill:"#628d6a"}));defs.appendChild(marker);linesSvg.appendChild(defs);
+ const defs=svgEl("defs");
+ Object.entries(EDGE_COLORS).forEach(([type,color])=>{
+  const marker=svgEl("marker",{id:"map-arrow-head-"+type,markerWidth:"14",markerHeight:"12",refX:"12",refY:"6",orient:"auto",markerUnits:"userSpaceOnUse"});
+  marker.appendChild(svgEl("path",{d:"M0,0 L14,6 L0,12 Z",fill:color}));defs.appendChild(marker);
+ });
+ linesSvg.appendChild(defs);
  const pairCounts=Object.create(null),pairIndexes=Object.create(null),paths=Object.create(null);
  edges.forEach(e=>{const p=pairKey(e.from,e.to);pairCounts[p]=(pairCounts[p]||0)+1});
  const ordered=edges.slice().sort((a,b)=>{
@@ -431,7 +459,9 @@ function drawEdges(dimensions){
   const labelX=labelPoint.x,labelY=labelPoint.y;
   placedLabels.push({x:labelX,y:labelY,width:labelWidth,height:labelHeight});
   const group=svgEl("g",{class:"map-edge",tabindex:"0",role:"button","data-edge-id":edge.id,"aria-label":(edge.name||edge.label)+"。反応式を表示"});
-  const hit=svgEl("path",{class:"map-edge-hitbox",d:pathD}),line=svgEl("path",{class:"map-edge-visible",d:pathD,"marker-end":"url(#map-arrow-head)"});
+  const edgeColor=EDGE_COLORS[edge.type]||EDGE_COLORS.other;
+  const markerType=EDGE_COLORS[edge.type]?edge.type:"other";
+  const hit=svgEl("path",{class:"map-edge-hitbox",d:pathD}),line=svgEl("path",{class:"map-edge-visible",d:pathD,stroke:edgeColor,"marker-end":"url(#map-arrow-head-"+markerType+")"});
   const bg=svgEl("rect",{class:"map-edge-label-bg",x:(labelX-labelWidth/2).toFixed(1),y:(labelY-labelHeight/2).toFixed(1),width:labelWidth,height:labelHeight,rx:8});
   const label=svgEl("text",{class:"map-edge-label-text",x:labelX.toFixed(1),y:labelY.toFixed(1)});label.textContent=text;
   group.append(hit,line,bg,label);group.addEventListener("click",()=>openReaction(edge));
@@ -461,9 +491,17 @@ async function renderStructures() {
       }
       let mol = null;
       try {
+        if (compound.repeatUnit) {
+          const repeat=document.createElement("div");repeat.className="map-polymer-structure";
+          const left=document.createElement("span");left.className="map-polymer-bracket";left.textContent="[";
+          const unit=document.createElement("span");unit.className="map-polymer-unit";unit.textContent=compound.repeatUnit;
+          const right=document.createElement("span");right.className="map-polymer-bracket";right.textContent="]";
+          const n=document.createElement("sub");n.className="map-polymer-n";n.textContent="n";
+          repeat.append(left,unit,right,n);host.replaceChildren(repeat);return;
+        }
         mol = rdkit.get_mol(compound.smiles);
         if (!mol) throw new Error("SMILES parse failed");
-        const opts = {width:330,height:154,bondLineWidth:1.8,scaleBondWidth:true,multipleBondOffset:0.16,padding:0.03,minFontSize:8,maxFontSize:20,annotationFontScale:0.62};
+        const opts = {width:310,height:170,bondLineWidth:1.45,scaleBondWidth:true,multipleBondOffset:0.16,padding:0.08,minFontSize:8,maxFontSize:15,annotationFontScale:0.48};
         const svg = mol.get_svg_with_highlights(JSON.stringify(opts));
         if (!svg || !/<svg[\s>]/i.test(svg)) throw new Error("No SVG");
         host.innerHTML = svg;
@@ -539,7 +577,7 @@ function zoomAt(nextScale, clientX, clientY) {
 function focusCompound(c) {
   if (!c || !nodePositions[c.id]) return;
   const pos = nodePositions[c.id];
-  scale = Math.max(scale, 0.9);
+  scale = Math.max(scale, 0.78);
   scale = Math.min(scale, 1.35);
   panX = viewport.clientWidth / 2 - (pos.x + NODE_W / 2) * scale;
   panY = viewport.clientHeight / 2 - (pos.y + NODE_H / 2) * scale;
@@ -623,7 +661,7 @@ function init() {
   applyTransform();
   requestAnimationFrame(() => {
     const root=nodePositions[dimensions.primaryRoot]||nodePositions[dimensions.primaryNodes[0]];
-    scale=Math.min(0.88,Math.max(0.76,viewport.clientWidth/1450));
+    scale=Math.min(0.74,Math.max(0.66,viewport.clientWidth/1700));
     panX=viewport.clientWidth/2-(root.x+NODE_W/2)*scale;
     panY=viewport.clientHeight/2-(root.y+NODE_H/2)*scale;
     applyTransform();
