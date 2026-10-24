@@ -400,6 +400,21 @@ function assignEdgePorts(edgeList){
   }
   return true;
  }
+ function portPathClear(nodeId,dir,routeId){
+  const p=nodeGridPositions[nodeId],d=DIRECTIONS[dir];let previous={x:p.x,y:p.y};
+  for(let step=1;step<=radius;step++){
+   const current={x:p.x+d.dx*step,y:p.y+d.dy*step};
+   const occupied=gridOccupancy[cellKey(current.x,current.y)];
+   if(occupied&&occupied!==nodeId)return false;
+   const sk=segmentKey(previous,current);
+   if((routedSegments[sk]||[]).some(owner=>owner!==routeId))return false;
+   const diag=diagonalInfo(previous,current);
+   if(diag&&(routedDiagonals[diag.square+"|"+(-diag.orientation)]||[]).some(owner=>owner!==routeId))return false;
+   if((routedGridPoints[cellKey(current.x,current.y)]||[]).some(owner=>owner!==routeId))return false;
+   previous=current;
+  }
+  return true;
+ }
  edgeList.forEach(edge=>{
   const a=nodeGridPositions[edge.from],b=nodeGridPositions[edge.to];
   if(!a||!b)return;
@@ -413,8 +428,9 @@ function assignEdgePorts(edgeList){
     if(usedDirections[edge.to].has(toDir))continue;
     const pb=portPoint(edge.to,toDir),kb=cellKey(pb.x,pb.y);
     const sharedPort=ka===kb;
-    if((usedPortCells[ka]||usedPortCells[kb])&&!(sharedPort&&!usedPortCells[ka]&&!usedPortCells[kb]))continue;
+    if(usedPortCells[ka]||usedPortCells[kb])continue;
     if(!clearConnector(edge.from,fromDir,edge.to,sharedPort)||!clearConnector(edge.to,toDir,edge.from,sharedPort))continue;
+    if(!portPathClear(edge.from,fromDir,String(edge.id))||!portPathClear(edge.to,toDir,String(edge.id)))continue;
     const score=circularDistance(fromDir,desiredFrom)*100+circularDistance(toDir,desiredTo)*100
       +(sharedPort?-12:0)+directionRank(fromDir)*.01+directionRank(toDir)*.001;
     candidates.push({fromDir,toDir,pa,pb,ka,kb,score});
@@ -431,9 +447,10 @@ function assignEdgePorts(edgeList){
     for(const toDir of DIRECTIONS.map(d=>d.index)){
      if(usedDirections[edge.to].has(toDir))continue;
      const pb=portPoint(edge.to,toDir),kb=cellKey(pb.x,pb.y);
-     if(usedPortCells[kb])continue;
+     if(usedPortCells[kb]||ka===kb)continue;
      const same=ka===kb;
      if(!clearConnector(edge.from,fromDir,edge.to,same)||!clearConnector(edge.to,toDir,edge.from,same))continue;
+     if(!portPathClear(edge.from,fromDir,String(edge.id))||!portPathClear(edge.to,toDir,String(edge.id)))continue;
      fallback.push({fromDir,toDir,pa,pb,ka,kb,score:circularDistance(fromDir,desiredFrom)*100+circularDistance(toDir,desiredTo)*100});
     }
    }
@@ -453,6 +470,8 @@ function assignEdgePorts(edgeList){
   edgePorts[edge.id].from=chosen.fromDir;edgePorts[edge.id].to=chosen.toDir;
   (usedPortCells[chosen.ka]||(usedPortCells[chosen.ka]=[])).push({edgeId:edge.id,nodeId:edge.from,role:"from"});
   (usedPortCells[chosen.kb]||(usedPortCells[chosen.kb]=[])).push({edgeId:edge.id,nodeId:edge.to,role:"to"});
+  reserveGridSegment(nodeGridPositions[edge.from],chosen.pa,String(edge.id));
+  reserveGridSegment(chosen.pb,nodeGridPositions[edge.to],String(edge.id));
  });
 }
 
@@ -493,16 +512,6 @@ function drawEdges(dimensions){
   return da-db||(graph.adj[b.from].length+graph.adj[b.to].length)-(graph.adj[a.from].length+graph.adj[a.to].length)||String(a.id).localeCompare(String(b.id));
  });
  assignEdgePorts(ordered);
- // Reserve all eight-way card exits before drawing a single main route.
- // Without this pass, early reactions can occupy the narrow space directly
- // outside a later card and leave no legal way out of its port.
- ordered.forEach(edge=>{
-  const a=nodeGridPositions[edge.from],b=nodeGridPositions[edge.to],ports=edgePorts[edge.id];
-  if(!a||!b||!ports)return;
-  const fromDir=DIRECTIONS[ports.from]||DIRECTIONS[2],toDir=DIRECTIONS[ports.to]||DIRECTIONS[6],radius=2,id=String(edge.id);
-  reserveGridSegment(a,{x:a.x+fromDir.dx*radius,y:a.y+fromDir.dy*radius},id);
-  reserveGridSegment({x:b.x+toDir.dx*radius,y:b.y+toDir.dy*radius},b,id);
- });
  ordered.forEach(e=>{paths[e.id]=findGridRoute(e)});
  function center(id){const p=nodePositions[id];return {x:p.x+NODE_W/2,y:p.y+NODE_H/2}}
  function borderPoint(c,dir){
