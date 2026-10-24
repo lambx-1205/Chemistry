@@ -110,3 +110,17 @@
 /* Keep reaction-name labels readable where several branches leave one card. */
 .map-edge-label-bg{height:22px}
 .map-edge-label-text{font-size:12px}
+
+/* Larger typography: the labels should be legible without excessive zoom. */
+.map-node{width:360px;height:280px;padding:13px 15px;grid-template-rows:25px 55px 1fr 23px;gap:5px;border-radius:15px}
+.map-node-family{font-size:13px;line-height:25px}
+.map-node-name{font-size:22px;line-height:1.35}
+.map-node-formula{font-size:15px;line-height:23px}
+.map-node-structure svg{width:100%!important;height:100%!important;max-width:100%;max-height:100%}
+.map-edge-visible{stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.map-edge-hitbox{stroke-width:28}
+.map-edge-label-bg{height:34px;stroke-width:1.2}
+.map-edge-label-text{font-size:18px;font-weight:850}
+.map-edge:hover .map-edge-visible,.map-edge:focus .map-edge-visible{stroke-width:4.8}
+.map-group-title{font-size:17px;font-weight:900}
+@media(max-width:600px){.map-node{width:360px;height:280px}.map-node-family{font-size:13px}.map-node-name{font-size:22px}.map-node-formula{font-size:15px}.map-edge-label-text{font-size:18px}}
