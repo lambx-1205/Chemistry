@@ -22,8 +22,8 @@ compounds.forEach((c, i) => {
   if (c.pubchemName) nameMap[String(c.pubchemName).toLocaleLowerCase()] = c;
 });
 
-const NODE_W = 360;
-const NODE_H = 280;
+const NODE_W = 240;
+const NODE_H = 112;
 const CELL = 120;
 const MAP_PAD = 100;
 const SVG_NS = "http://www.w3.org/2000/svg";
@@ -100,7 +100,8 @@ const equations = {
   e77:"C₁₈H₃₄O₂ + NaOH → C₁₈H₃₃NaO₂ + H₂O",
   e78:"C₁₆H₃₂O₂ + NaOH → C₁₆H₃₁NaO₂ + H₂O",
   e79:"C₁₈H₃₆O₂ + CH₃OH ⇌ C₁₉H₃₈O₂ + H₂O",
-  e80:"C₅₇H₁₁₀O₆ + 3NaOH → C₃H₈O₃ + 3C₁₈H₃₅NaO₂"
+  e80:"C₅₇H₁₁₀O₆ + 3NaOH → C₃H₈O₃ + 3C₁₈H₃₅NaO₂",
+  e81:"C₆H₆ + CH₂=CHCH₃ → C₆H₅CH(CH₃)₂"
 };
 
 const viewport = document.getElementById("map-viewport");
@@ -184,18 +185,18 @@ function buildAdjacency(){
 const graph=buildAdjacency();
 function makeComponent(nodes){
  const nodeSet=new Set(nodes),local=Object.create(null),occupied=Object.create(null),parent=Object.create(null);
- const root=nodes.slice().sort((a,b)=>graph.adj[b].length-graph.adj[a].length||compoundOrder[a]-compoundOrder[b])[0];
+ const root=nodes.includes("benzene")?"benzene":nodes.slice().sort((a,b)=>graph.adj[b].length-graph.adj[a].length||compoundOrder[a]-compoundOrder[b])[0];
  const queue=[root];local[root]={x:0,y:0};occupied[cellKey(0,0)]=root;
  while(queue.length){
   const current=queue.shift(),here=local[current];
   const unseen=graph.adj[current].filter(n=>nodeSet.has(n)&&!local[n]).sort((a,b)=>graph.adj[b].length-graph.adj[a].length||compoundOrder[a]-compoundOrder[b]);
   if(!unseen.length)continue;
-  const available=DIRECTIONS.filter(d=>!occupied[cellKey(here.x+d.dx*6,here.y+d.dy*6)]).map(d=>d.index);
+  const available=DIRECTIONS.filter(d=>!occupied[cellKey(here.x+d.dx*4,here.y+d.dy*4)]).map(d=>d.index);
   const back=parent[current]?directionForDelta(local[parent[current]].x-here.x,local[parent[current]].y-here.y):undefined;
   const chosen=chooseSpreadDirections(available,Math.min(unseen.length,available.length),back);
   unseen.forEach((next,i)=>{
    const d=i<chosen.length?DIRECTIONS[chosen[i]]:null;
-   const p=d?{x:here.x+d.dx*6,y:here.y+d.dy*6}:nearestFreeCell(here.x,here.y,occupied);
+   const p=d?{x:here.x+d.dx*4,y:here.y+d.dy*4}:nearestFreeCell(here.x,here.y,occupied);
    local[next]={x:p.x,y:p.y};occupied[cellKey(p.x,p.y)]=next;parent[next]=current;queue.push(next);
   });
  }
@@ -214,9 +215,9 @@ function buildLayout(){
  });
  components.sort((a,b)=>b.nodes.length-a.nodes.length||a.width-b.width);
  let cursorGX=1,cursorGY=1,rowHeight=0,maxGX=1,maxGY=1;
- const rowLimit=27;
+ const rowLimit=36;
  components.forEach((comp,index)=>{
-  if(cursorGX>1&&cursorGX+comp.width+1>rowLimit){cursorGX=1;cursorGY+=rowHeight+30;rowHeight=0}
+  if(cursorGX>1&&cursorGX+comp.width+5>rowLimit){cursorGX=1;cursorGY+=rowHeight+8;rowHeight=0}
   const originGX=cursorGX-comp.minX,originGY=cursorGY-comp.minY;
   const title=document.createElement("div");title.className="map-group-title";
   title.style.left=(MAP_PAD+(cursorGX-1)*CELL)+"px";title.style.top=Math.max(8,MAP_PAD+(cursorGY-1)*CELL-42)+"px";
@@ -227,12 +228,12 @@ function buildLayout(){
    for(let ox=-1;ox<=1;ox++)for(let oy=-1;oy<=1;oy++)gridOccupancy[cellKey(gx+ox,gy+oy)]=id;componentOf[id]=index;maxGX=Math.max(maxGX,gx);maxGY=Math.max(maxGY,gy);
   });
   const ps=comp.nodes.map(id=>nodeGridPositions[id]);
-  componentBounds[index]={minX:Math.min(...ps.map(p=>p.x))-10,maxX:Math.max(...ps.map(p=>p.x))+10,minY:Math.min(...ps.map(p=>p.y))-10,maxY:Math.max(...ps.map(p=>p.y))+10};
-  cursorGX+=comp.width+30;rowHeight=Math.max(rowHeight,comp.height);
+  componentBounds[index]={minX:Math.min(...ps.map(p=>p.x))-3,maxX:Math.max(...ps.map(p=>p.x))+3,minY:Math.min(...ps.map(p=>p.y))-3,maxY:Math.max(...ps.map(p=>p.y))+3};
+  cursorGX+=comp.width+5;rowHeight=Math.max(rowHeight,comp.height);
  });
  const isolated=compounds.filter(c=>graph.adj[c.id].length===0);
  if(isolated.length){
-  cursorGX=1;cursorGY+=rowHeight+14;
+  cursorGX=1;cursorGY+=rowHeight+6;
   const title=document.createElement("div");title.className="map-group-title";
   title.style.left=MAP_PAD+"px";title.style.top=(MAP_PAD+(cursorGY-1)*CELL-42)+"px";title.textContent="反応経路が未登録の化合物";groupLayer.appendChild(title);
   const cols=6;
@@ -337,6 +338,7 @@ function createNode(c) {
   const pos = nodePositions[c.id];
   const node = document.createElement("a");
   node.className = "map-node";
+  if (["benzene","ethene","ethanol","toluene","phenol","aniline","acetic-acid","glucose","propene","cumene"].includes(c.id)) node.classList.add("is-key-compound");
   node.href = "index.html?compound=" + encodeURIComponent(c.id);
   node.dataset.compoundId = c.id;
   node.style.left = pos.x + "px";
@@ -534,7 +536,7 @@ function zoomAt(nextScale, clientX, clientY) {
 function focusCompound(c) {
   if (!c || !nodePositions[c.id]) return;
   const pos = nodePositions[c.id];
-  scale = Math.max(scale, 0.78);
+  scale = Math.max(scale, 0.9);
   scale = Math.min(scale, 1.35);
   panX = viewport.clientWidth / 2 - (pos.x + NODE_W / 2) * scale;
   panY = viewport.clientHeight / 2 - (pos.y + NODE_H / 2) * scale;
@@ -618,7 +620,7 @@ function init() {
   applyTransform();
   requestAnimationFrame(() => {
     const root=nodePositions[dimensions.primaryRoot]||nodePositions[dimensions.primaryNodes[0]];
-    scale=Math.min(0.74,Math.max(0.66,viewport.clientWidth/1700));
+    scale=Math.min(0.88,Math.max(0.76,viewport.clientWidth/1450));
     panX=viewport.clientWidth/2-(root.x+NODE_W/2)*scale;
     panY=viewport.clientHeight/2-(root.y+NODE_H/2)*scale;
     applyTransform();
