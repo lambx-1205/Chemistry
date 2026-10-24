@@ -510,3 +510,6 @@ a{color:inherit}
 /* Shared equation field for reactions added to the reaction database. */
 .reaction-detail-equation{grid-column:1/-1}
 .reaction-detail-equation p{margin-top:8px;color:#304a35;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;line-height:1.8;overflow-wrap:anywhere;white-space:normal}
+
+.pubchem-sync-status{min-height:14px;margin:-9px 5px 18px;font-size:10px;line-height:1.5;color:#7b877e}
+.pubchem-sync-status:empty{display:none}
