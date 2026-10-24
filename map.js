@@ -159,6 +159,7 @@ const DIRECTIONS=[
  {dx:0,dy:-1,index:0},{dx:1,dy:-1,index:1},{dx:1,dy:0,index:2},{dx:1,dy:1,index:3},
  {dx:0,dy:1,index:4},{dx:-1,dy:1,index:5},{dx:-1,dy:0,index:6},{dx:-1,dy:-1,index:7}
 ];
+const edgePorts=Object.create(null);
 
 const nodeGridPositions=Object.create(null),componentOf=Object.create(null),componentBounds=Object.create(null);
 const gridOccupancy=Object.create(null),routedSegments=Object.create(null),routedDiagonals=Object.create(null),routedGridPoints=Object.create(null);
@@ -320,17 +321,49 @@ function reserveGridSegment(a,b,pair){
  }
 }
 
+function assignEdgePorts(edgeList){
+ const incidents=Object.create(null);
+ compounds.forEach(c=>{incidents[c.id]=[]});
+ edgeList.forEach(edge=>{
+  const a=nodeGridPositions[edge.from],b=nodeGridPositions[edge.to];
+  if(!a||!b)return;
+  incidents[edge.from].push({edgeId:edge.id,role:"from",desired:directionForDelta(b.x-a.x,b.y-a.y),other:edge.to});
+  incidents[edge.to].push({edgeId:edge.id,role:"to",desired:directionForDelta(a.x-b.x,a.y-b.y),other:edge.from});
+ });
+ Object.keys(incidents).forEach(id=>{
+  const items=incidents[id];
+  // Preserve the natural direction when possible, but give every incident
+  // reaction its own octant around the card. This removes stacked card exits.
+  items.sort((a,b)=>a.desired-b.desired||String(a.other).localeCompare(String(b.other))||String(a.edgeId).localeCompare(String(b.edgeId)));
+  const used=new Set();
+  items.forEach(item=>{
+   const candidates=DIRECTIONS.map(d=>d.index).filter(d=>!used.has(d));
+   candidates.sort((a,b)=>{
+    const sa=circularDistance(a,item.desired)*100+directionRank(a)*.01;
+    const sb=circularDistance(b,item.desired)*100+directionRank(b)*.01;
+    return sa-sb;
+   });
+   const chosen=candidates[0];
+   if(chosen===undefined)return;
+   used.add(chosen);
+   if(!edgePorts[item.edgeId])edgePorts[item.edgeId]={};
+   edgePorts[item.edgeId][item.role]=chosen;
+  });
+ });
+}
+
 function findGridRoute(edge,recoveryMode=false){
  const nodeStart=nodeGridPositions[edge.from],nodeGoal=nodeGridPositions[edge.to];
  if(!nodeStart||!nodeGoal)return [];
- const direction=DIRECTIONS[directionForDelta(nodeGoal.x-nodeStart.x,nodeGoal.y-nodeStart.y)];
+ const ports=edgePorts[edge.id]||{from:directionForDelta(nodeGoal.x-nodeStart.x,nodeGoal.y-nodeStart.y),to:directionForDelta(nodeStart.x-nodeGoal.x,nodeStart.y-nodeGoal.y)};
+ const fromDirection=DIRECTIONS[ports.from]||DIRECTIONS[2],toDirection=DIRECTIONS[ports.to]||DIRECTIONS[6];
  const portRadius=2;
- const start={x:nodeStart.x+direction.dx*portRadius,y:nodeStart.y+direction.dy*portRadius};
- const goal={x:nodeGoal.x-direction.dx*portRadius,y:nodeGoal.y-direction.dy*portRadius};
+ const start={x:nodeStart.x+fromDirection.dx*portRadius,y:nodeStart.y+fromDirection.dy*portRadius};
+ const goal={x:nodeGoal.x+toDirection.dx*portRadius,y:nodeGoal.y+toDirection.dy*portRadius};
  const coreBounds=componentBounds[componentOf[edge.from]]||{minX:nodeStart.x-10,maxX:nodeStart.x+10,minY:nodeStart.y-10,maxY:nodeStart.y+10};
  const margin=recoveryMode?22:0;
  const bounds={minX:coreBounds.minX-margin,maxX:coreBounds.maxX+margin,minY:coreBounds.minY-margin,maxY:coreBounds.maxY+margin};
- const routeId=pairKey(edge.from,edge.to);
+ const routeId=String(edge.id);
  // Reserve the short card-to-port connectors first, so every visible arrow
  // leaves a card instead of starting underneath its structure.
  reserveGridSegment(nodeStart,start,routeId);
@@ -426,6 +459,15 @@ function drawEdges(dimensions){
   const pa=nodeGridPositions[a.from],qa=nodeGridPositions[a.to],pb=nodeGridPositions[b.from],qb=nodeGridPositions[b.to];
   const da=Math.max(Math.abs(pa.x-qa.x),Math.abs(pa.y-qa.y)),db=Math.max(Math.abs(pb.x-qb.x),Math.abs(pb.y-qb.y));
   return da-db||(graph.adj[b.from].length+graph.adj[b.to].length)-(graph.adj[a.from].length+graph.adj[a.to].length)||String(a.id).localeCompare(String(b.id));
+ });
+ assignEdgePorts(ordered);
+ // Reserve all unique card exits before routing the first connecting line.
+ ordered.forEach(edge=>{
+  const a=nodeGridPositions[edge.from],b=nodeGridPositions[edge.to],ports=edgePorts[edge.id];
+  if(!a||!b||!ports)return;
+  const from=DIRECTIONS[ports.from],to=DIRECTIONS[ports.to],radius=2,routeId=String(edge.id);
+  reserveGridSegment(a,{x:a.x+from.dx*radius,y:a.y+from.dy*radius},routeId);
+  reserveGridSegment(b,{x:b.x+to.dx*radius,y:b.y+to.dy*radius},routeId);
  });
  ordered.forEach(e=>{paths[e.id]=findGridRoute(e)});
  function center(id){const p=nodePositions[id];return {x:p.x+NODE_W/2,y:p.y+NODE_H/2}}
