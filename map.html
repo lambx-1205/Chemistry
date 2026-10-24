@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="map.css?v=20261024-map9">
 <script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js" defer></script>
 <script src="chemistry-data.js?v=20261024-map5" defer></script>
-<script src="map.js?v=20261024-map19" defer></script>
+<script src="map.js?v=20261024-map20" defer></script>
 </head>
 <body>
 <header class="site-header">
@@ -61,7 +61,12 @@
       <div class="map-node-layer" id="map-node-layer"></div>
     </div>
   </section>
-  <p class="map-hint">ドラッグで移動・ホイールで拡大縮小できます。化合物カードは検索・反応の起点として使用できます。</p>
+  <p class="map-hint">ドラッグで移動・ホイールで拡大縮小できます。カードを選ぶと化合物詳細、矢印または下の反応一覧を選ぶと反応式を確認できます。</p>
+  <details class="reaction-registry">
+    <summary><span>登録済みの反応一覧</span><span class="reaction-registry-count" id="reaction-registry-count">反応を読み込んでいます</span></summary>
+    <p class="reaction-registry-intro">地図の矢印と同じ反応データを、反応の種類ごとに整理しています。一覧の反応を選ぶと、出発物質へ移動して反応式を開きます。</p>
+    <div id="reaction-registry-list" class="reaction-registry-list"></div>
+  </details>
 
   <footer class="site-update-footer map-update-footer" aria-label="更新日時と更新履歴">
     <div class="site-update-heading"><strong>更新情報</strong><span>最終更新：2026-10-24</span></div>
