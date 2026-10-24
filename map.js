@@ -216,7 +216,7 @@ function buildLayout(){
  let cursorGX=1,cursorGY=1,rowHeight=0,maxGX=1,maxGY=1;
  const rowLimit=27;
  components.forEach((comp,index)=>{
-  if(cursorGX>1&&cursorGX+comp.width+1>rowLimit){cursorGX=1;cursorGY+=rowHeight+22;rowHeight=0}
+  if(cursorGX>1&&cursorGX+comp.width+1>rowLimit){cursorGX=1;cursorGY+=rowHeight+30;rowHeight=0}
   const originGX=cursorGX-comp.minX,originGY=cursorGY-comp.minY;
   const title=document.createElement("div");title.className="map-group-title";
   title.style.left=(MAP_PAD+(cursorGX-1)*CELL)+"px";title.style.top=Math.max(8,MAP_PAD+(cursorGY-1)*CELL-42)+"px";
@@ -228,7 +228,7 @@ function buildLayout(){
   });
   const ps=comp.nodes.map(id=>nodeGridPositions[id]);
   componentBounds[index]={minX:Math.min(...ps.map(p=>p.x))-10,maxX:Math.max(...ps.map(p=>p.x))+10,minY:Math.min(...ps.map(p=>p.y))-10,maxY:Math.max(...ps.map(p=>p.y))+10};
-  cursorGX+=comp.width+22;rowHeight=Math.max(rowHeight,comp.height);
+  cursorGX+=comp.width+30;rowHeight=Math.max(rowHeight,comp.height);
  });
  const isolated=compounds.filter(c=>graph.adj[c.id].length===0);
  if(isolated.length){
@@ -243,7 +243,7 @@ function buildLayout(){
   });
  }
  const primary=components[0]||{nodes:compounds.map(c=>c.id),root:compounds[0]&&compounds[0].id};
- return {width:MAP_PAD*2+(maxGX+11)*CELL+NODE_W,height:MAP_PAD*2+(maxGY+11)*CELL+NODE_H,primaryNodes:primary.nodes,primaryRoot:primary.root,components};
+ return {width:MAP_PAD*2+(maxGX+15)*CELL+NODE_W,height:MAP_PAD*2+(maxGY+15)*CELL+NODE_H,primaryNodes:primary.nodes,primaryRoot:primary.root,components};
 }
 function heapPush(heap,item){
  heap.push(item);let i=heap.length-1;
@@ -257,9 +257,11 @@ function heapPop(heap){
 function segmentKey(a,b){const x=cellKey(a.x,a.y),y=cellKey(b.x,b.y);return x<y?x+"~"+y:y+"~"+x}
 function diagonalInfo(a,b){const dx=b.x-a.x,dy=b.y-a.y;if(Math.abs(dx)!==1||Math.abs(dy)!==1)return null;return {square:Math.min(a.x,b.x)+","+Math.min(a.y,b.y),orientation:dx*dy>0?1:-1}}
 function octileDistance(a,b){const dx=Math.abs(a.x-b.x),dy=Math.abs(a.y-b.y),di=Math.min(dx,dy),st=Math.max(dx,dy)-di;return di*14+st*10}
-function findGridRoute(edge){
+function findGridRoute(edge,recoveryMode){
  const start=nodeGridPositions[edge.from],goal=nodeGridPositions[edge.to];if(!start||!goal)return [];
- const bounds=componentBounds[componentOf[edge.from]]||{minX:start.x-5,maxX:start.x+5,minY:start.y-5,maxY:start.y+5};
+ const coreBounds=componentBounds[componentOf[edge.from]]||{minX:start.x-10,maxX:start.x+10,minY:start.y-10,maxY:start.y+10};
+ const margin=recoveryMode?4:0;
+ const bounds={minX:coreBounds.minX-margin,maxX:coreBounds.maxX+margin,minY:coreBounds.minY-margin,maxY:coreBounds.maxY+margin};
  const pair=pairKey(edge.from,edge.to),startKey=start.x+","+start.y+",-1";
  const open=[],best=new Map(),previous=new Map(),states=new Map();
  const first={x:start.x,y:start.y,dir:-1,g:0,f:octileDistance(start,goal),key:startKey};
@@ -273,17 +275,21 @@ function findGridRoute(edge){
    if(nx<bounds.minX||nx>bounds.maxX||ny<bounds.minY||ny>bounds.maxY)return;
    const nk=cellKey(nx,ny),blocked=gridOccupancy[nk];if(blocked&&blocked!==edge.from&&blocked!==edge.to)return;
    const next={x:nx,y:ny},sk=segmentKey(cur,next),owners=routedSegments[sk]||[];
-   // Crossings are forbidden, not merely made expensive; this prevents the
-   // router from accepting one crossing because several detours cost more.
-   if(owners.some(p=>p!==pair))return;
+   const segmentConflict=owners.some(p=>p!==pair);
    const diag=diagonalInfo(cur,next);
-   if(diag&&(routedDiagonals[diag.square+"|"+(-diag.orientation)]||[]).some(p=>p!==pair))return;
-   if(!(nx===goal.x&&ny===goal.y)&&!(nx===start.x&&ny===start.y)&&(routedGridPoints[nk]||[]).some(p=>p!==pair))return;
-   const ng=cur.g+((d.dx===0||d.dy===0)?10:14)+(cur.dir!==-1&&cur.dir!==d.index?4:0);
+   const diagonalConflict=!!(diag&&(routedDiagonals[diag.square+"|"+(-diag.orientation)]||[]).some(p=>p!==pair));
+   const pointConflict=!(nx===goal.x&&ny===goal.y)&&!(nx===start.x&&ny===start.y)&&(routedGridPoints[nk]||[]).some(p=>p!==pair);
+   // First search strictly avoids every intersection. If the local corridor is
+   // blocked, the recovery pass gets a wider border but still heavily prefers
+   // an unoccupied route over crossing another reaction.
+   if(!recoveryMode&&(segmentConflict||diagonalConflict||pointConflict))return;
+   const penalty=recoveryMode&&(segmentConflict||diagonalConflict||pointConflict)?50000:0;
+   const ng=cur.g+((d.dx===0||d.dy===0)?10:14)+(cur.dir!==-1&&cur.dir!==d.index?4:0)+penalty;
    const key=nx+","+ny+","+d.index;
    if(!best.has(key)||ng<best.get(key)){const state={x:nx,y:ny,dir:d.index,g:ng,f:ng+octileDistance(next,goal),key};best.set(key,ng);previous.set(key,cur.key);states.set(key,state);heapPush(open,state)}
   });
  }
+ if(!endState&&!recoveryMode)return findGridRoute(edge,true);
  if(!endState){
   const path=[{x:start.x,y:start.y}];let x=start.x,y=start.y;
   while(x!==goal.x||y!==goal.y){const dx=Math.sign(goal.x-x),dy=Math.sign(goal.y-y);if(dx&&dy){x+=dx;y+=dy}else if(dx)x+=dx;else y+=dy;path.push({x,y});if(path.length>1000)break}
