@@ -24,7 +24,7 @@ compounds.forEach((c, i) => {
 
 const NODE_W = 360;
 const NODE_H = 280;
-const CELL = 100;
+const CELL = 90;
 const MAP_PAD = 100;
 const SVG_NS = "http://www.w3.org/2000/svg";
 const equations = {
@@ -203,9 +203,9 @@ function nearestFreeCell(x,y,occupied,preferredDirection){
 }
 function nearestFreeNodeCell(x,y,occupied,preferredDirection){
  // Card locations must remain at least six routing cells apart.
- for(let radius=4;radius<=100;radius+=4){
+ for(let radius=5;radius<=125;radius+=5){
   const candidates=[];
-  for(let dy=-radius;dy<=radius;dy+=4)for(let dx=-radius;dx<=radius;dx+=4){
+  for(let dy=-radius;dy<=radius;dy+=5)for(let dx=-radius;dx<=radius;dx+=5){
    if(Math.max(Math.abs(dx),Math.abs(dy))!==radius||occupied[cellKey(x+dx,y+dy)])continue;
    const dir=directionForDelta(dx,dy);
    candidates.push({x:x+dx,y:y+dy,score:radius*20+(preferredDirection===undefined?0:circularDistance(dir,preferredDirection)*3)});
@@ -234,12 +234,12 @@ function makeComponent(nodes){
   const current=queue.shift(),here=local[current];
   const unseen=graph.adj[current].filter(n=>nodeSet.has(n)&&!local[n]).sort((a,b)=>graph.adj[b].length-graph.adj[a].length||compoundOrder[a]-compoundOrder[b]);
   if(!unseen.length)continue;
-  const available=DIRECTIONS.filter(d=>!occupied[cellKey(here.x+d.dx*4,here.y+d.dy*4)]).map(d=>d.index);
+  const available=DIRECTIONS.filter(d=>!occupied[cellKey(here.x+d.dx*5,here.y+d.dy*5)]).map(d=>d.index);
   const back=parent[current]?directionForDelta(local[parent[current]].x-here.x,local[parent[current]].y-here.y):undefined;
   const chosen=chooseSpreadDirections(available,Math.min(unseen.length,available.length),back);
   unseen.forEach((next,i)=>{
    const d=i<chosen.length?DIRECTIONS[chosen[i]]:null;
-   const p=d?{x:here.x+d.dx*4,y:here.y+d.dy*4}:nearestFreeNodeCell(here.x,here.y,occupied);
+   const p=d?{x:here.x+d.dx*5,y:here.y+d.dy*5}:nearestFreeNodeCell(here.x,here.y,occupied);
    local[next]={x:p.x,y:p.y};occupied[cellKey(p.x,p.y)]=next;parent[next]=current;queue.push(next);
   });
  }
@@ -285,12 +285,12 @@ function buildLayout(){
    const title=document.createElement("div");title.className="map-group-title";
    title.style.left=MAP_PAD+"px";title.style.top=(MAP_PAD+(isolatedY-1)*CELL-42)+"px";title.textContent=groupName;groupLayer.appendChild(title);
    list.forEach((c,i)=>{
-    const gx=1+(i%cols)*4,gy=isolatedY+Math.floor(i/cols)*4;
+    const gx=1+(i%cols)*5,gy=isolatedY+Math.floor(i/cols)*5;
     nodeGridPositions[c.id]={x:gx,y:gy};nodePositions[c.id]={x:MAP_PAD+(gx-1)*CELL,y:MAP_PAD+(gy-1)*CELL};
     for(let ox=-1;ox<=1;ox++)for(let oy=-1;oy<=1;oy++)gridOccupancy[cellKey(gx+ox,gy+oy)]=c.id;
     maxGX=Math.max(maxGX,gx);maxGY=Math.max(maxGY,gy);
    });
-   isolatedY+=Math.ceil(list.length/cols)*4+3;
+   isolatedY+=Math.ceil(list.length/cols)*5+3;
   });
  }
  const primary=components[0]||{nodes:compounds.map(c=>c.id),root:compounds[0]&&compounds[0].id};
