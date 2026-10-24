@@ -568,11 +568,32 @@ function renderIsomerGroups(c){
   if(target)drawStructure(host,target.smiles,200,84,"isomer-"+key,target.pubchemFormula||target.formula);
  });
 }
+async function fetchCompoundBySmiles(smiles){
+ if(!smiles)throw new Error("構造情報がないためPubChem CIDを特定できません。");
+ var endpoint="https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/"+encodeURIComponent(smiles)+"/property/Title,IUPACName,SMILES,ConnectivitySMILES,InChIKey,MolecularFormula,MolecularWeight/JSON";
+ var response=await fetch(endpoint,{headers:{Accept:"application/json"}});
+ if(!response.ok)throw new Error(response.status===404?"この構造に一致するPubChem化合物が見つかりません":"PubChemへの接続に失敗しました");
+ var data=await response.json();
+ var p=data&&data.PropertyTable&&data.PropertyTable.Properties&&data.PropertyTable.Properties[0];
+ if(!p||!p.CID)throw new Error("この構造のPubChem CIDを取得できませんでした");
+ return {pubchemCid:p.CID,pubchemName:p.Title||null,smiles:p.SMILES||p.ConnectivitySMILES,
+  pubchemFormula:p.MolecularFormula||null,molecularWeight:p.MolecularWeight||null,
+  inchiKey:p.InChIKey||null,iupacName:p.IUPACName||null};
+}
 async function getMolecule3DRecord(c){
  var record=c;
  if(!record.pubchemCid){
-  if(!record.pubchemName)throw new Error("この登録化合物にはPubChemのCIDがなく、3D座標を特定できません。");
-  record=await fetchCompound(record.pubchemName);
+  if(record.pubchemName){
+   try{record=await fetchCompound(record.pubchemName);}
+   catch(nameError){if(!record.smiles)throw nameError;record=await fetchCompoundBySmiles(record.smiles);}
+  }else{
+   record=await fetchCompoundBySmiles(record.smiles);
+  }
+  // Retain the resolved CID for subsequent 3D views in this page session.
+  c.pubchemCid=record.pubchemCid;
+  c.pubchemName=c.pubchemName||record.pubchemName||null;
+  c.inchiKey=c.inchiKey||record.inchiKey||null;
+  c.iupacName=c.iupacName||record.iupacName||null;
  }
  if(!record.pubchemCid)throw new Error("PubChemの化合物IDを取得できませんでした。");
  var url="https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/"+encodeURIComponent(record.pubchemCid)+"/SDF?record_type=3d";
