@@ -597,7 +597,7 @@ function openReaction(edge) {
   if (!from || !to) return;
   document.getElementById("reaction-dialog-title").textContent = edge.name || edge.label || "反応の詳細";
   document.getElementById("reaction-dialog-route").textContent = from.name + "  →  " + to.name;
-  document.getElementById("reaction-dialog-equation").textContent = equations[edge.id] || (from.formula + " → " + to.formula + "（簡略表記）");
+  document.getElementById("reaction-dialog-equation").textContent = edge.equation || equations[edge.id] || (from.formula + " → " + to.formula + "（簡略表記）");
   document.getElementById("reaction-dialog-condition").textContent = edge.condition || "反応条件は未登録";
   document.getElementById("reaction-dialog-note").textContent = edge.id === "e59" ? "複数段階の反応経路を示す概念図です。ここでは芳香族ニトロ化の一般式のみを表示し、個別の製造反応式や詳細条件は掲載していません。" : (edge.note || "反応の説明は未登録です。");
   const fromLink = document.getElementById("reaction-from-link");
