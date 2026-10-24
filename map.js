@@ -337,10 +337,8 @@ function findGridRoute(edge,recoveryLevel=0){
  const margin=margins[Math.min(recoveryLevel,margins.length-1)];
  const bounds={minX:coreBounds.minX-margin,maxX:coreBounds.maxX+margin,minY:coreBounds.minY-margin,maxY:coreBounds.maxY+margin};
  const routeId=String(edge.id);
- // Each reaction has its own reserved path. Sharing only the node pair caused
- // distinct reactions to occupy the same track and appear as one thick arrow.
- reserveGridSegment(nodeStart,start,routeId);
- reserveGridSegment(goal,nodeGoal,routeId);
+ // Source and target connectors are pre-reserved before any main route is
+ // searched; this stops an early route from cutting off a later arrow port.
  const startKey=start.x+","+start.y+",-1";
  const open=[],best=new Map(),previous=new Map(),states=new Map();
  const first={x:start.x,y:start.y,dir:-1,g:0,f:octileDistance(start,goal),key:startKey};
@@ -451,6 +449,16 @@ function drawEdges(dimensions){
   return da-db||(graph.adj[b.from].length+graph.adj[b.to].length)-(graph.adj[a.from].length+graph.adj[a.to].length)||String(a.id).localeCompare(String(b.id));
  });
  assignEdgePorts(ordered);
+ // Reserve all eight-way card exits before drawing a single main route.
+ // Without this pass, early reactions can occupy the narrow space directly
+ // outside a later card and leave no legal way out of its port.
+ ordered.forEach(edge=>{
+  const a=nodeGridPositions[edge.from],b=nodeGridPositions[edge.to],ports=edgePorts[edge.id];
+  if(!a||!b||!ports)return;
+  const fromDir=DIRECTIONS[ports.from]||DIRECTIONS[2],toDir=DIRECTIONS[ports.to]||DIRECTIONS[6],radius=2,id=String(edge.id);
+  reserveGridSegment(a,{x:a.x+fromDir.dx*radius,y:a.y+fromDir.dy*radius},id);
+  reserveGridSegment({x:b.x+toDir.dx*radius,y:b.y+toDir.dy*radius},b,id);
+ });
  ordered.forEach(e=>{paths[e.id]=findGridRoute(e)});
  function center(id){const p=nodePositions[id];return {x:p.x+NODE_W/2,y:p.y+NODE_H/2}}
  function borderPoint(c,dir){
