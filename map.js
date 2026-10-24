@@ -347,6 +347,7 @@ function drawEdges(dimensions){
   const dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy)||1,nx=-dy/len,ny=dx/len;
   return points.map(p=>({x:p.x+nx*offset,y:p.y+ny*offset}));
  }
+ const placedLabels=[];
  edges.forEach(edge=>{
   const gridPath=paths[edge.id];if(!gridPath||gridPath.length<2)return;
   const first={x:gridPath[1].x-gridPath[0].x,y:gridPath[1].y-gridPath[0].y};
@@ -355,17 +356,44 @@ function drawEdges(dimensions){
   for(let i=1;i<gridPath.length-1;i++)points.push({x:MAP_PAD+(gridPath[i].x-1)*CELL+NODE_W/2,y:MAP_PAD+(gridPath[i].y-1)*CELL+NODE_H/2});
   points.push(borderPoint(toCenter,last));
   const pair=pairKey(edge.from,edge.to),idx=pairIndexes[pair]||0;pairIndexes[pair]=idx+1;
-  const offset=(idx-(pairCounts[pair]-1)/2)*20,visiblePoints=shift(points,offset,fromCenter,toCenter);
+  const canonical=pair.split("|"),canonicalA=center(canonical[0]),canonicalB=center(canonical[1]);
+  const offset=(idx-(pairCounts[pair]-1)/2)*22,visiblePoints=shift(points,offset,canonicalA,canonicalB);
   const pathD=visiblePoints.map((p,i)=>(i===0?"M":"L")+p.x.toFixed(1)+","+p.y.toFixed(1)).join(" ");
-  let bestSeg=0,bestLength=-1;
-  for(let i=1;i<visiblePoints.length;i++){const len=Math.hypot(visiblePoints[i].x-visiblePoints[i-1].x,visiblePoints[i].y-visiblePoints[i-1].y);if(len>bestLength){bestLength=len;bestSeg=i-1}}
-  const p1=visiblePoints[bestSeg],p2=visiblePoints[bestSeg+1],len=Math.hypot(p2.x-p1.x,p2.y-p1.y)||1;
-  const nx=-(p2.y-p1.y)/len,ny=(p2.x-p1.x)/len,sign=toCenter.x>=fromCenter.x?-1:1;
-  const labelX=(p1.x+p2.x)/2+nx*sign*31,labelY=(p1.y+p2.y)/2+ny*sign*31;
-  const text=edge.label||edge.name||"反応",labelWidth=Math.min(300,Math.max(78,text.length*17+28));
+  const text=edge.label||edge.name||"反応",labelWidth=Math.min(320,Math.max(90,text.length*18+30)),labelHeight=38;
+  const segments=[];
+  for(let i=1;i<visiblePoints.length;i++){
+   const p1=visiblePoints[i-1],p2=visiblePoints[i],length=Math.hypot(p2.x-p1.x,p2.y-p1.y)||1;
+   let nx=-(p2.y-p1.y)/length,ny=(p2.x-p1.x)/length,sign=toCenter.x>=fromCenter.x?-1:1;
+   if(Math.abs(ny)<0.4)sign=nx>=0?1:-1;
+   segments.push({p1,p2,length,nx,ny,sign});
+  }
+  segments.sort((a,b)=>b.length-a.length);
+  let labelPoint=null;
+  const offsets=[32,52,74,98,124,152,182,214,248],fractions=[0.5,0.36,0.64];
+  function collidesWithNode(x,y){
+   for(const c of compounds){const p=nodePositions[c.id];if(!p)continue;
+    if(x+labelWidth/2+8>p.x&&x-labelWidth/2-8<p.x+NODE_W&&y+labelHeight/2+8>p.y&&y-labelHeight/2-8<p.y+NODE_H)return true;
+   }
+   return false;
+  }
+  function collidesWithLabel(x,y){
+   return placedLabels.some(box=>Math.abs(x-box.x)<(labelWidth+box.width)/2+10&&Math.abs(y-box.y)<(labelHeight+box.height)/2+10);
+  }
+  outer: for(const seg of segments){
+   for(const distance of offsets){
+    for(const fraction of fractions){
+     const mx=seg.p1.x+(seg.p2.x-seg.p1.x)*fraction,my=seg.p1.y+(seg.p2.y-seg.p1.y)*fraction;
+     const x=mx+seg.nx*seg.sign*distance,y=my+seg.ny*seg.sign*distance;
+     if(!collidesWithNode(x,y)&&!collidesWithLabel(x,y)){labelPoint={x,y};break outer;}
+    }
+   }
+  }
+  if(!labelPoint){const seg=segments[0];labelPoint={x:(seg.p1.x+seg.p2.x)/2+seg.nx*seg.sign*248,y:(seg.p1.y+seg.p2.y)/2+seg.ny*seg.sign*248};}
+  const labelX=labelPoint.x,labelY=labelPoint.y;
+  placedLabels.push({x:labelX,y:labelY,width:labelWidth,height:labelHeight});
   const group=svgEl("g",{class:"map-edge",tabindex:"0",role:"button","data-edge-id":edge.id,"aria-label":(edge.name||edge.label)+"。反応式を表示"});
   const hit=svgEl("path",{class:"map-edge-hitbox",d:pathD}),line=svgEl("path",{class:"map-edge-visible",d:pathD,"marker-end":"url(#map-arrow-head)"});
-  const bg=svgEl("rect",{class:"map-edge-label-bg",x:(labelX-labelWidth/2).toFixed(1),y:(labelY-17).toFixed(1),width:labelWidth,height:34,rx:8});
+  const bg=svgEl("rect",{class:"map-edge-label-bg",x:(labelX-labelWidth/2).toFixed(1),y:(labelY-labelHeight/2).toFixed(1),width:labelWidth,height:labelHeight,rx:8});
   const label=svgEl("text",{class:"map-edge-label-text",x:labelX.toFixed(1),y:labelY.toFixed(1)});label.textContent=text;
   group.append(hit,line,bg,label);group.addEventListener("click",()=>openReaction(edge));
   group.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();openReaction(edge)}});
