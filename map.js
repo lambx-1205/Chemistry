@@ -257,6 +257,21 @@ function heapPop(heap){
 function segmentKey(a,b){const x=cellKey(a.x,a.y),y=cellKey(b.x,b.y);return x<y?x+"~"+y:y+"~"+x}
 function diagonalInfo(a,b){const dx=b.x-a.x,dy=b.y-a.y;if(Math.abs(dx)!==1||Math.abs(dy)!==1)return null;return {square:Math.min(a.x,b.x)+","+Math.min(a.y,b.y),orientation:dx*dy>0?1:-1}}
 function octileDistance(a,b){const dx=Math.abs(a.x-b.x),dy=Math.abs(a.y-b.y),di=Math.min(dx,dy),st=Math.max(dx,dy)-di;return di*14+st*10}
+function reserveGridSegment(a,b,pair){
+ const dx=b.x-a.x,dy=b.y-a.y,steps=Math.max(Math.abs(dx),Math.abs(dy));
+ let previous={x:a.x,y:a.y};
+ for(let i=1;i<=steps;i++){
+  const current={x:a.x+Math.round(dx*i/steps),y:a.y+Math.round(dy*i/steps)};
+  const sk=segmentKey(previous,current),sl=routedSegments[sk]||(routedSegments[sk]=[]);
+  if(!sl.includes(pair))sl.push(pair);
+  const diag=diagonalInfo(previous,current);
+  if(diag){const dk=diag.square+"|"+diag.orientation,dl=routedDiagonals[dk]||(routedDiagonals[dk]=[]);if(!dl.includes(pair))dl.push(pair);}
+  const pk=cellKey(current.x,current.y),pl=routedGridPoints[pk]||(routedGridPoints[pk]=[]);
+  if(!pl.includes(pair))pl.push(pair);
+  previous=current;
+ }
+}
+
 function findGridRoute(edge,recoveryMode){
  const nodeStart=nodeGridPositions[edge.from],nodeGoal=nodeGridPositions[edge.to];if(!nodeStart||!nodeGoal)return [];
  const direction=DIRECTIONS[directionForDelta(nodeGoal.x-nodeStart.x,nodeGoal.y-nodeStart.y)];
@@ -268,7 +283,12 @@ function findGridRoute(edge,recoveryMode){
  const coreBounds=componentBounds[componentOf[edge.from]]||{minX:nodeStart.x-10,maxX:nodeStart.x+10,minY:nodeStart.y-10,maxY:nodeStart.y+10};
  const margin=recoveryMode?10:0;
  const bounds={minX:coreBounds.minX-margin,maxX:coreBounds.maxX+margin,minY:coreBounds.minY-margin,maxY:coreBounds.maxY+margin};
- const pair=pairKey(edge.from,edge.to),startKey=start.x+","+start.y+",-1";
+ const pair=pairKey(edge.from,edge.to);
+ // Reserve each fixed node-to-port connector before searching the middle path;
+ // otherwise later arrows could cut across these short but important segments.
+ reserveGridSegment(nodeStart,start,pair);
+ reserveGridSegment(goal,nodeGoal,pair);
+ const startKey=start.x+","+start.y+",-1";
  const open=[],best=new Map(),previous=new Map(),states=new Map();
  const first={x:start.x,y:start.y,dir:-1,g:0,f:octileDistance(start,goal),key:startKey};
  best.set(startKey,0);states.set(startKey,first);heapPush(open,first);
