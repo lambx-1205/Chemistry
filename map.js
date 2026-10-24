@@ -101,7 +101,10 @@ const equations = {
   e78:"C₁₆H₃₂O₂ + NaOH → C₁₆H₃₁NaO₂ + H₂O",
   e79:"C₁₈H₃₆O₂ + CH₃OH ⇌ C₁₉H₃₈O₂ + H₂O",
   e80:"C₅₇H₁₁₀O₆ + 3NaOH → C₃H₈O₃ + 3C₁₈H₃₅NaO₂",
-  e81:"C₆H₆ + CH₂=CHCH₃ → C₆H₅CH(CH₃)₂"
+  e81:"C₆H₆ + CH₂=CHCH₃ → C₆H₅CH(CH₃)₂",
+  e82:"C₆H₅Cl + NaOH → C₆H₅OH + NaCl",
+  e83:"C₆H₆O + Zn → C₆H₆ + ZnO",
+  e84:"C₆H₅N₂Cl + H₃PO₂ + H₂O → C₆H₆ + N₂ + H₃PO₃ + HCl"
 };
 
 const viewport = document.getElementById("map-viewport");
