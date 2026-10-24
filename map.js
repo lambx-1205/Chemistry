@@ -197,6 +197,19 @@ function nearestFreeCell(x,y,occupied,preferredDirection){
  }
  return {x:x+15,y:y+15};
 }
+function nearestFreeNodeCell(x,y,occupied,preferredDirection){
+ // Card locations must remain at least six routing cells apart.
+ for(let radius=6;radius<=90;radius+=6){
+  const candidates=[];
+  for(let dy=-radius;dy<=radius;dy+=6)for(let dx=-radius;dx<=radius;dx+=6){
+   if(Math.max(Math.abs(dx),Math.abs(dy))!==radius||occupied[cellKey(x+dx,y+dy)])continue;
+   const dir=directionForDelta(dx,dy);
+   candidates.push({x:x+dx,y:y+dy,score:radius*20+(preferredDirection===undefined?0:circularDistance(dir,preferredDirection)*3)});
+  }
+  if(candidates.length){candidates.sort((p,q)=>p.score-q.score||p.y-q.y||p.x-q.x);return candidates[0]}
+ }
+ return {x:x+96,y:y+96};
+}
 function buildAdjacency(){
  const adj=Object.create(null),inDeg=Object.create(null),outDeg=Object.create(null);
  compounds.forEach(c=>{adj[c.id]=[];inDeg[c.id]=0;outDeg[c.id]=0});
@@ -222,11 +235,11 @@ function makeComponent(nodes){
   const chosen=chooseSpreadDirections(available,Math.min(unseen.length,available.length),back);
   unseen.forEach((next,i)=>{
    const d=i<chosen.length?DIRECTIONS[chosen[i]]:null;
-   const p=d?{x:here.x+d.dx*6,y:here.y+d.dy*6}:nearestFreeCell(here.x,here.y,occupied);
+   const p=d?{x:here.x+d.dx*6,y:here.y+d.dy*6}:nearestFreeNodeCell(here.x,here.y,occupied);
    local[next]={x:p.x,y:p.y};occupied[cellKey(p.x,p.y)]=next;parent[next]=current;queue.push(next);
   });
  }
- nodes.forEach(id=>{if(!local[id]){const p=nearestFreeCell(0,0,occupied);local[id]={x:p.x,y:p.y};occupied[cellKey(p.x,p.y)]=id}});
+ nodes.forEach(id=>{if(!local[id]){const p=nearestFreeNodeCell(0,0,occupied);local[id]={x:p.x,y:p.y};occupied[cellKey(p.x,p.y)]=id}});
  const xs=nodes.map(id=>local[id].x),ys=nodes.map(id=>local[id].y);
  const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
  return {nodes,root,positions:local,minX,maxX,minY,maxY,width:maxX-minX+1,height:maxY-minY+1};
