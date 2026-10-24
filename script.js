@@ -6,7 +6,7 @@ var compounds=sharedData.compounds;
 var edges=sharedData.edges;
 var byId={},byName={};
 compounds.forEach(function(c){byId[c.id]=c;byName[c.name.toLocaleLowerCase()]=c;if(c.pubchemName)byName[c.pubchemName.toLocaleLowerCase()]=c;(c.aliases||[]).forEach(function(alias){byName[String(alias).toLocaleLowerCase()]=c;});});
-var currentCompound=null,lookupSequence=0,structureSequence=0;
+var currentCompound=null,lookupSequence=0,structureSequence=0,oneStepOrderReversed=false;
 var input=document.getElementById("compound-search");
 var searchButton=document.getElementById("search-button");
 var suggestions=document.getElementById("compound-suggestions-list");
@@ -21,6 +21,9 @@ var previousRoot=document.getElementById("previous-step-results");
 var nextRoot=document.getElementById("next-step-results");
 var previousCount=document.getElementById("previous-step-count");
 var nextCount=document.getElementById("next-step-count");
+var oneStepToolbar=document.getElementById("one-step-toolbar");
+var swapOneStepOrderButton=document.getElementById("swap-one-step-order");
+var oneStepOrderStatus=document.getElementById("one-step-order-status");
 var reactionDetailDialog=document.getElementById("reaction-detail-dialog");
 var reactionDetailTitle=document.getElementById("reaction-detail-title");
 var reactionDetailContent=document.getElementById("reaction-detail-content");
@@ -420,6 +423,60 @@ function drawStructure(target,smilesValue,width,height,key,formula){
   console.error("RDKit initialization failed:",error&&error.message?error.message:error);
  });
 }
+async function copyMainStructureImage(){
+ var button=document.getElementById("copy-structure");
+ if(!button)return;
+ var originalLabel=button.innerHTML;
+ button.disabled=true;
+ try{
+  var svg=mainStructure.querySelector("svg");
+  if(!svg)throw new Error("構造式がまだ描画されていません。少し待ってから再度コピーしてください。");
+  if(!navigator.clipboard||typeof navigator.clipboard.write!=="function"||typeof window.ClipboardItem!=="function"){
+   throw new Error("このブラウザでは画像コピーに対応していません。HTTPS接続の対応ブラウザでお試しください。");
+  }
+  var bounds=svg.getBoundingClientRect();
+  var scale=2;
+  var pixelWidth=Math.max(1,Math.round((bounds.width||mainStructure.clientWidth||440)*scale));
+  var pixelHeight=Math.max(1,Math.round((bounds.height||mainStructure.clientHeight||270)*scale));
+  var copySvg=svg.cloneNode(true);
+  copySvg.setAttribute("xmlns","http://www.w3.org/2000/svg");
+  copySvg.setAttribute("width",String(pixelWidth));
+  copySvg.setAttribute("height",String(pixelHeight));
+  var svgBlob=new Blob([new XMLSerializer().serializeToString(copySvg)],{type:"image/svg+xml;charset=utf-8"});
+  var objectUrl=URL.createObjectURL(svgBlob);
+  var image=new Image();
+  try{
+   await new Promise(function(resolve,reject){
+    image.onload=resolve;
+    image.onerror=function(){reject(new Error("構造式画像を変換できませんでした。"));};
+    image.src=objectUrl;
+   });
+  }finally{
+   URL.revokeObjectURL(objectUrl);
+  }
+  var canvas=document.createElement("canvas");
+  canvas.width=pixelWidth;canvas.height=pixelHeight;
+  var context=canvas.getContext("2d");
+  if(!context)throw new Error("画像変換用のキャンバスを作成できませんでした。");
+  context.fillStyle="#ffffff";
+  context.fillRect(0,0,canvas.width,canvas.height);
+  context.drawImage(image,0,0,canvas.width,canvas.height);
+  var pngBlob=await new Promise(function(resolve,reject){
+   canvas.toBlob(function(blob){
+    if(blob)resolve(blob);
+    else reject(new Error("PNG画像を作成できませんでした。"));
+   },"image/png");
+  });
+  await navigator.clipboard.write([new window.ClipboardItem({"image/png":pngBlob})]);
+  button.textContent="コピーしました ✓";
+  setStatus("白背景の構造式画像をコピーしました。","success");
+ }catch(error){
+  button.textContent="コピー失敗";
+  setStatus(error&&error.message?error.message:"構造式画像をコピーできませんでした。","error");
+ }finally{
+  window.setTimeout(function(){button.innerHTML=originalLabel;button.disabled=false;},1800);
+ }
+}
 document.getElementById("local-count").textContent=String(compounds.length);
 function renderSearchResults(){
  var optionCount=compounds.length;
@@ -539,16 +596,31 @@ function openReactionDetails(edgeId){
  if(typeof reactionDetailDialog.showModal==="function")reactionDetailDialog.showModal();
  else reactionDetailDialog.setAttribute("open","");
 }
+function setOneStepOrder(reversed){
+ var previousSection=previousRoot.closest(".one-step-section");
+ var nextSection=nextRoot.closest(".one-step-section");
+ if(!previousSection||!nextSection||previousSection.parentNode!==nextSection.parentNode)return;
+ if(reversed)previousSection.parentNode.insertBefore(nextSection,previousSection);
+ else nextSection.parentNode.insertBefore(previousSection,nextSection);
+ oneStepOrderReversed=!!reversed;
+ if(swapOneStepOrderButton){
+  swapOneStepOrderButton.setAttribute("aria-pressed",oneStepOrderReversed?"true":"false");
+  swapOneStepOrderButton.innerHTML=oneStepOrderReversed?'<span aria-hidden="true">↕</span> 元の上下順に戻す':'<span aria-hidden="true">↕</span> 上下を入れ替える';
+ }
+ if(oneStepOrderStatus)oneStepOrderStatus.textContent=oneStepOrderReversed?"表示順：一段階後 → 一段階前":"表示順：一段階前 → 一段階後";
+}
 function renderOneStep(c){
  var previousSection=previousRoot.closest(".one-step-section");
  var nextSection=nextRoot.closest(".one-step-section");
  if(c&&c.kind==="external"){
+  if(oneStepToolbar)oneStepToolbar.hidden=true;
   if(previousSection)previousSection.hidden=true;
   if(nextSection)nextSection.hidden=true;
   previousRoot.innerHTML="";nextRoot.innerHTML="";
   previousCount.textContent="00";nextCount.textContent="00";
   return;
  }
+ if(oneStepToolbar)oneStepToolbar.hidden=false;
  if(previousSection)previousSection.hidden=false;
  if(nextSection)nextSection.hidden=false;
  var incoming=edges.filter(function(edge){return edge.to===c.id;});
@@ -829,6 +901,8 @@ async function searchCompound(){
 function init(){
  fillSuggestions();renderSearchResults();
  document.getElementById("open-3d-model").addEventListener("click",open3DMolecule);
+ document.getElementById("copy-structure").addEventListener("click",copyMainStructureImage);
+ swapOneStepOrderButton.addEventListener("click",function(){setOneStepOrder(!oneStepOrderReversed);});
  document.getElementById("molecule3d-close").addEventListener("click",function(){molecule3dRequest++;if(activeMolecule3D&&activeMolecule3D.dispose)activeMolecule3D.dispose();activeMolecule3D=null;molecule3dDialog.close();});
  document.getElementById("molecule3d-spacefill").addEventListener("click",function(){setMolecule3DMode("spacefill");});
  document.getElementById("molecule3d-ballstick").addEventListener("click",function(){setMolecule3DMode("ballstick");});
