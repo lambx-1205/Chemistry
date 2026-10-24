@@ -513,3 +513,21 @@ a{color:inherit}
 
 .pubchem-sync-status{min-height:14px;margin:-9px 5px 18px;font-size:10px;line-height:1.5;color:#7b877e}
 .pubchem-sync-status:empty{display:none}
+
+
+/* Structure image export and reversible one-step reaction layout. */
+.structure-foot-actions{gap:7px;flex-wrap:wrap;}
+.structure-copy-trigger{display:inline-flex;align-items:center;gap:6px;border:1px solid #d9e4d8;border-radius:8px;padding:7px 9px;background:#f5f8f2;color:#42664a;font-size:10px;font-weight:800;white-space:nowrap;cursor:pointer;}
+.structure-copy-trigger:hover{background:#e4efe1;border-color:#b9cfb7;}
+.structure-copy-trigger:disabled{opacity:.7;cursor:wait;}
+.one-step-toolbar{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap;margin:22px 0 -12px;}
+.swap-one-step-trigger{display:inline-flex;align-items:center;gap:7px;border:1px solid #dbe4d8;border-radius:9px;padding:9px 12px;background:#f7f9f5;color:#49684e;font-size:10px;font-weight:800;cursor:pointer;transition:background .15s,border-color .15s;}
+.swap-one-step-trigger:hover,.swap-one-step-trigger[aria-pressed="true"]{background:#e6f0e3;border-color:#b9cfb7;}
+.one-step-order-status{color:#899589;font-size:9px;line-height:1.6;}
+.one-step-toolbar[hidden]{display:none!important;}
+@media(max-width:620px){
+ .structure-foot-actions{gap:6px;}
+ .structure-copy-trigger,.molecule-3d-trigger{padding:6px 7px;font-size:9px;}
+ .one-step-toolbar{justify-content:flex-start;gap:7px;margin:18px 0 -12px;}
+ .one-step-order-status{width:100%;}
+}
