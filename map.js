@@ -461,7 +461,7 @@ function drawEdges(dimensions){
   const group=svgEl("g",{class:"map-edge",tabindex:"0",role:"button","data-edge-id":edge.id,"aria-label":(edge.name||edge.label)+"。反応式を表示"});
   const edgeColor=EDGE_COLORS[edge.type]||EDGE_COLORS.other;
   const markerType=EDGE_COLORS[edge.type]?edge.type:"other";
-  const hit=svgEl("path",{class:"map-edge-hitbox",d:pathD}),line=svgEl("path",{class:"map-edge-visible",d:pathD,stroke:edgeColor,"marker-end":"url(#map-arrow-head-"+markerType+")"});
+  const hit=svgEl("path",{class:"map-edge-hitbox",d:pathD}),line=svgEl("path",{class:"map-edge-visible",d:pathD,style:"stroke:"+edgeColor,"marker-end":"url(#map-arrow-head-"+markerType+")"});
   const bg=svgEl("rect",{class:"map-edge-label-bg",x:(labelX-labelWidth/2).toFixed(1),y:(labelY-labelHeight/2).toFixed(1),width:labelWidth,height:labelHeight,rx:8});
   const label=svgEl("text",{class:"map-edge-label-text",x:labelX.toFixed(1),y:labelY.toFixed(1)});label.textContent=text;
   group.append(hit,line,bg,label);group.addEventListener("click",()=>openReaction(edge));
