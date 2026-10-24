@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f5f6f2">
+<meta name="description" content="化合物を構造式カード、化学反応を矢印でつないだ有機化学の反応系統図。">
+<title>化合物map — Organic Atlas</title>
+<link rel="preconnect" href="https://unpkg.com">
+<link rel="stylesheet" href="styles.css?v=20261024-map1">
+<link rel="stylesheet" href="map.css?v=20261024-map1">
+<script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js" defer></script>
+<script src="chemistry-data.js?v=20261024-map1" defer></script>
+<script src="map.js?v=20261024-map1" defer></script>
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="./" aria-label="Organic Atlas 化合物検索へ">
+    <span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 32 32" width="27" height="27" fill="none"><path d="M6 20.5 13 7l13 5-7 13-13-4.5Z" stroke="currentColor" stroke-width="1.6"/><circle cx="13" cy="7" r="2" fill="currentColor"/><circle cx="26" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="25" r="2" fill="currentColor"/><circle cx="6" cy="20.5" r="2" fill="currentColor"/></svg></span>
+    <span class="brand-wordmark"><strong>Organic Atlas</strong><span>HIGH SCHOOL ORGANIC CHEMISTRY</span></span>
+  </a>
+  <nav class="map-header-nav" aria-label="ページ移動">
+    <a href="./">化合物検索</a>
+    <a href="compounds.html">化合物一覧</a>
+  </nav>
+</header>
+
+<main class="map-page">
+  <section class="map-heading">
+    <div>
+      <span class="section-eyebrow">REACTION ATLAS</span>
+      <h1>化合物map</h1>
+      <p>化合物を選ぶと詳細ページへ、反応の矢印を選ぶと反応式が開きます。</p>
+    </div>
+    <div class="map-count" id="map-count" aria-live="polite">反応系統図を準備しています…</div>
+  </section>
+
+  <section class="map-controls" aria-label="地図の操作">
+    <div class="map-search-wrap">
+      <label for="map-search">化合物を探す</label>
+      <div class="map-search-line">
+        <input id="map-search" type="search" list="map-compound-options" placeholder="化合物名を入力…" autocomplete="off">
+        <datalist id="map-compound-options"></datalist>
+        <button id="map-search-button" type="button">移動</button>
+      </div>
+      <span class="map-search-status" id="map-search-status" role="status"></span>
+    </div>
+    <div class="map-view-actions" aria-label="表示倍率">
+      <button type="button" id="map-zoom-out" aria-label="縮小" title="縮小">−</button>
+      <button type="button" id="map-zoom-in" aria-label="拡大" title="拡大">＋</button>
+      <button type="button" id="map-fit" class="map-fit-button">全体表示</button>
+    </div>
+    <div class="map-legend"><span class="legend-arrow" aria-hidden="true">→</span>反応の向き <span class="legend-note">矢印を選択して反応式を確認</span></div>
+  </section>
+
+  <section class="map-viewport" id="map-viewport" aria-label="化合物反応系統図">
+    <div class="map-loading" id="map-loading">化合物と反応を配置しています…</div>
+    <div class="map-world" id="map-world" hidden>
+      <svg class="map-lines" id="map-lines" aria-label="反応を示す矢印"></svg>
+      <div class="map-group-layer" id="map-group-layer" aria-hidden="true"></div>
+      <div class="map-node-layer" id="map-node-layer"></div>
+    </div>
+  </section>
+  <p class="map-hint">ドラッグで移動・ホイールで拡大縮小できます。化合物カードは検索・反応の起点として使用できます。</p>
+
+  <footer class="site-update-footer map-update-footer" aria-label="更新日時と更新履歴">
+    <div class="site-update-heading"><strong>更新情報</strong><span>最終更新：2026-10-24</span></div>
+    <details class="site-update-history">
+      <summary>更新履歴</summary>
+      <ul>
+        <li><time datetime="2026-10-24">2026-10-24</time> 化合物mapを新設。構造式リンク・反応矢印・反応式ダイアログを追加</li>
+        <li><time datetime="2026-10-24">2026-10-24</time> PubChem候補は日本語名のみ表示し、未登録化合物の検索を改善</li>
+        <li><time datetime="2026-10-24">2026-10-24</time> 3D分子模型と異性体比較機能を追加</li>
+      </ul>
+    </details>
+  </footer>
+</main>
+
+<dialog class="reaction-dialog" id="reaction-dialog" aria-labelledby="reaction-dialog-title">
+  <div class="reaction-dialog-head">
+    <div>
+      <span class="section-eyebrow">REACTION DETAIL</span>
+      <h2 id="reaction-dialog-title">反応名</h2>
+    </div>
+    <button type="button" id="reaction-dialog-close" class="reaction-dialog-close" aria-label="閉じる">×</button>
+  </div>
+  <p class="reaction-dialog-route" id="reaction-dialog-route"></p>
+  <div class="reaction-equation-label">化学反応式</div>
+  <div class="reaction-equation" id="reaction-dialog-equation"></div>
+  <div class="reaction-detail-grid">
+    <div><span>反応条件・試薬</span><strong id="reaction-dialog-condition"></strong></div>
+    <div><span>反応の概要</span><p id="reaction-dialog-note"></p></div>
+  </div>
+  <div class="reaction-dialog-actions">
+    <a id="reaction-from-link" href="./">出発物質を開く ↗</a>
+    <a id="reaction-to-link" href="./">生成物を開く ↗</a>
+  </div>
+</dialog>
+</body>
+</html>
