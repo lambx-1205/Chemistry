@@ -273,11 +273,13 @@ function findGridRoute(edge){
    if(nx<bounds.minX||nx>bounds.maxX||ny<bounds.minY||ny>bounds.maxY)return;
    const nk=cellKey(nx,ny),blocked=gridOccupancy[nk];if(blocked&&blocked!==edge.from&&blocked!==edge.to)return;
    const next={x:nx,y:ny},sk=segmentKey(cur,next),owners=routedSegments[sk]||[];
-   let penalty=owners.some(p=>p!==pair)?100000:0;
+   // Crossings are forbidden, not merely made expensive; this prevents the
+   // router from accepting one crossing because several detours cost more.
+   if(owners.some(p=>p!==pair))return;
    const diag=diagonalInfo(cur,next);
-   if(diag&&(routedDiagonals[diag.square+"|"+(-diag.orientation)]||[]).some(p=>p!==pair))penalty+=100000;
-   if(!(nx===goal.x&&ny===goal.y)&&!(nx===start.x&&ny===start.y)&&(routedGridPoints[nk]||[]).some(p=>p!==pair))penalty+=100000;
-   const ng=cur.g+((d.dx===0||d.dy===0)?10:14)+(cur.dir!==-1&&cur.dir!==d.index?4:0)+penalty;
+   if(diag&&(routedDiagonals[diag.square+"|"+(-diag.orientation)]||[]).some(p=>p!==pair))return;
+   if(!(nx===goal.x&&ny===goal.y)&&!(nx===start.x&&ny===start.y)&&(routedGridPoints[nk]||[]).some(p=>p!==pair))return;
+   const ng=cur.g+((d.dx===0||d.dy===0)?10:14)+(cur.dir!==-1&&cur.dir!==d.index?4:0);
    const key=nx+","+ny+","+d.index;
    if(!best.has(key)||ng<best.get(key)){const state={x:nx,y:ny,dir:d.index,g:ng,f:ng+octileDistance(next,goal),key};best.set(key,ng);previous.set(key,cur.key);states.set(key,state);heapPush(open,state)}
   });
