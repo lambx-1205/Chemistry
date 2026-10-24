@@ -65,7 +65,7 @@ function isPubChemEnrichmentCandidate(c){
  var identity=[c.id,c.name,c.pubchemName].join(" ");
  var category=[c.family,c.formula].join(" ");
  if(isRestrictedLookupTerm(identity))return false;
- if(is3DRestrictedCompound(c))return false;
+ if(c.id==="diazonium"||is3DRestrictedCompound(c))return false;
  if(/高分子|polymer/i.test(category))return false;
  if(/cellulose|starch|natural-rubber|polyethylene|polystyrene|polypropylene|polyvinyl|polyacrylonitrile|polybutadiene|nylon-66|^ptfe$/i.test(String(c.id)))return false;
  if(/ₙ/.test(String(c.formula||"")))return false;

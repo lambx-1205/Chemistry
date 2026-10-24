@@ -34,13 +34,15 @@ def normalize_formula(value: object) -> str:
 
 
 RESTRICTED_PATTERN = re.compile(
-    r"(trinitrotoluene|(^|\\W)tnt($|\\W)|nitroglycerin|nitroglycerine|"
+    r"(trinitrotoluene|tnt|nitroglycerin|nitroglycerine|"
     r"methamphetamine|amphetamine|cocaine|heroin|fentanyl|mdma|ecstasy|"
     r"oxycodone|hydrocodone|carfentanil|ricin|sarin|vx nerve agent|cyanide|"
-    r"hydrazoic acid|rdx|pentaerythritol tetranitrate|petn|cumene[- ]hydroperoxide|"
-    r"トリニトロトルエン|ニトログリセリン|クメンヒドロペルオキシド|メタンフェタミン|覚醒剤|コカイン|"
-    r"ヘロイン|フェンタニル|エクスタシー|モルヒネ|オキシコドン|リシン毒素|ヒマ毒|"
-    r"サリン|シアン化物|青酸|爆薬|爆発物|神経剤)",
+    r"hydrazoic acid|rdx|pentaerythritol tetranitrate|petn|"
+    r"cumene[- ]hydroperoxide|benzenediazonium|benzene diazonium|"
+    r"トリニトロトルエン|ニトログリセリン|クメンヒドロペルオキシド|"
+    r"塩化ベンゼンジアゾニウム|メタンフェタミン|覚醒剤|コカイン|"
+    r"ヘロイン|フェンタニル|エクスタシー|モルヒネ|オキシコドン|"
+    r"リシン毒素|ヒマ毒|サリン|シアン化物|青酸|爆薬|爆発物|神経剤)",
     re.IGNORECASE,
 )
 
