@@ -159,9 +159,7 @@ const DIRECTIONS=[
  {dx:0,dy:-1,index:0},{dx:1,dy:-1,index:1},{dx:1,dy:0,index:2},{dx:1,dy:1,index:3},
  {dx:0,dy:1,index:4},{dx:-1,dy:1,index:5},{dx:-1,dy:0,index:6},{dx:-1,dy:-1,index:7}
 ];
-const ROUTE_DIRECTIONS=[
- {dx:0,dy:-1,index:0},{dx:1,dy:0,index:2},{dx:0,dy:1,index:4},{dx:-1,dy:0,index:6}
-];
+const ROUTE_DIRECTIONS=DIRECTIONS;
 const edgePorts=Object.create(null);
 const nodeGridPositions=Object.create(null),componentOf=Object.create(null),componentBounds=Object.create(null);
 const gridOccupancy=Object.create(null),routedSegments=Object.create(null),routedDiagonals=Object.create(null),routedGridPoints=Object.create(null);
@@ -307,7 +305,7 @@ function heapPop(heap){
 }
 function segmentKey(a,b){const x=cellKey(a.x,a.y),y=cellKey(b.x,b.y);return x<y?x+"~"+y:y+"~"+x}
 function diagonalInfo(a,b){const dx=b.x-a.x,dy=b.y-a.y;if(Math.abs(dx)!==1||Math.abs(dy)!==1)return null;return {square:Math.min(a.x,b.x)+","+Math.min(a.y,b.y),orientation:dx*dy>0?1:-1}}
-function octileDistance(a,b){return (Math.abs(a.x-b.x)+Math.abs(a.y-b.y))*10}
+function octileDistance(a,b){const dx=Math.abs(a.x-b.x),dy=Math.abs(a.y-b.y),di=Math.min(dx,dy),st=Math.max(dx,dy)-di;return di*14+st*10}
 function reserveGridSegment(a,b,pair){
  const dx=b.x-a.x,dy=b.y-a.y,steps=Math.max(Math.abs(dx),Math.abs(dy));
  let previous={x:a.x,y:a.y};
@@ -353,11 +351,14 @@ function findGridRoute(edge,recoveryLevel=0){
    const nk=cellKey(nx,ny);if(gridOccupancy[nk])return;
    const next={x:nx,y:ny},sk=segmentKey(cur,next),owners=routedSegments[sk]||[];
    const segmentConflict=owners.some(p=>p!==routeId);
+   const diag=diagonalInfo(cur,next);
+   const diagonalConflict=!!(diag&&(routedDiagonals[diag.square+"|"+(-diag.orientation)]||[]).some(p=>p!==routeId));
    const pointConflict=(routedGridPoints[nk]||[]).some(p=>p!==routeId);
-   // Only collision-free paths are admitted. Recovery retries add more routing
-   // lanes around the component instead of allowing a line to cross another.
-   if(segmentConflict||pointConflict)return;
-   const ng=cur.g+10+(cur.dir!==-1&&cur.dir!==d.index?9:0);
+   // Every segment, crossing diagonal and grid junction is reserved. This
+   // permits a diagonal exit from a congested card port while still preventing
+   // arrows from crossing or sharing the same track.
+   if(segmentConflict||diagonalConflict||pointConflict)return;
+   const ng=cur.g+((d.dx===0||d.dy===0)?10:14)+(cur.dir!==-1&&cur.dir!==d.index?5:0);
    const key=nx+","+ny+","+d.index;
    if(!best.has(key)||ng<best.get(key)){
     const state={x:nx,y:ny,dir:d.index,g:ng,f:ng+octileDistance(next,goal),key};
@@ -373,6 +374,8 @@ function findGridRoute(edge,recoveryLevel=0){
  for(let i=1;i<path.length;i++){
   const a=path[i-1],b=path[i],sk=segmentKey(a,b),list=routedSegments[sk]||(routedSegments[sk]=[]);
   if(!list.includes(routeId))list.push(routeId);
+  const diag=diagonalInfo(a,b);
+  if(diag){const dk=diag.square+"|"+diag.orientation,dl=routedDiagonals[dk]||(routedDiagonals[dk]=[]);if(!dl.includes(routeId))dl.push(routeId)}
  }
  path.slice(1).forEach(point=>{
   const k=cellKey(point.x,point.y),owners=routedGridPoints[k]||(routedGridPoints[k]=[]);
