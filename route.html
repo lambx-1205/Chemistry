@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f5f6f2">
+<meta name="description" content="出発物質と目的物を指定し、登録済みの化学反応から合成経路を探す。">
+<title>経路検索 — Organic Atlas</title>
+<link rel="stylesheet" href="styles.css?v=20261024-map-nav1">
+<link rel="stylesheet" href="route.css?v=20261024-route1">
+<script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js" defer></script>
+<script src="chemistry-data.js?v=20261024-map5" defer></script>
+<script src="route.js?v=20261024-route1" defer></script>
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="./" aria-label="Organic Atlas 化合物検索へ">
+    <span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 32 32" width="27" height="27" fill="none"><path d="M6 20.5 13 7l13 5-7 13-13-4.5Z" stroke="currentColor" stroke-width="1.6"/><circle cx="13" cy="7" r="2" fill="currentColor"/><circle cx="26" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="25" r="2" fill="currentColor"/><circle cx="6" cy="20.5" r="2" fill="currentColor"/></svg></span>
+    <span class="brand-wordmark"><strong>Organic Atlas</strong><span>HIGH SCHOOL ORGANIC CHEMISTRY</span></span>
+  </a>
+  <nav class="route-header-nav" aria-label="ページ移動">
+    <a href="./">化合物検索</a>
+    <a href="compounds.html">化合物一覧</a>
+    <a href="map.html">化合物map</a>
+    <a href="route.html" aria-current="page">経路検索</a>
+  </nav>
+</header>
+<main class="route-page">
+  <section class="route-intro">
+    <div class="route-eyebrow"><span class="route-eyebrow-dot"></span>SYNTHESIS ROUTE FINDER</div>
+    <h1>経路検索</h1>
+    <p>出発物質から目的物まで、登録済みの反応をたどって経路を探します。</p>
+  </section>
+
+  <section class="route-search-panel" aria-label="経路の検索">
+    <form id="route-search-form" class="route-search-form" autocomplete="off">
+      <div class="route-input-field">
+        <label for="route-start">始点 · START</label>
+        <input id="route-start" list="route-compound-options" name="start" placeholder="例：ベンゼン" spellcheck="false" required>
+      </div>
+      <div class="route-search-arrow" aria-hidden="true">
+        <svg viewBox="0 0 48 24" width="48" height="24"><path d="M2 12h40m-9-8 9 8-9 8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="route-input-field">
+        <label for="route-end">終点 · GOAL</label>
+        <input id="route-end" list="route-compound-options" name="end" placeholder="例：フェノール" spellcheck="false" required>
+      </div>
+      <datalist id="route-compound-options"></datalist>
+      <button class="route-search-submit" id="route-search-submit" type="submit"><span>経路を検索</span><span aria-hidden="true">↗</span></button>
+    </form>
+    <div class="route-search-status" id="route-search-status" aria-live="polite">化合物名を入力するか、下の例を選んでください。</div>
+    <div class="route-examples" aria-label="経路検索の例">
+      <span>検索例</span>
+      <button type="button" data-route-example="ベンゼン|フェノール">ベンゼン → フェノール</button>
+      <button type="button" data-route-example="ベンゼン|クメン">ベンゼン → クメン</button>
+      <button type="button" data-route-example="D-グルコース|エタノール">グルコース → エタノール</button>
+      <button type="button" data-route-example="エタン|エタノール">エタン → エタノール</button>
+    </div>
+  </section>
+
+  <section class="route-results" id="route-results" hidden aria-live="polite">
+    <div class="route-results-head">
+      <div>
+        <span class="route-section-kicker">FOUND ROUTE</span>
+        <h2 id="route-results-title">合成経路</h2>
+        <p id="route-results-subtitle"></p>
+      </div>
+      <div class="route-results-badge" id="route-results-count"></div>
+    </div>
+    <div class="route-direction-note"><span class="route-direction-symbol" aria-hidden="true">↓</span><span>上から下へ進みます。各反応のカードを押すと、試薬・反応条件・反応の概要を確認できます。</span></div>
+    <div class="route-timeline" id="route-timeline"></div>
+  </section>
+
+  <section class="route-empty-state" id="route-empty-state">
+    <div class="route-empty-icon" aria-hidden="true">↕</div>
+    <h2>出発物質と目的物をつなぐ</h2>
+    <p>検索結果は、登録されている反応の向きを尊重した最短経路です。未登録の反応や逆向きの反応は、自動では補いません。</p>
+  </section>
+
+  <footer class="site-update-footer" aria-label="更新日時と更新履歴">
+    <div class="site-update-heading"><strong>更新情報</strong><span>最終更新：2026-10-24</span></div>
+    <details class="site-update-history">
+      <summary>更新履歴</summary>
+      <ul>
+        <li><time datetime="2026-10-24">2026-10-24</time> 経路検索を追加。登録済み反応の最短経路と各反応の試薬・条件を表示</li>
+      </ul>
+    </details>
+  </footer>
+</main>
+
+<dialog class="route-reaction-dialog" id="route-reaction-dialog" aria-labelledby="route-dialog-title">
+  <div class="route-dialog-header">
+    <div><span class="route-section-kicker">REACTION DETAILS</span><h2 id="route-dialog-title">反応の詳細</h2></div>
+    <button type="button" class="route-dialog-close" id="route-dialog-close" aria-label="閉じる">×</button>
+  </div>
+  <div class="route-dialog-path" id="route-dialog-path"></div>
+  <section class="route-dialog-equation-panel">
+    <span class="route-dialog-label">反応式</span>
+    <div id="route-dialog-equation" class="route-dialog-equation"></div>
+  </section>
+  <section class="route-dialog-field">
+    <span class="route-dialog-label">使用試薬・反応条件</span>
+    <div id="route-dialog-condition" class="route-dialog-condition"></div>
+  </section>
+  <section class="route-dialog-field">
+    <span class="route-dialog-label">反応の概要・注意点</span>
+    <p id="route-dialog-note" class="route-dialog-note"></p>
+  </section>
+  <div class="route-dialog-links">
+    <a id="route-dialog-from-link" href="./">出発物質を開く ↗</a>
+    <a id="route-dialog-to-link" href="./">生成物を開く ↗</a>
+  </div>
+</dialog>
+</body>
+</html>
