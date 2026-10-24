@@ -4,6 +4,7 @@ const data=window.OrganicAtlasData;
 if(!data){const status=document.getElementById("route-search-status");if(status)status.textContent="化合物データを読み込めませんでした。ページを再読み込みしてください。";return;}
 const compounds=data.compounds||[],edges=data.edges||[];
 const byId=Object.create(null),byName=Object.create(null),adj=Object.create(null);
+let activeRoutes=[],activeRouteIndex=0,activeStart=null,activeEnd=null;
 compounds.forEach(c=>{
  byId[c.id]=c;adj[c.id]=[];
  [c.name,c.id,c.pubchemName,...(c.aliases||[])].filter(Boolean).forEach(label=>byName[String(label).trim().toLocaleLowerCase()]=c);
@@ -131,27 +132,57 @@ function resolveCompound(raw){
  const partial=compounds.filter(c=>[c.name,c.id,c.pubchemName,...(c.aliases||[])].filter(Boolean).some(v=>String(v).toLocaleLowerCase().includes(query)));
  return partial.length===1?partial[0]:null;
 }
-function shortestPath(startId,endId){
- if(startId===endId)return {compounds:[byId[startId]],edges:[]};
- const queue=[startId],seen=new Set([startId]),previous=Object.create(null);
- let found=false;
- for(let head=0;head<queue.length&&!found;head++){
-  const id=queue[head];
-  for(const edge of adj[id]||[]){
-   if(seen.has(edge.to))continue;
-   seen.add(edge.to);previous[edge.to]={from:id,edge};queue.push(edge.to);
-   if(edge.to===endId){found=true;break;}
+function findRoutes(startId,endId,limit=8){
+ if(startId===endId)return [{compounds:[byId[startId]],edges:[]}];
+ const queue=[{id:startId,edges:[],visited:new Set([startId])}],found=[];
+ let head=0,examined=0;
+ const maxDepth=Math.min(compounds.length-1,20),maxExplored=50000;
+ while(head<queue.length&&examined<maxExplored){
+  const current=queue[head++];examined++;
+  if(found.length>=limit&&current.edges.length>=found[found.length-1].edges.length)break;
+  if(current.edges.length>=maxDepth)continue;
+  for(const edge of adj[current.id]||[]){
+   if(current.visited.has(edge.to))continue;
+   const nextEdges=current.edges.concat(edge);
+   if(edge.to===endId){
+    found.push({compounds:[byId[startId],...nextEdges.map(item=>byId[item.to])],edges:nextEdges});
+    found.sort((a,b)=>a.edges.length-b.edges.length);
+    if(found.length>limit)found.pop();
+    continue;
+   }
+   const visited=new Set(current.visited);visited.add(edge.to);
+   queue.push({id:edge.to,edges:nextEdges,visited});
   }
  }
- if(!seen.has(endId))return null;
- const pathEdges=[];let cursor=endId;
- while(cursor!==startId){
-  const step=previous[cursor];if(!step)return null;
-  pathEdges.push(step.edge);cursor=step.from;
- }
- pathEdges.reverse();
- return {compounds:[byId[startId],...pathEdges.map(edge=>byId[edge.to])],edges:pathEdges};
+ return found;
 }
+function renderRouteOptions(routes,selectedIndex,start,end){
+ const host=document.getElementById("route-options-list");
+ const section=document.getElementById("route-options");
+ if(!host||!section)return;
+ host.replaceChildren();
+ section.hidden=routes.length<2;
+ if(routes.length<2)return;
+ document.getElementById("route-options-heading").textContent=routes.length+"通りの経路が見つかりました";
+ document.getElementById("route-options-description").textContent="段階数の少ない順です。経路を選ぶと、下の詳細表示が切り替わります。";
+ routes.forEach((route,index)=>{
+  const button=document.createElement("button");button.type="button";button.className="route-option"+(index===selectedIndex?" is-selected":"");button.setAttribute("aria-pressed",index===selectedIndex?"true":"false");
+  const top=document.createElement("span");top.className="route-option-top";
+  const num=document.createElement("span");num.className="route-option-number";num.textContent="経路 "+String(index+1).padStart(2,"0");
+  const steps=document.createElement("span");steps.className="route-option-steps";steps.textContent=route.edges.length+"段階";
+  if(index===0){const badge=document.createElement("span");badge.className="route-option-shortest";badge.textContent="最短";top.append(num,badge,steps);}else top.append(num,steps);
+  const path=document.createElement("span");path.className="route-option-path";path.textContent=route.compounds.map(compound=>compound.name).join(" → ");
+  button.append(top,path);
+  button.addEventListener("click",()=>{
+   activeRouteIndex=index;
+   renderRouteOptions(activeRoutes,activeRouteIndex,activeStart,activeEnd);
+   renderSearch(activeRoutes[index],activeStart,activeEnd);
+   setStatus("経路 "+(index+1)+" を表示中です。各反応の詳細から試薬・条件を確認できます。","success");
+  });
+  host.appendChild(button);
+ });
+}
+
 function setStatus(text,type){
  status.textContent=text;status.className="route-search-status"+(type?" "+type:"");
 }
@@ -160,7 +191,7 @@ function renderSearch(path,start,end){
  timeline.replaceChildren();
  const n=path.compounds.length;
  document.getElementById("route-results-title").textContent=start.name+" → "+end.name;
- document.getElementById("route-results-subtitle").textContent=n===1?"始点と終点が同じ化合物です。反応段階はありません。":"登録済みの反応データから、"+path.edges.length+"段階の最短経路が見つかりました。";
+ document.getElementById("route-results-subtitle").textContent=n===1?"始点と終点が同じ化合物です。反応段階はありません。":(activeRoutes.length>1?"全"+activeRoutes.length+"候補のうち、経路 "+(activeRouteIndex+1)+" を表示中です。":"登録済み反応から"+path.edges.length+"段階の経路が見つかりました。");
  document.getElementById("route-results-count").textContent=path.edges.length+"段階 · "+n+"化合物";
  path.compounds.forEach((compound,index)=>{
   const stage=document.createElement("article");stage.className="route-stage";stage.dataset.compoundId=compound.id;
@@ -218,13 +249,15 @@ function runSearch(event){
  }
  startInput.value=start.name;endInput.value=end.name;
  if(start.id===end.id){
-  renderSearch({compounds:[start],edges:[]},start,end);
+  activeStart=start;activeEnd=end;activeRouteIndex=0;activeRoutes=[{compounds:[start],edges:[]}];
+  renderRouteOptions(activeRoutes,0,start,end);renderSearch(activeRoutes[0],start,end);
   setStatus("始点と終点が同じ化合物です。","success");return;
  }
  submit.disabled=true;submit.querySelector("span").textContent="検索中…";
  try{
-  const path=shortestPath(start.id,end.id);
-  if(!path){
+  const routes=findRoutes(start.id,end.id,8);
+  if(!routes.length){
+   activeRoutes=[];activeRouteIndex=0;activeStart=start;activeEnd=end;renderRouteOptions([],0,start,end);
    timeline.replaceChildren();setHidden(results,true);setHidden(emptyState,false);
    emptyState.querySelector("h2").textContent="登録済み反応では経路が見つかりません";
    emptyState.querySelector("p").textContent=start.name+" から "+end.name+" へ向かう反応を、登録データの矢印方向に沿ってたどれませんでした。逆反応や未登録反応は自動で補わないため、地図に経路があっても向きが逆なら表示されません。";
@@ -232,8 +265,10 @@ function runSearch(event){
   }else{
    emptyState.querySelector("h2").textContent="出発物質と目的物をつなぐ";
    emptyState.querySelector("p").textContent="検索結果は、登録されている反応の向きを尊重した最短経路です。未登録の反応や逆向きの反応は、自動では補いません。";
-   renderSearch(path,start,end);
-   setStatus("経路が見つかりました。各反応の「詳細を見る」から試薬・条件を確認できます。","success");
+   activeStart=start;activeEnd=end;activeRoutes=routes;activeRouteIndex=0;
+   renderRouteOptions(activeRoutes,activeRouteIndex,start,end);
+   renderSearch(activeRoutes[0],start,end);
+   setStatus(routes.length>1?routes.length+"通りの経路が見つかりました。候補を選んで表示を切り替えられます。":"経路が見つかりました。各反応の「詳細を見る」から試薬・条件を確認できます。","success");
    results.scrollIntoView({behavior:"smooth",block:"start"});
   }
  }finally{
