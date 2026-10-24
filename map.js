@@ -24,7 +24,7 @@ compounds.forEach((c, i) => {
 
 const NODE_W = 360;
 const NODE_H = 280;
-const CELL = 120;
+const CELL = 100;
 const MAP_PAD = 100;
 const SVG_NS = "http://www.w3.org/2000/svg";
 const equations = {
@@ -159,6 +159,10 @@ const DIRECTIONS=[
  {dx:0,dy:-1,index:0},{dx:1,dy:-1,index:1},{dx:1,dy:0,index:2},{dx:1,dy:1,index:3},
  {dx:0,dy:1,index:4},{dx:-1,dy:1,index:5},{dx:-1,dy:0,index:6},{dx:-1,dy:-1,index:7}
 ];
+const ROUTE_DIRECTIONS=[
+ {dx:0,dy:-1,index:0},{dx:1,dy:0,index:2},{dx:0,dy:1,index:4},{dx:-1,dy:0,index:6}
+];
+const edgePorts=Object.create(null);
 const nodeGridPositions=Object.create(null),componentOf=Object.create(null),componentBounds=Object.create(null);
 const gridOccupancy=Object.create(null),routedSegments=Object.create(null),routedDiagonals=Object.create(null),routedGridPoints=Object.create(null);
 function cellKey(x,y){return x+","+y}
@@ -199,9 +203,9 @@ function nearestFreeCell(x,y,occupied,preferredDirection){
 }
 function nearestFreeNodeCell(x,y,occupied,preferredDirection){
  // Card locations must remain at least six routing cells apart.
- for(let radius=6;radius<=90;radius+=6){
+ for(let radius=4;radius<=100;radius+=4){
   const candidates=[];
-  for(let dy=-radius;dy<=radius;dy+=6)for(let dx=-radius;dx<=radius;dx+=6){
+  for(let dy=-radius;dy<=radius;dy+=4)for(let dx=-radius;dx<=radius;dx+=4){
    if(Math.max(Math.abs(dx),Math.abs(dy))!==radius||occupied[cellKey(x+dx,y+dy)])continue;
    const dir=directionForDelta(dx,dy);
    candidates.push({x:x+dx,y:y+dy,score:radius*20+(preferredDirection===undefined?0:circularDistance(dir,preferredDirection)*3)});
@@ -230,12 +234,12 @@ function makeComponent(nodes){
   const current=queue.shift(),here=local[current];
   const unseen=graph.adj[current].filter(n=>nodeSet.has(n)&&!local[n]).sort((a,b)=>graph.adj[b].length-graph.adj[a].length||compoundOrder[a]-compoundOrder[b]);
   if(!unseen.length)continue;
-  const available=DIRECTIONS.filter(d=>!occupied[cellKey(here.x+d.dx*6,here.y+d.dy*6)]).map(d=>d.index);
+  const available=DIRECTIONS.filter(d=>!occupied[cellKey(here.x+d.dx*4,here.y+d.dy*4)]).map(d=>d.index);
   const back=parent[current]?directionForDelta(local[parent[current]].x-here.x,local[parent[current]].y-here.y):undefined;
   const chosen=chooseSpreadDirections(available,Math.min(unseen.length,available.length),back);
   unseen.forEach((next,i)=>{
    const d=i<chosen.length?DIRECTIONS[chosen[i]]:null;
-   const p=d?{x:here.x+d.dx*6,y:here.y+d.dy*6}:nearestFreeNodeCell(here.x,here.y,occupied);
+   const p=d?{x:here.x+d.dx*4,y:here.y+d.dy*4}:nearestFreeNodeCell(here.x,here.y,occupied);
    local[next]={x:p.x,y:p.y};occupied[cellKey(p.x,p.y)]=next;parent[next]=current;queue.push(next);
   });
  }
@@ -256,7 +260,7 @@ function buildLayout(){
  let cursorGX=1,cursorGY=1,rowHeight=0,maxGX=1,maxGY=1;
  const rowLimit=27;
  components.forEach((comp,index)=>{
-  if(cursorGX>1&&cursorGX+comp.width+1>rowLimit){cursorGX=1;cursorGY+=rowHeight+30;rowHeight=0}
+  if(cursorGX>1&&cursorGX+comp.width+3>rowLimit){cursorGX=1;cursorGY+=rowHeight+8;rowHeight=0}
   const originGX=cursorGX-comp.minX,originGY=cursorGY-comp.minY;
   const title=document.createElement("div");title.className="map-group-title";
   title.style.left=(MAP_PAD+(cursorGX-1)*CELL)+"px";title.style.top=Math.max(8,MAP_PAD+(cursorGY-1)*CELL-42)+"px";
@@ -268,7 +272,7 @@ function buildLayout(){
   });
   const ps=comp.nodes.map(id=>nodeGridPositions[id]);
   componentBounds[index]={minX:Math.min(...ps.map(p=>p.x))-10,maxX:Math.max(...ps.map(p=>p.x))+10,minY:Math.min(...ps.map(p=>p.y))-10,maxY:Math.max(...ps.map(p=>p.y))+10};
-  cursorGX+=comp.width+30;rowHeight=Math.max(rowHeight,comp.height);
+  cursorGX+=comp.width+8;rowHeight=Math.max(rowHeight,comp.height);
  });
  const isolated=compounds.filter(c=>graph.adj[c.id].length===0);
  if(isolated.length){
@@ -281,12 +285,12 @@ function buildLayout(){
    const title=document.createElement("div");title.className="map-group-title";
    title.style.left=MAP_PAD+"px";title.style.top=(MAP_PAD+(isolatedY-1)*CELL-42)+"px";title.textContent=groupName;groupLayer.appendChild(title);
    list.forEach((c,i)=>{
-    const gx=1+(i%cols)*6,gy=isolatedY+Math.floor(i/cols)*6;
+    const gx=1+(i%cols)*4,gy=isolatedY+Math.floor(i/cols)*4;
     nodeGridPositions[c.id]={x:gx,y:gy};nodePositions[c.id]={x:MAP_PAD+(gx-1)*CELL,y:MAP_PAD+(gy-1)*CELL};
     for(let ox=-1;ox<=1;ox++)for(let oy=-1;oy<=1;oy++)gridOccupancy[cellKey(gx+ox,gy+oy)]=c.id;
     maxGX=Math.max(maxGX,gx);maxGY=Math.max(maxGY,gy);
    });
-   isolatedY+=Math.ceil(list.length/cols)*6+4;
+   isolatedY+=Math.ceil(list.length/cols)*4+3;
   });
  }
  const primary=components[0]||{nodes:compounds.map(c=>c.id),root:compounds[0]&&compounds[0].id};
@@ -303,7 +307,7 @@ function heapPop(heap){
 }
 function segmentKey(a,b){const x=cellKey(a.x,a.y),y=cellKey(b.x,b.y);return x<y?x+"~"+y:y+"~"+x}
 function diagonalInfo(a,b){const dx=b.x-a.x,dy=b.y-a.y;if(Math.abs(dx)!==1||Math.abs(dy)!==1)return null;return {square:Math.min(a.x,b.x)+","+Math.min(a.y,b.y),orientation:dx*dy>0?1:-1}}
-function octileDistance(a,b){const dx=Math.abs(a.x-b.x),dy=Math.abs(a.y-b.y),di=Math.min(dx,dy),st=Math.max(dx,dy)-di;return di*14+st*10}
+function octileDistance(a,b){return (Math.abs(a.x-b.x)+Math.abs(a.y-b.y))*10}
 function reserveGridSegment(a,b,pair){
  const dx=b.x-a.x,dy=b.y-a.y,steps=Math.max(Math.abs(dx),Math.abs(dy));
  let previous={x:a.x,y:a.y};
@@ -319,65 +323,95 @@ function reserveGridSegment(a,b,pair){
  }
 }
 
-function findGridRoute(edge,recoveryMode){
- const nodeStart=nodeGridPositions[edge.from],nodeGoal=nodeGridPositions[edge.to];if(!nodeStart||!nodeGoal)return [];
- const direction=DIRECTIONS[directionForDelta(nodeGoal.x-nodeStart.x,nodeGoal.y-nodeStart.y)];
- // Start/end search outside the rectangular card footprint; the drawing is
- // clipped back to the card border after a collision-free route is found.
+function findGridRoute(edge,recoveryLevel=0){
+ const nodeStart=nodeGridPositions[edge.from],nodeGoal=nodeGridPositions[edge.to];
+ if(!nodeStart||!nodeGoal)return [];
+ const ports=edgePorts[edge.id]||{from:directionForDelta(nodeGoal.x-nodeStart.x,nodeGoal.y-nodeStart.y),to:directionForDelta(nodeStart.x-nodeGoal.x,nodeStart.y-nodeGoal.y)};
+ const fromDirection=DIRECTIONS[ports.from]||DIRECTIONS[2];
+ const toDirection=DIRECTIONS[ports.to]||DIRECTIONS[6];
  const portRadius=2;
- const start={x:nodeStart.x+direction.dx*portRadius,y:nodeStart.y+direction.dy*portRadius};
- const goal={x:nodeGoal.x-direction.dx*portRadius,y:nodeGoal.y-direction.dy*portRadius};
+ const start={x:nodeStart.x+fromDirection.dx*portRadius,y:nodeStart.y+fromDirection.dy*portRadius};
+ const goal={x:nodeGoal.x+toDirection.dx*portRadius,y:nodeGoal.y+toDirection.dy*portRadius};
  const coreBounds=componentBounds[componentOf[edge.from]]||{minX:nodeStart.x-10,maxX:nodeStart.x+10,minY:nodeStart.y-10,maxY:nodeStart.y+10};
- const margin=recoveryMode?10:0;
+ const margins=[0,8,18,35,60];
+ const margin=margins[Math.min(recoveryLevel,margins.length-1)];
  const bounds={minX:coreBounds.minX-margin,maxX:coreBounds.maxX+margin,minY:coreBounds.minY-margin,maxY:coreBounds.maxY+margin};
- const pair=pairKey(edge.from,edge.to);
- // Reserve each fixed node-to-port connector before searching the middle path;
- // otherwise later arrows could cut across these short but important segments.
- reserveGridSegment(nodeStart,start,pair);
- reserveGridSegment(goal,nodeGoal,pair);
+ const routeId=String(edge.id);
+ // Each reaction has its own reserved path. Sharing only the node pair caused
+ // distinct reactions to occupy the same track and appear as one thick arrow.
+ reserveGridSegment(nodeStart,start,routeId);
+ reserveGridSegment(goal,nodeGoal,routeId);
  const startKey=start.x+","+start.y+",-1";
  const open=[],best=new Map(),previous=new Map(),states=new Map();
  const first={x:start.x,y:start.y,dir:-1,g:0,f:octileDistance(start,goal),key:startKey};
  best.set(startKey,0);states.set(startKey,first);heapPush(open,first);
  let endState=null,iterations=0;
- while(open.length&&iterations<250000){
+ while(open.length&&iterations<500000){
   iterations++;const cur=heapPop(open);if(cur.g!==best.get(cur.key))continue;
   if(cur.x===goal.x&&cur.y===goal.y){endState=cur;break}
-  DIRECTIONS.forEach(d=>{
+  ROUTE_DIRECTIONS.forEach(d=>{
    const nx=cur.x+d.dx,ny=cur.y+d.dy;
    if(nx<bounds.minX||nx>bounds.maxX||ny<bounds.minY||ny>bounds.maxY)return;
-   const nk=cellKey(nx,ny),blocked=gridOccupancy[nk];if(blocked)return;
+   const nk=cellKey(nx,ny);if(gridOccupancy[nk])return;
    const next={x:nx,y:ny},sk=segmentKey(cur,next),owners=routedSegments[sk]||[];
-   const segmentConflict=owners.some(p=>p!==pair);
-   const diag=diagonalInfo(cur,next);
-   const diagonalConflict=!!(diag&&(routedDiagonals[diag.square+"|"+(-diag.orientation)]||[]).some(p=>p!==pair));
-   const pointConflict=!(nx===goal.x&&ny===goal.y)&&!(nx===start.x&&ny===start.y)&&(routedGridPoints[nk]||[]).some(p=>p!==pair);
-   // First search strictly avoids every intersection. If the local corridor is
-   // blocked, the recovery pass gets a wider border but still heavily prefers
-   // an unoccupied route over crossing another reaction.
-   if(!recoveryMode&&(segmentConflict||diagonalConflict||pointConflict))return;
-   const penalty=recoveryMode&&(segmentConflict||diagonalConflict||pointConflict)?50000:0;
-   const ng=cur.g+((d.dx===0||d.dy===0)?10:14)+(cur.dir!==-1&&cur.dir!==d.index?4:0)+penalty;
+   const segmentConflict=owners.some(p=>p!==routeId);
+   const pointConflict=(routedGridPoints[nk]||[]).some(p=>p!==routeId);
+   // Only collision-free paths are admitted. Recovery retries add more routing
+   // lanes around the component instead of allowing a line to cross another.
+   if(segmentConflict||pointConflict)return;
+   const ng=cur.g+10+(cur.dir!==-1&&cur.dir!==d.index?9:0);
    const key=nx+","+ny+","+d.index;
-   if(!best.has(key)||ng<best.get(key)){const state={x:nx,y:ny,dir:d.index,g:ng,f:ng+octileDistance(next,goal),key};best.set(key,ng);previous.set(key,cur.key);states.set(key,state);heapPush(open,state)}
+   if(!best.has(key)||ng<best.get(key)){
+    const state={x:nx,y:ny,dir:d.index,g:ng,f:ng+octileDistance(next,goal),key};
+    best.set(key,ng);previous.set(key,cur.key);states.set(key,state);heapPush(open,state);
+   }
   });
  }
- if(!endState&&!recoveryMode)return findGridRoute(edge,true);
- if(!endState){
-  const path=[{x:start.x,y:start.y}];let x=start.x,y=start.y;
-  while(x!==goal.x||y!==goal.y){const dx=Math.sign(goal.x-x),dy=Math.sign(goal.y-y);if(dx&&dy){x+=dx;y+=dy}else if(dx)x+=dx;else y+=dy;path.push({x,y});if(path.length>1000)break}
-  return [nodeStart].concat(path,[nodeGoal]);
- }
+ if(!endState&&recoveryLevel<margins.length-1)return findGridRoute(edge,recoveryLevel+1);
+ if(!endState)return [];
  const path=[];let key=endState.key;
- while(key){const s=states.get(key);path.push({x:s.x,y:s.y});key=previous.get(key)||""}
+ while(key){const state=states.get(key);path.push({x:state.x,y:state.y});key=previous.get(key)||""}
  path.reverse();
  for(let i=1;i<path.length;i++){
-  const p=pairKey(edge.from,edge.to),a=path[i-1],b=path[i],sk=segmentKey(a,b),list=routedSegments[sk]||(routedSegments[sk]=[]);
-  if(!list.includes(p))list.push(p);
-  const diag=diagonalInfo(a,b);if(diag){const dk=diag.square+"|"+diag.orientation,dl=routedDiagonals[dk]||(routedDiagonals[dk]=[]);if(!dl.includes(p))dl.push(p)}
+  const a=path[i-1],b=path[i],sk=segmentKey(a,b),list=routedSegments[sk]||(routedSegments[sk]=[]);
+  if(!list.includes(routeId))list.push(routeId);
  }
- path.slice(1,-1).forEach(p=>{const k=cellKey(p.x,p.y),owners=routedGridPoints[k]||(routedGridPoints[k]=[]);if(!owners.includes(pair))owners.push(pair)});
+ path.slice(1).forEach(point=>{
+  const k=cellKey(point.x,point.y),owners=routedGridPoints[k]||(routedGridPoints[k]=[]);
+  if(!owners.includes(routeId))owners.push(routeId);
+ });
  return [nodeStart].concat(path,[nodeGoal]);
+}
+function assignEdgePorts(edgeList){
+ const incidents=Object.create(null);
+ compounds.forEach(c=>{incidents[c.id]=[]});
+ edgeList.forEach(edge=>{
+  const a=nodeGridPositions[edge.from],b=nodeGridPositions[edge.to];
+  if(!a||!b)return;
+  incidents[edge.from].push({edgeId:edge.id,role:"from",other:edge.to,desired:directionForDelta(b.x-a.x,b.y-a.y)});
+  incidents[edge.to].push({edgeId:edge.id,role:"to",other:edge.from,desired:directionForDelta(a.x-b.x,a.y-b.y)});
+ });
+ Object.keys(incidents).forEach(id=>{
+  const entries=incidents[id];
+  entries.sort((a,b)=>a.desired-b.desired||String(a.edgeId).localeCompare(String(b.edgeId)));
+  const used=new Set();
+  entries.forEach(entry=>{
+   let candidates=DIRECTIONS.map(d=>d.index);
+   candidates.sort((a,b)=>{
+    const scoreA=circularDistance(a,entry.desired)*100+(used.has(a)?10000:0)+directionRank(a);
+    const scoreB=circularDistance(b,entry.desired)*100+(used.has(b)?10000:0)+directionRank(b);
+    return scoreA-scoreB;
+   });
+   let chosen=candidates[0];
+   if(used.size>=DIRECTIONS.length){
+    // For very high degree, prefer an occupied port on a different lane side.
+    chosen=candidates.slice().sort((a,b)=>circularDistance(a,entry.desired)-circularDistance(b,entry.desired)||a-b)[0];
+   }
+   used.add(chosen);
+   if(!edgePorts[entry.edgeId])edgePorts[entry.edgeId]={};
+   edgePorts[entry.edgeId][entry.role]=chosen;
+  });
+ });
 }
 
 function createNode(c) {
@@ -416,6 +450,7 @@ function drawEdges(dimensions){
   const da=Math.max(Math.abs(pa.x-qa.x),Math.abs(pa.y-qa.y)),db=Math.max(Math.abs(pb.x-qb.x),Math.abs(pb.y-qb.y));
   return da-db||(graph.adj[b.from].length+graph.adj[b.to].length)-(graph.adj[a.from].length+graph.adj[a.to].length)||String(a.id).localeCompare(String(b.id));
  });
+ assignEdgePorts(ordered);
  ordered.forEach(e=>{paths[e.id]=findGridRoute(e)});
  function center(id){const p=nodePositions[id];return {x:p.x+NODE_W/2,y:p.y+NODE_H/2}}
  function borderPoint(c,dir){
@@ -435,11 +470,9 @@ function drawEdges(dimensions){
   const fromCenter=center(edge.from),toCenter=center(edge.to),points=[borderPoint(fromCenter,first)];
   for(let i=1;i<gridPath.length-1;i++)points.push({x:MAP_PAD+(gridPath[i].x-1)*CELL+NODE_W/2,y:MAP_PAD+(gridPath[i].y-1)*CELL+NODE_H/2});
   points.push(borderPoint(toCenter,last));
-  const pair=pairKey(edge.from,edge.to),idx=pairIndexes[pair]||0;pairIndexes[pair]=idx+1;
-  const canonical=pair.split("|"),canonicalA=center(canonical[0]),canonicalB=center(canonical[1]);
-  const offset=(idx-(pairCounts[pair]-1)/2)*22,visiblePoints=shift(points,offset,canonicalA,canonicalB);
+  const visiblePoints=points;
   const pathD=visiblePoints.map((p,i)=>(i===0?"M":"L")+p.x.toFixed(1)+","+p.y.toFixed(1)).join(" ");
-  const text=edge.label||edge.name||"反応",labelWidth=Math.min(320,Math.max(90,text.length*18+30)),labelHeight=38;
+  const text=edge.label||edge.name||"反応",labelWidth=Math.min(290,Math.max(86,text.length*15+22)),labelHeight=30;
   const segments=[];
   for(let i=1;i<visiblePoints.length;i++){
    const p1=visiblePoints[i-1],p2=visiblePoints[i],length=Math.hypot(p2.x-p1.x,p2.y-p1.y)||1;
@@ -449,7 +482,7 @@ function drawEdges(dimensions){
   }
   segments.sort((a,b)=>b.length-a.length);
   let labelPoint=null;
-  const offsets=[32,52,74,98,124,152,182,214,248],fractions=[0.5,0.36,0.64];
+  const offsets=[24,38,54,72,94,120,150,184,220,260,305],fractions=[0.5,0.35,0.65,0.2,0.8];
   function collidesWithNode(x,y){
    for(const c of compounds){const p=nodePositions[c.id];if(!p)continue;
     if(x+labelWidth/2+8>p.x&&x-labelWidth/2-8<p.x+NODE_W&&y+labelHeight/2+8>p.y&&y-labelHeight/2-8<p.y+NODE_H)return true;
@@ -654,6 +687,42 @@ window.addEventListener("resize",() => {
   if (!world.hidden && scale < 0.4) fitToView();
 });
 
+function reactionTypeLabel(type){
+ const names={substitution:"置換反応",addition:"付加反応",oxidation:"酸化反応",reduction:"還元反応",elimination:"脱離反応",polymerization:"重合反応",other:"その他の反応"};
+ return names[type]||"未分類の反応";
+}
+function renderReactionRegistry(){
+ const host=document.getElementById("reaction-registry-list");
+ const count=document.getElementById("reaction-registry-count");
+ if(!host)return;
+ const groups=Object.create(null);
+ edges.forEach(edge=>{const key=edge.type||"other";(groups[key]||(groups[key]=[])).push(edge)});
+ const order=["substitution","addition","oxidation","reduction","elimination","polymerization","other"];
+ const keys=Object.keys(groups).sort((a,b)=>{
+  const ai=order.indexOf(a),bi=order.indexOf(b);
+  return (ai<0?99:ai)-(bi<0?99:bi)||a.localeCompare(b);
+ });
+ host.replaceChildren();
+ keys.forEach(type=>{
+  const section=document.createElement("section");section.className="reaction-registry-group";
+  const heading=document.createElement("h3");heading.className="reaction-registry-group-title";
+  heading.textContent=reactionTypeLabel(type)+"（"+groups[type].length+"）";section.appendChild(heading);
+  const list=document.createElement("div");list.className="reaction-registry-items";
+  groups[type].forEach(edge=>{
+   const button=document.createElement("button");button.type="button";button.className="reaction-registry-item";
+   const route=document.createElement("span");route.className="reaction-registry-route";
+   route.textContent=(byId[edge.from]?.name||edge.from)+" → "+(byId[edge.to]?.name||edge.to);
+   const label=document.createElement("span");label.className="reaction-registry-label";label.textContent=edge.label||edge.name||"反応";
+   button.append(route,label);button.addEventListener("click",()=>{
+    focusCompound(byId[edge.from]);openReaction(edge);
+   });
+   list.appendChild(button);
+  });
+  section.appendChild(list);host.appendChild(section);
+ });
+ if(count)count.textContent=edges.length+"件";
+}
+
 function init() {
   const datalist = document.getElementById("map-compound-options");
   compounds.forEach((c) => {
@@ -670,7 +739,8 @@ function init() {
   world.dataset.mapHeight = dimensions.height;
   world.hidden = false;
   loading.hidden = true;
-  countEl.textContent = compounds.length + "化合物・" + edges.length + "反応";
+  countEl.textContent = compounds.length + "化合物・" + edges.length + "登録反応を矢印表示";
+  renderReactionRegistry();
   applyTransform();
   requestAnimationFrame(() => {
     const root=nodePositions[dimensions.primaryRoot]||nodePositions[dimensions.primaryNodes[0]];
