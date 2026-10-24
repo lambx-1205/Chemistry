@@ -70,6 +70,22 @@ function isPubChemEnrichmentCandidate(c){
  if(/ₙ/.test(String(c.formula||"")))return false;
  return true;
 }
+function updatePubChemSyncStatus(){
+ var el=document.getElementById("pubchem-sync-status");
+ if(!el)return;
+ var eligible=compounds.filter(isPubChemEnrichmentCandidate);
+ var verified=eligible.filter(function(c){
+  return !!(c.pubchemCid&&c.pubchemFormula&&c.molecularWeight&&c.inchiKey&&c.structureSource==="PubChem");
+ }).length;
+ var total=eligible.length;
+ if(total&&verified===total){
+  el.textContent="PubChem照合完了："+verified+" / "+total+" 件。";
+  el.classList.add("is-complete");
+ }else{
+  el.textContent="PubChem照合状況："+verified+" / "+total+" 件。残りはID・構造の照合が必要です。";
+  el.classList.remove("is-complete");
+ }
+}
 var japaneseNameCache=Object.create(null);
 var knownJapaneseCompoundNames={
  "ethanol":"エタノール","ethyl alcohol":"エタノール","methanol":"メタノール","methyl alcohol":"メタノール",
@@ -417,6 +433,7 @@ function is3DRestrictedCompound(c){
 }
 function renderCompound(c){
  currentCompound=c;
+ updatePubChemSyncStatus();
  document.title=c.name+" — Organic Atlas";
  var main=document.getElementById("compound-main");
  main.hidden=false;
