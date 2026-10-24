@@ -8,10 +8,10 @@
 <title>化合物map — Organic Atlas</title>
 <link rel="preconnect" href="https://unpkg.com">
 <link rel="stylesheet" href="styles.css?v=20261024-map1">
-<link rel="stylesheet" href="map.css?v=20261024-map7">
+<link rel="stylesheet" href="map.css?v=20261024-map8">
 <script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js" defer></script>
-<script src="chemistry-data.js?v=20261024-map1" defer></script>
-<script src="map.js?v=20261024-map14" defer></script>
+<script src="chemistry-data.js?v=20261024-map2" defer></script>
+<script src="map.js?v=20261024-map15" defer></script>
 </head>
 <body>
 <header class="site-header">
@@ -50,7 +50,7 @@
       <button type="button" id="map-zoom-in" aria-label="拡大" title="拡大">＋</button>
       <button type="button" id="map-fit" class="map-fit-button">全体表示</button>
     </div>
-    <div class="map-legend"><span class="legend-arrow" aria-hidden="true">→</span>反応の向き <span class="legend-note">矢印を選択して反応式を確認</span></div>
+    <div class="map-legend"><span class="legend-arrow" aria-hidden="true">→</span>反応の向き <span class="legend-note">赤枠＝重要化合物</span></div>
   </section>
 
   <section class="map-viewport" id="map-viewport" aria-label="化合物反応系統図">
@@ -68,6 +68,7 @@
     <details class="site-update-history">
       <summary>更新履歴</summary>
       <ul>
+        <li><time datetime="2026-10-24">2026-10-24</time> 全体図を文字優先のコンパクト表示に変更し、重要化合物を赤枠で強調。ベンゼンからクメンへの反応経路を追加</li>
         <li><time datetime="2026-10-24">2026-10-24</time> 主要化合物から八方向に分岐する配置と交差回避ルートを導入、文字サイズを拡大</li>
         <li><time datetime="2026-10-24">2026-10-24</time> 化合物カードを大型化し、矢印を水平・垂直の専用レーンで配置</li>
         <li><time datetime="2026-10-24">2026-10-24</time> 化合物mapを新設。構造式リンク・反応矢印・反応式ダイアログを追加</li>
