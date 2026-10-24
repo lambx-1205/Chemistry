@@ -37,9 +37,9 @@ RESTRICTED_PATTERN = re.compile(
     r"(trinitrotoluene|(^|\\W)tnt($|\\W)|nitroglycerin|nitroglycerine|"
     r"methamphetamine|amphetamine|cocaine|heroin|fentanyl|mdma|ecstasy|"
     r"oxycodone|hydrocodone|carfentanil|ricin|sarin|vx nerve agent|cyanide|"
-    r"hydrazoic acid|\\brdx\\b|pentaerythritol tetranitrate|\\bpetn\\b|"
-    r"トリニトロトルエン|ニトログリセリン|メタンフェタミン|覚醒剤|コカイン|"
-    r"ヘロイン|フェンタニル|エクスタシー|モルヒネ|オキシコドン|リシン|"
+    r"hydrazoic acid|rdx|pentaerythritol tetranitrate|petn|cumene[- ]hydroperoxide|"
+    r"トリニトロトルエン|ニトログリセリン|クメンヒドロペルオキシド|メタンフェタミン|覚醒剤|コカイン|"
+    r"ヘロイン|フェンタニル|エクスタシー|モルヒネ|オキシコドン|リシン毒素|ヒマ毒|"
     r"サリン|シアン化物|青酸|爆薬|爆発物|神経剤)",
     re.IGNORECASE,
 )

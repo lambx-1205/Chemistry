@@ -58,13 +58,14 @@ function setLoading(loading){
 }
 function fillSuggestions(){suggestions.innerHTML="";suggestions.hidden=true;}
 
-var restrictedLookupPattern=/(trinitrotoluene|(^|\W)tnt($|\W)|nitroglycerin|nitroglycerine|methamphetamine|amphetamine|cocaine|heroin|fentanyl|mdma|ecstasy|oxycodone|hydrocodone|carfentanil|ricin|sarin|vx nerve agent|cyanide|hydrazoic acid|rdx|pentaerythritol tetranitrate|petn|トリニトロトルエン|ニトログリセリン|メタンフェタミン|覚醒剤|コカイン|ヘロイン|フェンタニル|エクスタシー|モルヒネ|オキシコドン|リシン|サリン|シアン化物|青酸|爆薬|爆発物|神経剤)/i;
+var restrictedLookupPattern=/(trinitrotoluene|(^|\W)tnt($|\W)|nitroglycerin|nitroglycerine|methamphetamine|amphetamine|cocaine|heroin|fentanyl|mdma|ecstasy|oxycodone|hydrocodone|carfentanil|ricin|sarin|vx nerve agent|cyanide|hydrazoic acid|rdx|pentaerythritol tetranitrate|petn|トリニトロトルエン|ニトログリセリン|メタンフェタミン|覚醒剤|コカイン|ヘロイン|フェンタニル|エクスタシー|モルヒネ|オキシコドン|リシン毒素|ヒマ毒|サリン|シアン化物|青酸|爆薬|爆発物|神経剤)/i;
 function isRestrictedLookupTerm(value){return restrictedLookupPattern.test(String(value||""));}
 function isPubChemEnrichmentCandidate(c){
  if(!c||!c.id||!c.smiles||String(c.smiles).indexOf("*")>=0)return false;
  var identity=[c.id,c.name,c.pubchemName].join(" ");
  var category=[c.family,c.formula].join(" ");
  if(isRestrictedLookupTerm(identity))return false;
+ if(is3DRestrictedCompound(c))return false;
  if(/高分子|polymer/i.test(category))return false;
  if(/cellulose|starch|natural-rubber|polyethylene|polystyrene|polypropylene|polyvinyl|polyacrylonitrile|polybutadiene|nylon-66|^ptfe$/i.test(String(c.id)))return false;
  if(/ₙ/.test(String(c.formula||"")))return false;
