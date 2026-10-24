@@ -154,6 +154,7 @@ def select_formula_match(rows: list[dict], expected_formula: str) -> dict | None
 
 def enrich(compound: dict) -> bool:
     if compound.get("pubchemLookupStatus") == "verified" and compound.get("pubchemCid"):
+        compound.pop("pubchemLookupReason", None)
         return False
 
     expected_formula = compound.get("formula")
@@ -236,6 +237,7 @@ def main() -> int:
 
     for index, compound in enumerate(eligible, start=1):
         if compound.get("pubchemLookupStatus") == "verified" and compound.get("pubchemCid"):
+            compound.pop("pubchemLookupReason", None)
             continue
         try:
             if enrich(compound):
