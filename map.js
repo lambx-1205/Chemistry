@@ -279,7 +279,8 @@ function buildLayout() {
 
   return {
     width:Math.max(2850, maxX + 80),
-    height:Math.max(1100, maxY + 70)
+    height:Math.max(1100, maxY + 70),
+    primaryNodes:components.length ? components[0].nodes : compounds.map((c) => c.id)
   };
 }
 
@@ -557,10 +558,15 @@ function init() {
   countEl.textContent = compounds.length + "化合物・" + edges.length + "反応";
   applyTransform();
   requestAnimationFrame(() => {
-    fitToView();
-    scale = Math.min(0.82, scale * 1.3);
-    panX = (viewport.clientWidth - dimensions.width * scale) / 2;
-    panY = (viewport.clientHeight - dimensions.height * scale) / 2;
+    const primary = dimensions.primaryNodes.map((id) => nodePositions[id]).filter(Boolean);
+    const minX = Math.min.apply(null, primary.map((p) => p.x));
+    const minY = Math.min.apply(null, primary.map((p) => p.y));
+    const maxX = Math.max.apply(null, primary.map((p) => p.x + NODE_W));
+    const maxY = Math.max.apply(null, primary.map((p) => p.y + NODE_H));
+    const regionW = maxX - minX;
+    scale = Math.min(0.76, Math.max(0.42, (viewport.clientWidth - 54) / regionW));
+    panX = (viewport.clientWidth - regionW * scale) / 2 - minX * scale;
+    panY = (viewport.clientHeight - (maxY - minY) * scale) / 2 - minY * scale;
     applyTransform();
   });
   renderStructures();
