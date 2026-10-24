@@ -124,3 +124,10 @@
 .map-edge:hover .map-edge-visible,.map-edge:focus .map-edge-visible{stroke-width:4.8}
 .map-group-title{font-size:17px;font-weight:900}
 @media(max-width:600px){.map-node{width:360px;height:280px}.map-node-family{font-size:13px}.map-node-name{font-size:22px}.map-node-formula{font-size:15px}.map-edge-label-text{font-size:18px}}
+
+.map-node-family{font-size:15px;line-height:27px}
+.map-node-name{font-size:26px;line-height:1.3}
+.map-node-formula{font-size:18px;line-height:24px}
+.map-edge-label-text{font-size:20px;font-weight:900}
+.map-edge-label-bg{stroke-width:1.5}
+@media(max-width:600px){.map-node-name{font-size:26px}.map-node-family{font-size:15px}.map-node-formula{font-size:18px}.map-edge-label-text{font-size:20px}}
