@@ -326,33 +326,34 @@ function drawEdges(dimensions) {
   defs.appendChild(marker);
   linesSvg.appendChild(defs);
 
-  // All route segments are strictly horizontal or vertical, so every segment
-  // has an angle that is a multiple of 45 degrees. Each edge receives its own
-  // port on a node and its own lane in the gap between columns.
+  // Route every arrow with 0°/90° segments only. The final segment is
+  // horizontal, and every edge gets separate card ports and a separate lane.
   const specs = edges.map((edge) => {
     const fromPos = nodePositions[edge.from];
     const toPos = nodePositions[edge.to];
     if (!fromPos || !toPos) return null;
     const sameColumn = Math.abs(fromPos.x - toPos.x) < 1;
-    let startSide, endSide, gapStart;
+    let startSide, endSide, gapStart, laneDirection;
     if (sameColumn) {
-      // For links within the same layer, use the free corridor to the right.
       startSide = "right";
       endSide = "right";
       gapStart = fromPos.x + NODE_W;
+      laneDirection = "right";
     } else if (fromPos.x < toPos.x) {
       startSide = "right";
       endSide = "left";
       gapStart = fromPos.x + NODE_W;
+      laneDirection = "right";
     } else {
       startSide = "left";
       endSide = "right";
       gapStart = toPos.x + NODE_W;
+      laneDirection = "left";
     }
-    return {edge,fromPos,toPos,sameColumn,startSide,endSide,gapStart};
+    return {edge,fromPos,toPos,sameColumn,startSide,endSide,gapStart,laneDirection};
   }).filter(Boolean);
 
-  // Assign distinct attachment ports around each card.
+  // Spread attachment points along each card edge, ordered by destination.
   const portGroups = Object.create(null);
   specs.forEach((spec) => {
     [
@@ -366,8 +367,8 @@ function drawEdges(dimensions) {
   const ports = Object.create(null);
   Object.keys(portGroups).forEach((key) => {
     const entries = portGroups[key].sort((a,b) => {
-      const av = (a.other.y + NODE_H / 2);
-      const bv = (b.other.y + NODE_H / 2);
+      const av = a.other.y + NODE_H / 2;
+      const bv = b.other.y + NODE_H / 2;
       return av - bv || String(a.spec.edge.id).localeCompare(String(b.spec.edge.id));
     });
     const maxSpread = NODE_H * 0.42;
@@ -387,25 +388,38 @@ function drawEdges(dimensions) {
         else point = {x:pos.x + NODE_W/2 + offset,y:pos.y};
       }
       ports[entry.spec.edge.id + "|" + entry.where] = point;
+      if (entry.where === "start") entry.spec.portOrder = i;
     });
   });
 
-  // Reserve a non-overlapping lane for every edge within each column gap.
+  // Keep lanes on the destination half of each gap. This makes the source
+  // segment long enough for the reaction label, while lane x-coordinates stay
+  // unique so two arrows cannot lie on top of one another.
   const gapGroups = Object.create(null);
-  specs.forEach((spec) => (gapGroups[spec.gapStart] ||= []).push(spec));
+  specs.forEach((spec) => {
+    const key = spec.gapStart + "|" + spec.laneDirection;
+    (gapGroups[key] ||= []).push(spec);
+  });
   Object.keys(gapGroups).forEach((key) => {
     const group = gapGroups[key].sort((a,b) => {
-      const ay = (a.fromPos.y + a.toPos.y) / 2;
-      const by = (b.fromPos.y + b.toPos.y) / 2;
+      const ay = ports[a.edge.id + "|start"].y;
+      const by = ports[b.edge.id + "|start"].y;
       return ay - by || String(a.edge.id).localeCompare(String(b.edge.id));
     });
+    const gapStart = group[0].gapStart;
+    const gapWidth = COL_STEP - NODE_W;
+    const mid = gapStart + gapWidth / 2;
+    const outerMargin = 24;
+    const innerMargin = 12;
+    const left = gapStart + outerMargin;
+    const right = gapStart + gapWidth - outerMargin;
+    const laneMin = group[0].laneDirection === "right" ? mid + innerMargin : left;
+    const laneMax = group[0].laneDirection === "right" ? right : mid - innerMargin;
+    const span = Math.max(8,laneMax-laneMin);
     group.forEach((spec,i) => {
-      spec.laneIndex = i;
-      const gapStart = Number(key);
-      const gapWidth = COL_STEP - NODE_W;
-      const inset = Math.min(72, Math.max(24, gapWidth * 0.25));
-      const usable = Math.max(12, gapWidth - 2 * inset);
-      spec.laneX = gapStart + inset + (group.length === 1 ? usable/2 : usable * i/(group.length-1));
+      spec.laneX = group.length === 1 ? (laneMin+laneMax)/2 : laneMin + span*i/(group.length-1);
+      // Alternate label spacing to keep crowded branches from colliding.
+      spec.labelTier = (spec.portOrder || 0) % 2;
     });
   });
 
@@ -413,24 +427,23 @@ function drawEdges(dimensions) {
     const edge = spec.edge;
     const startPoint = ports[edge.id + "|start"];
     const endPoint = ports[edge.id + "|end"];
-    const laneX = spec.laneX;
+    const gapStart = spec.gapStart;
+    const gapWidth = COL_STEP - NODE_W;
+    const midX = gapStart + gapWidth/2;
     const points = [
       startPoint,
-      {x:laneX,y:startPoint.y},
-      {x:laneX,y:endPoint.y},
+      {x:midX,y:startPoint.y},
+      {x:spec.laneX,y:startPoint.y},
+      {x:spec.laneX,y:endPoint.y},
       endPoint
     ];
     const compact = points.filter((point,i) => i===0 || point.x!==points[i-1].x || point.y!==points[i-1].y);
     const pathD = compact.map((point,i) => (i===0?"M":"L")+point.x.toFixed(1)+","+point.y.toFixed(1)).join(" ");
-    const fromIsLeft = spec.fromPos.x < spec.toPos.x;
-    const fromIsRight = spec.fromPos.x > spec.toPos.x;
-    const arrowPointsLeft = fromIsRight || spec.sameColumn;
+    const arrowPointsLeft = spec.laneDirection === "left";
     const labelText = edge.label || edge.name || "反応";
-    const labelWidth = Math.min(190,Math.max(56,labelText.length*12+20));
-    const midpointX = (spec.fromPos.x + spec.toPos.x + NODE_W)/2;
-    const midpointY = (startPoint.y + endPoint.y)/2;
-    const labelY = midpointY + (arrowPointsLeft ? 1 : -1) * 18;
-    const labelX = midpointX;
+    const labelWidth = Math.min(180,Math.max(56,labelText.length*12+20));
+    const labelX = midX;
+    const labelY = startPoint.y + (arrowPointsLeft ? 1 : -1) * (18 + 12*spec.labelTier);
     const group = svgEl("g",{
       class:"map-edge",tabindex:"0",role:"button","data-edge-id":edge.id,
       "aria-label":(edge.name || edge.label)+"。反応式を表示"
@@ -439,12 +452,10 @@ function drawEdges(dimensions) {
     const visible = svgEl("path",{class:"map-edge-visible",d:pathD,"marker-end":"url(#map-arrow-head)"});
     const labelBg = svgEl("rect",{
       class:"map-edge-label-bg",
-      x:(labelX-labelWidth/2).toFixed(1),y:(labelY-12).toFixed(1),
-      width:labelWidth,height:24,rx:7
+      x:(labelX-labelWidth/2).toFixed(1),y:(labelY-11).toFixed(1),
+      width:labelWidth,height:22,rx:7
     });
-    const label = svgEl("text",{
-      class:"map-edge-label-text",x:labelX.toFixed(1),y:labelY.toFixed(1)
-    });
+    const label = svgEl("text",{class:"map-edge-label-text",x:labelX.toFixed(1),y:labelY.toFixed(1)});
     label.textContent = labelText;
     group.append(hit,visible,labelBg,label);
     group.addEventListener("click",() => openReaction(edge));
@@ -644,7 +655,7 @@ function init() {
     const maxY = Math.max.apply(null, primary.map((p) => p.y + NODE_H));
     const regionW = maxX - minX;
     const regionH = maxY - minY;
-    scale = Math.min(0.62, Math.max(0.48, (viewport.clientWidth - 40) / regionW));
+    scale = Math.min(0.68, Math.max(0.56, (viewport.clientWidth - 40) / regionW));
     // Keep the main reaction group comfortably readable; the user can pan to
     // other groups or use "全体表示" when they need the complete atlas.
     panX = (viewport.clientWidth - regionW * scale) / 2 - minX * scale;
