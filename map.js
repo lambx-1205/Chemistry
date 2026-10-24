@@ -439,7 +439,7 @@ function drawEdges(dimensions) {
     ];
     const compact = points.filter((point,i) => i===0 || point.x!==points[i-1].x || point.y!==points[i-1].y);
     const pathD = compact.map((point,i) => (i===0?"M":"L")+point.x.toFixed(1)+","+point.y.toFixed(1)).join(" ");
-    const arrowPointsLeft = spec.laneDirection === "left";
+    const arrowPointsLeft = spec.laneDirection === "left" || spec.sameColumn;
     const labelText = edge.label || edge.name || "反応";
     const labelWidth = Math.min(180,Math.max(56,labelText.length*12+20));
     const labelX = midX;
