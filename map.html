@@ -8,7 +8,7 @@
 <title>化合物map — Organic Atlas</title>
 <link rel="preconnect" href="https://unpkg.com">
 <link rel="stylesheet" href="styles.css?v=20261024-map1">
-<link rel="stylesheet" href="map.css?v=20261024-map9">
+<link rel="stylesheet" href="map.css?v=20261024-map10">
 <script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js" defer></script>
 <script src="chemistry-data.js?v=20261024-map5" defer></script>
 <script src="map.js?v=20261024-map21" defer></script>
@@ -22,6 +22,7 @@
   <nav class="map-header-nav" aria-label="ページ移動">
     <a href="./">化合物検索</a>
     <a href="compounds.html">化合物一覧</a>
+    <a href="route.html">経路検索</a>
   </nav>
 </header>
 
@@ -73,6 +74,7 @@
     <details class="site-update-history">
       <summary>更新履歴</summary>
       <ul>
+        <li><time datetime="2026-10-24">2026-10-24</time> 経路検索ページを追加。始点・終点から反応経路を縦に表示し、試薬・条件を確認</li>
         <li><time datetime="2026-10-24">2026-10-24</time> 大型カード配置に戻し、名前と構造式だけを表示。反応線を太くし、必須アミノ酸・糖類・高分子・エノール・ピリジン類を追加</li>
         <li><time datetime="2026-10-24">2026-10-24</time> 主要化合物から八方向に分岐する配置と交差回避ルートを導入、文字サイズを拡大</li>
         <li><time datetime="2026-10-24">2026-10-24</time> 化合物カードを大型化し、矢印を水平・垂直の専用レーンで配置</li>
