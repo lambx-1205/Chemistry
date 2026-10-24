@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="map.css?v=20261024-map9">
 <script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js" defer></script>
 <script src="chemistry-data.js?v=20261024-map4" defer></script>
-<script src="map.js?v=20261024-map17" defer></script>
+<script src="map.js?v=20261024-map18" defer></script>
 </head>
 <body>
 <header class="site-header">
@@ -50,7 +50,7 @@
       <button type="button" id="map-zoom-in" aria-label="拡大" title="拡大">＋</button>
       <button type="button" id="map-fit" class="map-fit-button">全体表示</button>
     </div>
-    <div class="map-legend"><span class="legend-arrow" aria-hidden="true">→</span>反応の向き <span class="legend-note">赤枠＝重要化合物</span></div>
+    <div class="map-legend" aria-label="反応線の凡例"><span class="legend-arrow" aria-hidden="true">→</span><span class="legend-caption">反応の向き</span><span class="legend-key legend-substitution">置換</span><span class="legend-key legend-addition">付加</span><span class="legend-key legend-oxidation">酸化</span><span class="legend-key legend-reduction">還元</span><span class="legend-key legend-elimination">脱離</span><span class="legend-key legend-polymerization">重合</span><span class="legend-key legend-other">その他</span><span class="legend-note">赤枠＝重要化合物</span></div>
   </section>
 
   <section class="map-viewport" id="map-viewport" aria-label="化合物反応系統図">
