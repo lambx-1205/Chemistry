@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#f5f6f2">
+<script id="data-theme-bootstrap">(function(){try{var t=localStorage.getItem("organic-atlas-theme");if(t==="dark"||(t!=="light"&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.dataset.theme="dark";}catch(e){}})();</script>
 <meta name="description" content="Organic Atlasに登録された有機化学反応を一覧表示。出発物・生成物、反応名、試薬、構造式を確認できます。">
 <title>反応一覧 — Organic Atlas</title>
 <link rel="stylesheet" href="styles.css?v=20261026-navigation1">
@@ -12,6 +13,8 @@
 <script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js" defer></script>
 <script src="chemistry-data.js?v=20261026-large4" defer></script>
 <script src="reactions.js?v=20261026-large4" defer></script>
+<link rel="stylesheet" href="dark-mode.css?v=20261026-dark1">
+<script src="theme.js?v=20261026-dark1" defer></script>
 </head>
 <body>
 <header class="site-header">
@@ -27,6 +30,7 @@
     <a class="header-label" href="route.html"><span class="header-dot" aria-hidden="true"></span>経路検索</a>
     <a class="header-label" href="reactions.html" aria-current="page"><span class="header-dot" aria-hidden="true"></span>反応一覧</a>
     <a class="header-label" href="exercise.html"><span class="header-dot" aria-hidden="true"></span>演習</a>
+      <button type="button" class="theme-toggle" id="theme-toggle" aria-pressed="false" aria-label="ダークモードに切り替え"><span class="theme-toggle-icon" aria-hidden="true">☾</span><span class="theme-toggle-label">ダークモード</span></button>
   </nav>
 </header>
 <main class="reaction-library-page">
