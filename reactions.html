@@ -6,24 +6,25 @@
 <meta name="theme-color" content="#f5f6f2">
 <meta name="description" content="Organic Atlasに登録された有機化学反応を一覧表示。出発物・生成物、反応名、試薬、構造式を確認できます。">
 <title>反応一覧 — Organic Atlas</title>
-<link rel="stylesheet" href="styles.css?v=20261026-reaction-list1">
+<link rel="stylesheet" href="styles.css?v=20261026-navigation1">
 <link rel="stylesheet" href="reactions.css?v=20261026-reaction-list1">
+<link rel="stylesheet" href="site-nav.css?v=20261026-navigation1">
 <script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js" defer></script>
 <script src="chemistry-data.js?v=20261026-reaction-conditions2" defer></script>
 <script src="reactions.js?v=20261026-reaction-list1" defer></script>
 </head>
 <body>
 <header class="site-header">
-  <a class="brand" href="./" aria-label="Organic Atlas 化合物検索へ">
+  <a class="brand" href="./" aria-label="Organic Atlas トップページへ">
     <span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 32 32" width="27" height="27" fill="none"><path d="M6 20.5 13 7l13 5-7 13-13-4.5Z" stroke="currentColor" stroke-width="1.6"/><circle cx="13" cy="7" r="2" fill="currentColor"/><circle cx="26" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="25" r="2" fill="currentColor"/><circle cx="6" cy="20.5" r="2" fill="currentColor"/></svg></span>
     <span class="brand-wordmark"><strong>Organic Atlas</strong><span>HIGH SCHOOL ORGANIC CHEMISTRY</span></span>
   </a>
-  <nav class="header-actions" aria-label="ページ移動">
-    <a class="header-label" href="./"><span class="header-dot"></span>検索ページ ↗</a>
-    <a class="header-label" href="compounds.html"><span class="header-dot"></span>化合物一覧 ↗</a>
-    <a class="header-label" href="map.html"><span class="header-dot"></span>化合物map ↗</a>
-    <a class="header-label" href="route.html"><span class="header-dot"></span>経路検索 ↗</a>
-    <a class="header-label" href="reactions.html" aria-current="page"><span class="header-dot"></span>反応一覧</a>
+  <nav class="header-actions site-nav" aria-label="ページ移動">
+    <a class="header-label" href="./"><span class="header-dot" aria-hidden="true"></span>トップページ</a>
+    <a class="header-label" href="compounds.html"><span class="header-dot" aria-hidden="true"></span>化合物一覧</a>
+    <a class="header-label" href="map.html"><span class="header-dot" aria-hidden="true"></span>化合物map</a>
+    <a class="header-label" href="route.html"><span class="header-dot" aria-hidden="true"></span>経路検索</a>
+    <a class="header-label" href="reactions.html" aria-current="page"><span class="header-dot" aria-hidden="true"></span>反応一覧</a>
   </nav>
 </header>
 <main class="reaction-library-page">
@@ -59,6 +60,7 @@
   <details class="site-update-history">
     <summary>更新履歴</summary>
     <ul>
+      <li><time datetime="2026-10-26">2026-10-26</time> トップページを新設し、化合物検索・詳細を化合物一覧へ統合。全ページのナビゲーション順を統一</li>
       <li><time datetime="2026-10-26">2026-10-26</time> 登録済み反応181件の試薬・条件を総点検し、曖昧な条件を明確化。代表的な反応条件と生成物混合の注意を追加</li>
       <li><time datetime="2026-10-26">2026-10-26</time> 登録済み反応一覧ページを作成。リスト形式・拡大形式、反応名・試薬検索、種類による絞り込みを追加</li>
     </ul>
