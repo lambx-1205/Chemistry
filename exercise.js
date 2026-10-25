@@ -38,7 +38,7 @@ function makeRouteQuestion(){
   }
   if(options.length<4){
    const choices=shuffle(compounds.filter(c=>!path.includes(c.id)));
-   while(options.length<4&&choices.length){const candidate=path.slice();candidate[1]=choices.pop().id;const key=candidate.join("|");if(seen.has(key)||candidate.slice(0,-1).some((id,i)=>!edgeByPair[id+"|"+candidate[i+1]]))continue;seen.add(key);options.push({path:candidate,correct:false});}
+   while(options.length<4&&choices.length){const candidate=path.slice();candidate[1]=choices.pop().id;const key=candidate.join("|");if(seen.has(key)||pathValid(candidate))continue;seen.add(key);options.push({path:candidate,correct:false});}
   }
   if(options.length<2)continue;
   return {mode:"route",path,options:shuffle(options),start,goal};
