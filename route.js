@@ -317,8 +317,8 @@ function openReaction(edge){
  document.getElementById("route-dialog-condition").textContent=edge.condition||"試薬・反応条件は未登録です。";
  document.getElementById("route-dialog-note").textContent=edge.note||"反応の概要は未登録です。登録データが増えると詳細も拡張できます。";
  const fromLink=document.getElementById("route-dialog-from-link"),toLink=document.getElementById("route-dialog-to-link");
- fromLink.href="index.html?compound="+encodeURIComponent(from.id);fromLink.textContent="出発物質："+from.name+" ↗";
- toLink.href="index.html?compound="+encodeURIComponent(to.id);toLink.textContent="生成物："+to.name+" ↗";
+ fromLink.href="compounds.html?compound="+encodeURIComponent(from.id);fromLink.textContent="出発物質："+from.name+" ↗";
+ toLink.href="compounds.html?compound="+encodeURIComponent(to.id);toLink.textContent="生成物："+to.name+" ↗";
  if(typeof dialog.showModal==="function")dialog.showModal();
 }
 document.getElementById("route-dialog-close").addEventListener("click",()=>dialog.close());
