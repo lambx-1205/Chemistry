@@ -111,3 +111,23 @@
 .compound-explorer-intro p{margin:0;color:#7a877d;font-size:12px;line-height:1.8}
 .compound-explorer .page-foot{margin-bottom:0}
 @media(max-width:620px){.compound-explorer-intro{margin-bottom:10px}.compound-explorer-intro h2{font-size:23px}}
+
+/* Large update: default list mode and compact embedded list */
+.compound-list-grid.is-list{display:flex;flex-direction:column;gap:0;border-top:1px solid #e2e8df}
+.compound-list-grid.is-list .compound-list-row{display:grid;grid-template-columns:minmax(150px,1.5fr) minmax(100px,1fr) minmax(120px,1fr) 100px 18px;align-items:center;gap:12px;padding:12px 14px;border:0;border-bottom:1px solid #e7ebe4;border-radius:0;background:#fff;text-decoration:none}
+.compound-list-grid.is-list .compound-row-name{font-size:13px;font-weight:800;color:#304437}
+.compound-list-grid.is-list .compound-row-formula{font-size:12px;color:#637668}
+.compound-list-grid.is-list .compound-row-family{font-size:11px;color:#78877a}
+.compound-list-grid.is-list .compound-row-weight{font-size:10px;color:#8a968b;text-align:right}
+.compound-list-grid.is-list .compound-row-arrow{color:#8da18f}
+.family-filter-field{display:flex;flex-direction:column;gap:6px;min-width:180px;flex:1}
+.family-filter-field label{font-size:10px;color:#849087;font-weight:800}
+#list-major-filter{min-width:0;max-width:100%;padding:8px 30px 8px 10px;border:1px solid #dfe6dd;border-radius:8px;background:#fff;color:#3f5144;font:inherit;font-size:11px}
+.embedded-list-utility{width:min(1000px,calc(100% - 48px));margin:0 auto 28px}
+#open-embedded-compound-list{display:flex;align-items:center;justify-content:space-between;width:100%;padding:15px 18px;border:1px solid #dce5da;border-radius:12px;background:#f5f8f3;color:#315f46;font:inherit;font-size:13px;font-weight:800;cursor:pointer}
+#open-embedded-compound-list span{font-size:20px}
+#embedded-compound-list{margin-top:10px;border:1px solid #e1e7de;border-radius:13px;background:#fff;overflow:hidden}
+#embedded-compound-list>summary{padding:13px 16px;cursor:pointer;color:#536c58;font-size:12px;font-weight:800}
+#embedded-compound-list[open]>.compound-list-page{padding-top:8px}
+#embedded-compound-list .compound-list-page{width:100%;padding:8px 16px 20px}
+@media(max-width:620px){.compound-list-grid.is-list .compound-list-row{grid-template-columns:minmax(0,1fr) minmax(70px,.7fr) 16px;gap:7px;padding:11px 8px}.compound-list-grid.is-list .compound-row-family,.compound-list-grid.is-list .compound-row-weight{display:none}.embedded-list-utility{width:calc(100% - 24px)}.family-filter-field{min-width:100%}}
