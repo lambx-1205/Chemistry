@@ -29,7 +29,7 @@
 .home-section-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;margin-bottom:22px}
 .home-section-heading h2{margin:8px 0 0;font-size:clamp(23px,3vw,30px);font-weight:820;letter-spacing:-.9px}
 .home-section-heading>p{max-width:400px;margin:0;color:#869188;font-size:11px;line-height:1.8}
-.home-tool-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.home-tool-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .home-tool-card{position:relative;display:flex;flex-direction:column;align-items:flex-start;min-width:0;min-height:245px;padding:19px 17px 16px;border:1px solid #e1e7de;border-radius:13px;background:rgba(255,255,255,.78);text-decoration:none;transition:transform .16s,border-color .16s,box-shadow .16s}
 .home-tool-card:hover{transform:translateY(-3px);border-color:#b9cdb7;box-shadow:0 9px 22px rgba(32,49,36,.05);text-decoration:none}
 .home-tool-featured{border-color:#cbdac9;background:linear-gradient(145deg,#fff,#f6f9f4)}
