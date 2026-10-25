@@ -8,11 +8,11 @@
 <title>化合物map — Organic Atlas</title>
 <link rel="preconnect" href="https://unpkg.com">
 <link rel="stylesheet" href="styles.css?v=20261026-navigation1">
-<link rel="stylesheet" href="map.css?v=20261024-map10">
+<link rel="stylesheet" href="map.css?v=20261026-areas1">
 <link rel="stylesheet" href="site-nav.css?v=20261026-navigation1">
 <script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js" defer></script>
 <script src="chemistry-data.js?v=20261026-reaction-conditions2" defer></script>
-<script src="map.js?v=20261024-map22" defer></script>
+<script src="map.js?v=20261026-areas1" defer></script>
 </head>
 <body>
 <header class="site-header">
@@ -26,73 +26,29 @@
     <a class="header-label" href="map.html" aria-current="page"><span class="header-dot" aria-hidden="true"></span>化合物map</a>
     <a class="header-label" href="route.html"><span class="header-dot" aria-hidden="true"></span>経路検索</a>
     <a class="header-label" href="reactions.html"><span class="header-dot" aria-hidden="true"></span>反応一覧</a>
+    <a class="header-label" href="exercise.html"><span class="header-dot" aria-hidden="true"></span>演習</a>
   </nav>
 </header>
 
 <main class="map-page">
   <section class="map-heading">
-    <div>
-      <span class="section-eyebrow">REACTION ATLAS</span>
-      <h1>化合物map</h1>
-      <p>化合物を選ぶと詳細ページへ、反応の矢印を選ぶと反応式が開きます。</p>
-    </div>
-    <div class="map-count" id="map-count" aria-live="polite">反応系統図を準備しています…</div>
+    <div><span class="section-eyebrow">REACTION ATLAS</span><h1>化合物map</h1><p>反応系統をエリアごとに切り替えて探索。矢印を選ぶと試薬・条件・反応式を確認できます。</p></div>
+    <div class="map-count" id="map-count" aria-live="polite">反応データを読み込んでいます…</div>
   </section>
-
-  <section class="map-controls" aria-label="地図の操作">
-    <div class="map-search-wrap">
-      <label for="map-search">化合物を探す</label>
-      <div class="map-search-line">
-        <input id="map-search" type="search" list="map-compound-options" placeholder="化合物名を入力…" autocomplete="off">
-        <datalist id="map-compound-options"></datalist>
-        <button id="map-search-button" type="button">移動</button>
-      </div>
-      <span class="map-search-status" id="map-search-status" role="status"></span>
-    </div>
-    <div class="map-view-actions" aria-label="表示倍率">
-      <button type="button" id="map-zoom-out" aria-label="縮小" title="縮小">−</button>
-      <button type="button" id="map-zoom-in" aria-label="拡大" title="拡大">＋</button>
-      <button type="button" id="map-fit" class="map-fit-button">全体表示</button>
-    </div>
-    <div class="map-legend" aria-label="反応線の凡例"><span class="legend-arrow" aria-hidden="true">→</span><span class="legend-caption">反応の向き</span><span class="legend-key legend-substitution">置換</span><span class="legend-key legend-addition">付加</span><span class="legend-key legend-oxidation">酸化</span><span class="legend-key legend-reduction">還元</span><span class="legend-key legend-elimination">脱離</span><span class="legend-key legend-polymerization">重合</span><span class="legend-key legend-other">その他</span><span class="legend-note">赤枠＝重要化合物</span></div>
+  <section class="map-tools" aria-label="化合物の検索と地図の凡例">
+    <div class="map-search-wrap"><label for="map-search">化合物からエリアへ移動</label><div class="map-search-line"><input id="map-search" type="search" list="map-compound-options" placeholder="例：ベンゼン、エタノール" autocomplete="off"><datalist id="map-compound-options"></datalist><button id="map-search-button" type="button">移動</button></div><div class="map-search-status" id="map-search-status" role="status" aria-live="polite"></div></div>
+    <div class="map-legend" aria-label="反応の色分け"><span class="legend-arrow" aria-hidden="true">→</span><span>反応の向き</span><span class="legend-key legend-substitution">置換</span><span class="legend-key legend-addition">付加</span><span class="legend-key legend-oxidation">酸化</span><span class="legend-key legend-reduction">還元</span><span class="legend-key legend-elimination">脱離</span><span class="legend-key legend-polymerization">重合</span><span class="legend-key legend-other">その他</span></div>
   </section>
-
-  <section class="map-viewport" id="map-viewport" aria-label="化合物反応系統図">
-    <div class="map-loading" id="map-loading">化合物と反応を配置しています…</div>
-    <div class="map-world" id="map-world" hidden>
-      <svg class="map-lines" id="map-lines" aria-label="反応を示す矢印"></svg>
-      <div class="map-group-layer" id="map-group-layer" aria-hidden="true"></div>
-      <div class="map-node-layer" id="map-node-layer"></div>
-    </div>
+  <section class="map-area-panel" aria-label="表示するエリア">
+    <h2>反応mapのエリア</h2><div class="map-area-tabs" id="map-area-tabs" role="group" aria-label="表示する反応エリア"></div><p class="map-area-description" id="map-area-description"></p>
   </section>
-  <p class="map-hint">ドラッグで移動・ホイールで拡大縮小できます。カードを選ぶと化合物詳細、矢印または下の反応一覧を選ぶと反応式を確認できます。</p>
-  <details class="reaction-registry">
-    <summary><span>登録済みの反応一覧</span><span class="reaction-registry-count" id="reaction-registry-count">反応を読み込んでいます</span></summary>
-    <p class="reaction-registry-intro">地図の矢印と同じ反応データを、反応の種類ごとに整理しています。一覧の反応を選ぶと、出発物質へ移動して反応式を開きます。</p>
-    <div id="reaction-registry-list" class="reaction-registry-list"></div>
-  </details>
-
-  <footer class="site-update-footer map-update-footer" aria-label="更新日時と更新履歴">
-    <div class="site-update-heading"><strong>更新情報</strong><span>最終更新：2026-10-26</span></div>
-    <details class="site-update-history">
-      <summary>更新履歴</summary>
-      <ul>
-      <li><time datetime="2026-10-26">2026-10-26</time> トップページを新設し、化合物検索・詳細を化合物一覧へ統合。全ページのナビゲーション順を統一</li>
-      <li><time datetime="2026-10-26">2026-10-26</time> 登録済み反応181件の試薬・条件を総点検し、曖昧な条件を明確化。代表的な反応条件と生成物混合の注意を追加</li>
-      <li><time datetime="2026-10-26">2026-10-26</time> 反応一覧ページを追加。リスト・拡大表示に対応し、化合物一覧にカード・リスト表示と種別絞り込みを追加</li>
-      <li><time datetime="2026-10-24">2026-10-24</time> 教育向けの有機化合物52種を追加し、PubChemのCID・構造情報を照合。反応経路と異性体比較を拡充</li>
-      <li><time datetime="2026-10-24">2026-10-24</time> PubChem照合済みのアミド関連化合物・酒石酸・リン酸塩・硫黄関連化合物を追加。構造情報と関連する反応経路を拡充</li>
-        <li><time datetime="2026-10-24">2026-10-24</time> 炭化水素・カルボニル化合物・エーテル・カルボン酸・エステル・アミノ酸を拡充。アルドール反応、クライゼン縮合、カニッツァロ反応、アセタール形成などと中間体を追加</li>
-        <li><time datetime="2026-10-24">2026-10-24</time> 経路検索ページを追加。始点・終点から反応経路を縦に表示し、試薬・条件を確認</li>
-        <li><time datetime="2026-10-24">2026-10-24</time> 大型カード配置に戻し、名前と構造式だけを表示。反応線を太くし、必須アミノ酸・糖類・高分子・エノール・ピリジン類を追加</li>
-        <li><time datetime="2026-10-24">2026-10-24</time> 主要化合物から八方向に分岐する配置と交差回避ルートを導入、文字サイズを拡大</li>
-        <li><time datetime="2026-10-24">2026-10-24</time> 化合物カードを大型化し、矢印を水平・垂直の専用レーンで配置</li>
-        <li><time datetime="2026-10-24">2026-10-24</time> 化合物mapを新設。構造式リンク・反応矢印・反応式ダイアログを追加</li>
-        <li><time datetime="2026-10-24">2026-10-24</time> PubChem候補は日本語名のみ表示し、未登録化合物の検索を改善</li>
-        <li><time datetime="2026-10-24">2026-10-24</time> 3D分子模型と異性体比較機能を追加</li>
-      </ul>
-    </details>
-  </footer>
+  <section class="map-viewport" id="map-viewport" aria-label="選択したエリアの反応系統図">
+    <div class="map-loading" id="map-loading">反応エリアを準備しています…</div>
+    <div class="map-canvas" id="map-canvas" hidden><svg class="map-lines" id="map-lines" aria-label="反応の矢印"></svg><div class="map-node-layer" id="map-node-layer"></div></div>
+  </section>
+  <p class="map-hint">化合物カードから詳細ページへ移動できます。矢印または反応名をクリックすると反応詳細が開きます。反応数が多いエリアはスクロールして閲覧できます。</p>
+  <details class="reaction-registry"><summary><span>登録済み反応を一覧から探す</span><span class="reaction-registry-count" id="reaction-registry-count">読み込み中</span></summary><p class="reaction-registry-intro">反応名または化合物名から探し、該当する反応の条件を直接確認できます。</p><div id="reaction-registry-list" class="reaction-registry-list"></div></details>
+  <footer class="site-update-footer map-update-footer" aria-label="更新日時と更新履歴"><div class="site-update-heading"><strong>更新情報</strong><span>最終更新：2026-10-26</span></div><details class="site-update-history"><summary>更新履歴</summary><ul><li><time datetime="2026-10-26">2026-10-26</time> 反応条件を総点検。新しいトップページとナビゲーションを整備</li><li><time datetime="2026-10-26">2026-10-26</time> 化合物mapをエリア切替方式に再構成し、描画と矢印の詳細表示を改善</li></ul></details></footer>
 </main>
 
 <dialog class="reaction-dialog" id="reaction-dialog" aria-labelledby="reaction-dialog-title">
