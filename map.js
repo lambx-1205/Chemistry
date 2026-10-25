@@ -14,10 +14,11 @@ const byId=Object.create(null),nameMap=Object.create(null),order=Object.create(n
 compounds.forEach((c,i)=>{byId[c.id]=c;order[c.id]=i;[c.name,c.id,c.pubchemName,c.englishName,...(c.aliases||[])].forEach(n=>{if(n)nameMap[String(n).toLocaleLowerCase()]=c;});});
 const NODE_W=250,NODE_H=170,GAP_X=150,GAP_Y=76,NS="http://www.w3.org/2000/svg";
 const specs=[
- {id:"aliphatic",label:"脂肪族の反応",description:"炭化水素からアルコール・カルボニル化合物などへ続く、基本的な脂肪族反応。"},
- {id:"aromatic",label:"芳香族の反応",description:"ベンゼン環をもつ化合物の置換、酸化、変換などを整理したエリア。"},
- {id:"functional",label:"酸素官能基",description:"アルコール、アルデヒド、ケトン、カルボン酸、エステルなどの反応。"},
- {id:"nitrogen",label:"窒素・複素環",description:"芳香族アミン、窒素化合物、複素環化合物などの変換。"},
+ {id:"aliphatic",label:"炭化水素・基本反応",description:"炭化水素を中心とした、付加・置換・脱離などの基本反応。"},
+ {id:"aromatic",label:"芳香族の反応",description:"ベンゼン環をもつ化合物の置換や変換。窒素官能基を直接扱う反応は窒素エリアに分けています。"},
+ {id:"carbonyl",label:"カルボニル・カルボン酸",description:"アルデヒド、ケトン、カルボン酸、エステルなどの変換と相互関係。"},
+ {id:"alcohol",label:"アルコール・エーテル",description:"アルコール、エーテル、エノールなど酸素官能基を中心に整理した反応。"},
+ {id:"nitrogen",label:"窒素・複素環",description:"ニトロ化合物、アミン、アミド、ジアゾニウム塩、含窒素複素環などの反応。"},
  {id:"bio",label:"糖・アミノ酸",description:"糖類、アミノ酸、ペプチドなど生体関連化合物の反応。"},
  {id:"polymer",label:"高分子",description:"付加重合・縮合重合、高分子とその原料のつながり。"}
 ];
@@ -26,14 +27,19 @@ function compoundArea(c){
  const t=[c.kind,c.family,c.mapGroup,c.name,c.id].filter(Boolean).join(" ").toLocaleLowerCase();
  if(c.kind==="polymer"||/高分子|ポリエチレン|ポリプロピレン|ナイロン|セルロース|でんぷん|デンプン|天然ゴム|pet-polymer|nylon-66|polymer/.test(t))return "polymer";
  if(c.kind==="sugar"||c.kind==="amino"||/糖類|単糖|二糖|多糖|アミノ酸|ペプチド|タンパク質|核酸|生体関連|ビタミン/.test(t))return "bio";
- if(c.kind==="aromatic"||/芳香族|ベンゼン|フェノール|アニリン|キシレン|ナフタレン/.test(t))return "aromatic";
  if(c.kind==="heteroaromatic"||/含窒素|窒素|アミン|ニトロ|ジアゾ|アゾ化合物|アミド|ピリジン|複素環|ニトリル|スルホンアミド/.test(t))return "nitrogen";
- if(/アルコール|アルデヒド|ケトン|カルボニル|カルボン酸|エステル|エーテル|エノール|酸無水物|ヒドロキシ|アセタール|脂肪酸|油脂|石けん/.test(t))return "functional";
+ if(c.kind==="aromatic"||/芳香族|ベンゼン|フェノール|アニリン|キシレン|ナフタレン/.test(t))return "aromatic";
+ if(/アルデヒド|ケトン|カルボニル|カルボン酸|エステル|酸無水物|アセタール|ヒドロキシカルボン酸|ジカルボン酸|カルボキシ|脂肪酸|油脂|石けん|イミン|β-ケト酸|β-ケトエステル/.test(t))return "carbonyl";
+ if(/アルコール|エーテル|エノール|ヒドロキシ|カルボニル水和体|ヘミアセタール/.test(t))return "alcohol";
  return "aliphatic";
 }
-const priority=["polymer","bio","aromatic","nitrogen","functional","aliphatic"];
+const priority=["polymer","bio","nitrogen","aromatic","carbonyl","alcohol","aliphatic"];
 function edgeArea(e){
  const a=compoundArea(byId[e.from]||{}),b=compoundArea(byId[e.to]||{});
+ const terms=[e.name,e.label,e.condition,e.note].filter(Boolean).join(" ");
+ if(a==="polymer"||b==="polymer")return "polymer";
+ if(a==="bio"||b==="bio")return "bio";
+ if(/窒素|アミノ|アミン|ニトロ|ニトリ|アミド|ジアゾ|アゾ|ピリジン|複素環|亜硝酸/.test(terms)||a==="nitrogen"||b==="nitrogen")return "nitrogen";
  if(a===b)return a;
  for(const id of priority)if(a===id||b===id)return id;
  return "aliphatic";
