@@ -33,8 +33,8 @@
 .map-edge-hitbox{fill:none;stroke:transparent;stroke-width:20;pointer-events:stroke;cursor:pointer}
 .map-edge-visible{fill:none;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;opacity:.88;transition:stroke-width .15s,opacity .15s}
 .map-edge:hover .map-edge-visible,.map-edge:focus .map-edge-visible{stroke-width:5;opacity:1}
-.map-edge-label-bg{fill:#fffdf8;stroke:#d9e4d7;stroke-width:1;opacity:.98;pointer-events:none}
-.map-edge-label-text{fill:#496c50;font-family:inherit;font-size:11px;font-weight:850;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.map-edge-label-bg{fill:#fffdf8;stroke:#d9e4d7;stroke-width:1;opacity:.98;pointer-events:auto}
+.map-edge-label-text{fill:#496c50;font-family:inherit;font-size:11px;font-weight:850;text-anchor:middle;dominant-baseline:central;pointer-events:auto}
 .map-edge:hover .map-edge-label-bg,.map-edge:focus .map-edge-label-bg{fill:#fff0e3;stroke:#dba27f}
 .map-node-layer{position:absolute;left:0;top:0;z-index:2}
 .map-node{position:absolute;width:250px;height:170px;display:grid;grid-template-rows:16px 30px minmax(0,1fr) 17px;gap:4px;padding:10px 12px;border:1px solid #dce5d9;border-radius:12px;background:rgba(255,255,255,.98);box-shadow:0 4px 12px rgba(31,49,35,.07);color:#293a2d;text-decoration:none;overflow:hidden;transition:border-color .15s,box-shadow .15s,transform .15s}
