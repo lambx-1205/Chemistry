@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f5f6f2">
+<meta name="description" content="高校有機化学の反応経路・試薬・反応条件を問題演習で学ぶ。">
+<title>演習 — Organic Atlas</title>
+<link rel="stylesheet" href="styles.css?v=20261026-navigation1">
+<link rel="stylesheet" href="exercise.css?v=20261026-exercises1">
+<link rel="stylesheet" href="site-nav.css?v=20261026-navigation1">
+<script src="chemistry-data.js?v=20261026-reaction-conditions2" defer></script>
+<script src="exercise.js?v=20261026-exercises1" defer></script>
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="./" aria-label="Organic Atlas トップページへ">
+    <span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 32 32" width="27" height="27" fill="none"><path d="M6 20.5 13 7l13 5-7 13-13-4.5Z" stroke="currentColor" stroke-width="1.6"/><circle cx="13" cy="7" r="2" fill="currentColor"/><circle cx="26" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="25" r="2" fill="currentColor"/><circle cx="6" cy="20.5" r="2" fill="currentColor"/></svg></span>
+    <span class="brand-wordmark"><strong>Organic Atlas</strong><span>HIGH SCHOOL ORGANIC CHEMISTRY</span></span>
+  </a>
+  <nav class="header-actions site-nav" aria-label="ページ移動">
+    <a class="header-label" href="./"><span class="header-dot" aria-hidden="true"></span>トップページ</a>
+    <a class="header-label" href="compounds.html"><span class="header-dot" aria-hidden="true"></span>化合物一覧</a>
+    <a class="header-label" href="map.html"><span class="header-dot" aria-hidden="true"></span>化合物map</a>
+    <a class="header-label" href="route.html"><span class="header-dot" aria-hidden="true"></span>経路検索</a>
+    <a class="header-label" href="reactions.html"><span class="header-dot" aria-hidden="true"></span>反応一覧</a>
+    <a class="header-label" href="exercise.html" aria-current="page"><span class="header-dot" aria-hidden="true"></span>演習</a>
+  </nav>
+</header>
+<main class="exercise-page">
+  <section class="exercise-intro">
+    <span class="section-eyebrow">PRACTICE LAB</span>
+    <h1>知識を使って、反応を解く。</h1>
+    <p>登録済みの反応データから出題します。経路を組み立てる問題と、試薬・反応条件を考える問題に挑戦できます。</p>
+  </section>
+  <section class="exercise-workspace">
+    <div class="exercise-mode-bar" role="group" aria-label="演習モード">
+      <button type="button" class="exercise-mode is-active" id="mode-route" aria-pressed="true"><span class="exercise-mode-number">01</span><span><strong>反応経路</strong><small>始点から終点をつなぐ</small></span></button>
+      <button type="button" class="exercise-mode" id="mode-reagent" aria-pressed="false"><span class="exercise-mode-number">02</span><span><strong>試薬・条件</strong><small>反応に必要な条件を考える</small></span></button>
+    </div>
+    <section class="exercise-question" aria-live="polite">
+      <div class="exercise-question-top"><span class="exercise-question-kicker" id="question-kicker">ROUTE CHALLENGE</span><span class="exercise-score" id="exercise-score">正解 0 / 解答 0</span></div>
+      <h2 id="question-title">経路を考えよう</h2>
+      <p class="exercise-question-prompt" id="question-prompt">始点と終点を見て、正しい反応経路を選んでください。</p>
+      <div class="exercise-route-endpoints" id="question-endpoints"></div>
+      <div class="exercise-equation-preview" id="question-equation" hidden></div>
+      <div class="exercise-options" id="exercise-options" role="group" aria-label="解答の選択肢"></div>
+      <div class="exercise-feedback" id="exercise-feedback" role="status" aria-live="polite" hidden></div>
+      <div class="exercise-answer-details" id="exercise-answer-details" hidden></div>
+      <div class="exercise-actions"><span class="exercise-progress-note" id="exercise-progress-note">反応データからランダムに出題します。</span><button type="button" id="next-question" class="exercise-next-button" disabled>次の問題へ <span aria-hidden="true">→</span></button></div>
+    </section>
+  </section>
+  <section class="exercise-guide">
+    <div><span class="section-eyebrow">HOW TO PRACTICE</span><h2>解いたあとが大切</h2></div>
+    <div class="exercise-guide-grid">
+      <article><span>01</span><h3>経路のつながりを考える</h3><p>始点と終点だけを手掛かりに、途中の化合物と反応の順番を選びます。</p></article>
+      <article><span>02</span><h3>試薬を根拠とともに覚える</h3><p>正解後に反応条件・反応式・概要を確認して、似た反応と区別します。</p></article>
+      <article><span>03</span><h3>間違いを次に生かす</h3><p>現時点ではこのページを離れるとスコアはリセットされます。復習機能は今後の拡張候補です。</p></article>
+    </div>
+  </section>
+</main>
+<footer class="site-update-footer exercise-update-footer" aria-label="更新日時と更新履歴">
+  <div class="site-update-heading"><strong>更新情報</strong><span>最終更新：2026-10-26</span></div>
+  <details class="site-update-history"><summary>更新履歴</summary><ul><li><time datetime="2026-10-26">2026-10-26</time> 反応経路・試薬条件の演習モードを追加</li></ul></details>
+</footer>
+</body>
+</html>
