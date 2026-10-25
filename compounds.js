@@ -7,6 +7,10 @@ var sort=document.getElementById("list-sort");
 var countLabel=document.getElementById("list-count");
 var status=document.getElementById("list-status");
 var empty=document.getElementById("list-empty");
+var familyFilter=document.getElementById("list-family-filter");
+var cardsViewButton=document.getElementById("list-view-cards");
+var rowsViewButton=document.getElementById("list-view-rows");
+var listView="cards";
 if(!data||!Array.isArray(data.compounds)){
  status.textContent="化合物データを読み込めませんでした。ページを再読み込みしてください。";
  status.className="list-status error";
@@ -99,6 +103,23 @@ function cardHtml(c){
   '</div>'+
  '</a>';
 }
+function rowHtml(c){
+ var weight=molecularWeight(c);
+ var weightText=weight===null?"—":weight.toFixed(2)+" g/mol";
+ return '<a class="compound-list-row" href="index.html?compound='+encodeURIComponent(c.id)+'" aria-label="'+esc(c.name)+'の詳細を開く">'+
+  '<span class="compound-row-name">'+esc(c.name)+'</span>'+
+  '<span class="compound-row-formula">'+formulaHtml(c.formula)+'</span>'+
+  '<span class="compound-row-family">'+esc(c.family||"分類なし")+'</span>'+
+  '<span class="compound-row-weight">'+weightText+'</span>'+
+  '<span class="compound-row-arrow" aria-hidden="true">↗</span>'+
+ '</a>';
+}
+function populateFamilyFilter(){
+ var current=familyFilter.value;
+ var families=Array.from(new Set(compounds.map(function(c){return c.family||"分類なし";}))).sort(function(a,b){return a.localeCompare(b,"ja");});
+ familyFilter.innerHTML='<option value="">すべての種別</option>'+families.map(function(f){return '<option value="'+esc(f)+'">'+esc(f)+'</option>';}).join("");
+ familyFilter.value=current;
+}
 function sortCompounds(list){
  var method=sort.value;
  return list.slice().sort(function(a,b){
@@ -118,21 +139,33 @@ function sortCompounds(list){
 }
 function renderList(){
  var query=String(search.value||"").trim().toLocaleLowerCase();
+ var selectedFamily=familyFilter.value;
  var filtered=compounds.filter(function(c){
-  return !query||[c.name,c.pubchemName,c.formula,c.family,c.desc,c.feature].concat(c.aliases||[]).some(function(v){return String(v||"").toLocaleLowerCase().indexOf(query)>=0;});
+  var matchesQuery=!query||[c.name,c.pubchemName,c.formula,c.family,c.desc,c.feature].concat(c.aliases||[]).some(function(v){return String(v||"").toLocaleLowerCase().indexOf(query)>=0;});
+  var matchesFamily=!selectedFamily||(c.family||"分類なし")===selectedFamily;
+  return matchesQuery&&matchesFamily;
  });
  var ordered=sortCompounds(filtered);
- root.innerHTML=ordered.map(cardHtml).join("");
+ root.classList.toggle("is-list",listView==="list");
+ root.innerHTML=ordered.map(listView==="list"?rowHtml:cardHtml).join("");
  countLabel.textContent=ordered.length+" / "+compounds.length+" 化合物";
  empty.hidden=ordered.length>0;
  root.hidden=ordered.length===0;
- root.querySelectorAll("[data-thumb-id]").forEach(function(host){
-  var compound=compounds.find(function(c){return c.id===host.getAttribute("data-thumb-id");});
-  if(compound)renderThumbnail(host,compound);
- });
+ cardsViewButton.setAttribute("aria-pressed",listView==="cards"?"true":"false");
+ rowsViewButton.setAttribute("aria-pressed",listView==="list"?"true":"false");
+ if(listView==="cards"){
+  root.querySelectorAll("[data-thumb-id]").forEach(function(host){
+   var compound=compounds.find(function(c){return c.id===host.getAttribute("data-thumb-id");});
+   if(compound)renderThumbnail(host,compound);
+  });
+ }
 }
+populateFamilyFilter();
 search.addEventListener("input",renderList);
 sort.addEventListener("change",renderList);
+familyFilter.addEventListener("change",renderList);
+cardsViewButton.addEventListener("click",function(){listView="cards";renderList();});
+rowsViewButton.addEventListener("click",function(){listView="list";renderList();});
 renderList();
 getRDKit().then(function(){
  status.textContent="構造式を表示できます。カードを選ぶと化合物の詳細・反応経路を確認できます。";
