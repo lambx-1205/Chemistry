@@ -146,6 +146,7 @@
   <section class="compound-list-grid" id="compound-list" aria-label="化合物一覧"></section>
   <div class="list-empty" id="list-empty" hidden>該当する化合物がありません。</div>
   <footer class="list-page-foot"><span>ORGANIC ATLAS</span><span>構造データ · RDKit.js</span></footer>
+</main>
 <footer class="site-update-footer" aria-label="更新日時と更新履歴">
   <div class="site-update-heading"><strong>更新情報</strong><span>最終更新：2026-10-26</span></div>
   <details class="site-update-history">
@@ -165,6 +166,34 @@
     </ul>
   </details>
 </footer>
-</main>
+<dialog class="molecule3d-dialog" id="molecule3d-dialog" aria-labelledby="molecule3d-title">
+  <div class="molecule3d-header">
+    <div><span class="section-eyebrow">3D MOLECULAR MODEL</span><h2 id="molecule3d-title">3D分子模型</h2></div>
+    <button class="dialog-icon-close" type="button" id="molecule3d-close" aria-label="閉じる">×</button>
+  </div>
+  <div class="molecule3d-toolbar" aria-label="分子模型の表示形式">
+    <button type="button" class="molecule3d-mode is-active" id="molecule3d-spacefill">空間充填</button>
+    <button type="button" class="molecule3d-mode" id="molecule3d-ballstick">球棒モデル</button>
+    <span class="molecule3d-help">ドラッグで回転 · ホイールで拡大</span>
+  </div>
+  <div class="molecule3d-stage" id="molecule3d-stage"></div>
+  <img class="molecule3d-fallback" id="molecule3d-fallback" alt="PubChemが提供する3D分子構造画像" hidden>
+  <p class="molecule3d-status" id="molecule3d-status" role="status" aria-live="polite">3D構造を取得しています…</p>
+  <div class="molecule3d-footer"><span id="molecule3d-source">PubChem 3Dデータ</span><a id="molecule3d-pubchem-link" href="https://pubchem.ncbi.nlm.nih.gov/" target="_blank" rel="noopener noreferrer">PubChem ↗</a></div>
+</dialog>
+<dialog class="reaction-dialog" id="reaction-detail-dialog" aria-labelledby="reaction-detail-title">
+  <div class="reaction-dialog-header">
+    <div>
+      <span class="section-eyebrow">REACTION DETAILS</span>
+      <h2 id="reaction-detail-title">反応の詳細</h2>
+    </div>
+    <button class="dialog-icon-close" type="button" id="reaction-detail-close" aria-label="閉じる">×</button>
+  </div>
+  <div class="reaction-detail-content" id="reaction-detail-content"></div>
+  <div class="reaction-dialog-footer">
+    <span>登録済みの反応データに基づく概要です。</span>
+    <button class="reaction-details-button" type="button" id="reaction-detail-done">閉じる</button>
+  </div>
+</dialog>
 </body>
 </html>
