@@ -104,3 +104,10 @@
  .compound-row-weight{grid-column:2;grid-row:2;text-align:right;font-size:9px;}
  .compound-row-arrow{grid-column:3;grid-row:1 / span 2;}
 }
+
+/* Integrated compound search/detail section on the compound library page. */
+.compound-explorer-intro{margin:0 0 14px;padding:0 2px}
+.compound-explorer-intro h2{margin:7px 0 5px;font-size:clamp(22px,3vw,30px);letter-spacing:-.8px}
+.compound-explorer-intro p{margin:0;color:#7a877d;font-size:12px;line-height:1.8}
+.compound-explorer .page-foot{margin-bottom:0}
+@media(max-width:620px){.compound-explorer-intro{margin-bottom:10px}.compound-explorer-intro h2{font-size:23px}}
