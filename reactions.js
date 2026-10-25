@@ -83,7 +83,7 @@ function recordHtml(edge){
  function compoundHtml(c){
   return '<div class="reaction-record-compound">'+
    (expanded?'<div class="reaction-structure-thumb" data-structure-id="'+esc(c.id)+'" role="img" aria-label="'+esc(c.name)+'の構造式"><span class="structure-loading">構造式</span></div>':"")+
-   '<a class="reaction-record-compound-name" href="index.html?compound='+encodeURIComponent(c.id)+'" title="'+esc(c.name)+'の詳細を開く">'+esc(c.name)+'</a>'+
+   '<a class="reaction-record-compound-name" href="compounds.html?compound='+encodeURIComponent(c.id)+'" title="'+esc(c.name)+'の詳細を開く">'+esc(c.name)+'</a>'+
    (expanded?'<span class="reaction-record-formula">'+formulaHtml(c.formula)+'</span>':"")+
   '</div>';
  }
