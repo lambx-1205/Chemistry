@@ -131,3 +131,9 @@
 #embedded-compound-list[open]>.compound-list-page{padding-top:8px}
 #embedded-compound-list .compound-list-page{width:100%;padding:8px 16px 20px}
 @media(max-width:620px){.compound-list-grid.is-list .compound-list-row{grid-template-columns:minmax(0,1fr) minmax(70px,.7fr) 16px;gap:7px;padding:11px 8px}.compound-list-grid.is-list .compound-row-family,.compound-list-grid.is-list .compound-row-weight{display:none}.embedded-list-utility{width:calc(100% - 24px)}.family-filter-field{min-width:100%}}
+
+/* Two-level compound taxonomy layout */
+.family-filter-field{display:flex;flex-direction:column;gap:6px;min-width:180px;flex:1}
+.family-filter-field label{font-size:10px;color:#849087;font-weight:800}
+#list-major-filter{min-width:0;max-width:100%;padding:8px 30px 8px 10px;border:1px solid #dfe6dd;border-radius:8px;background:#fff;color:#3f5144;font:inherit;font-size:11px}
+@media(max-width:620px){.family-filter-field{min-width:100%}}
