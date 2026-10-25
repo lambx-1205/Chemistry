@@ -33,7 +33,7 @@ function makeRouteQuestion(){
    if(candidate.includes(replacement)||!byId[replacement])continue;
    candidate[idx]=replacement;
    const key=candidate.join("|");
-   if(seen.has(key)||candidate.slice(0,-1).some((id,i)=>!edgeByPair[id+"|"+candidate[i+1]]))continue;
+   if(seen.has(key)||pathValid(candidate))continue;
    seen.add(key);options.push({path:candidate,correct:false});
   }
   if(options.length<4){
