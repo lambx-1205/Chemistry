@@ -62,7 +62,7 @@ html[data-theme="dark"] .route-stage-side{background:rgba(10,18,12,.18)!importan
 html[data-theme="dark"] :is(.route-stage-role,.route-reaction-open,.route-options-choice-hint,.route-option){background:#202e23!important;border-color:#435744!important;color:#c5d7c5!important}
 html[data-theme="dark"] .route-option.is-selected{background:#2a442d!important;border-color:#81b186!important}
 html[data-theme="dark"] .route-option.is-selected .route-option-path{color:#d0e6cf!important}
-html[data-theme="dark"] .route-dialog-equation-panel,.html[data-theme="dark"] .exercise-equation-preview{background:#17231a!important;border-color:#3c4d3d!important;color:#c7e0c8!important}
+html[data-theme="dark"] .route-dialog-equation-panel,html[data-theme="dark"] .exercise-equation-preview{background:#17231a!important;border-color:#3c4d3d!important;color:#c7e0c8!important}
 html[data-theme="dark"] .route-dialog-condition{background:#3a2c21!important;color:#ecc09e!important}
 html[data-theme="dark"] .route-dialog-path{color:#a7d6ab!important}
 html[data-theme="dark"] .route-dialog-links a{background:#1e2b21!important;border-color:#3b4e3c!important;color:#bcdfbc!important}
