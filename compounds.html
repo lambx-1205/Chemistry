@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#f5f6f2">
+<script id="data-theme-bootstrap">(function(){try{var t=localStorage.getItem("organic-atlas-theme");if(t==="dark"||(t!=="light"&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.dataset.theme="dark";}catch(e){}})();</script>
 <meta name="description" content="登録された有機化合物を構造式サムネイルで一覧表示し、分類や分子量で並べ替える。">
 <title>化合物表示 — Organic Atlas</title>
 <link rel="preconnect" href="https://pubchem.ncbi.nlm.nih.gov">
@@ -16,6 +17,8 @@
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"}}</script>
 <script type="module" src="molecule3d.js?v=20261026-large4"></script>
 <script src="compounds.js?v=20261026-large4" defer></script>
+<link rel="stylesheet" href="dark-mode.css?v=20261026-dark1">
+<script src="theme.js?v=20261026-dark1" defer></script>
 </head>
 <body>
 <header class="site-header">
@@ -31,6 +34,7 @@
     <a class="header-label" href="route.html"><span class="header-dot" aria-hidden="true"></span>経路検索</a>
     <a class="header-label" href="reactions.html"><span class="header-dot" aria-hidden="true"></span>反応一覧</a>
     <a class="header-label" href="exercise.html"><span class="header-dot" aria-hidden="true"></span>演習</a>
+      <button type="button" class="theme-toggle" id="theme-toggle" aria-pressed="false" aria-label="ダークモードに切り替え"><span class="theme-toggle-icon" aria-hidden="true">☾</span><span class="theme-toggle-label">ダークモード</span></button>
   </nav>
 </header>
 <div class="page-shell compound-explorer" id="compound-explorer"><section class="compound-explorer-intro"><span class="section-eyebrow">COMPOUND EXPLORER</span><h2>化合物検索・詳細</h2><p>名前から検索して、構造式・基本情報・一段階前後の反応をまとめて確認できます。</p></section>
