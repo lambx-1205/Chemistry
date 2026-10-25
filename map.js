@@ -7,35 +7,33 @@ const compounds=data?.compounds||[],edges=(data?.edges||[]).filter(e=>e&&e.from&
 const byId=Object.create(null),names=Object.create(null);
 compounds.forEach(c=>{byId[c.id]=c;[c.id,c.name,c.englishName,c.pubchemName,...(c.aliases||[])].forEach(n=>{if(n)names[String(n).toLocaleLowerCase()]=c;});});
 let currentId=null;
-const dirs=[
- {name:"北西",out:"↖",in:"↘",pos:"nw"},{name:"北",out:"↑",in:"↓",pos:"n"},
- {name:"北東",out:"↗",in:"↙",pos:"ne"},{name:"西",out:"←",in:"→",pos:"w"},
- {name:"東",out:"→",in:"←",pos:"e"},{name:"南西",out:"↙",in:"↗",pos:"sw"},
- {name:"南",out:"↓",in:"↑",pos:"s"},{name:"南東",out:"↘",in:"↖",pos:"se"}
-];
+const directionByPosition={
+ nw:{out:"↖",in:"↘"},n:{out:"↑",in:"↓"},ne:{out:"↗",in:"↙"},
+ w:{out:"←",in:"→"},e:{out:"→",in:"←"},
+ sw:{out:"↙",in:"↗"},s:{out:"↓",in:"↑"},se:{out:"↘",in:"↖"}
+};
 function esc(s){return String(s??"").replace(/[&<>"']/g,x=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[x]));}
 function formula(s){return esc(s||"—").replace(/([0-9]+)/g,"<sub>$1</sub>");}
 function render(id){
  const c=byId[id];if(!c)return;
  currentId=id;search.value=c.name;status.textContent="";
  const related=edges.filter(e=>e.from===id||e.to===id).map(e=>({edge:e,incoming:e.to===id,neighbor:byId[e.to===id?e.from:e.to]})).filter(x=>x.neighbor);
- const chosen=related.slice(0,8);
+ const positions=["nw","n","ne","w","e","sw","s","se"];
  const neighborSlots=Object.create(null);
- chosen.forEach((r,i)=>{
-  const d=dirs[i],edge=r.edge,arrow=r.incoming?d.in:d.out;
-  const direction=r.incoming?"この化合物が生成物："+r.neighbor.name+"から生成":"この化合物が反応物："+r.neighbor.name+"へ変化";
-  neighborSlots[d.pos]=
-   '<button type="button" class="single-reaction-arrow '+(r.incoming?"incoming":"outgoing")+'" data-neighbor="'+esc(r.neighbor.id)+'" title="'+esc(direction+"｜"+(edge.condition||"条件未登録"))+'">'+
+ related.slice(0,8).forEach((r,i)=>{
+  const pos=positions[i],edge=r.edge,arrow=directionByPosition[pos][r.incoming?"in":"out"];
+  const direction=r.incoming?"隣の化合物から現在の化合物へ向かう反応":"現在の化合物から隣の化合物へ向かう反応";
+  neighborSlots[pos]='<button type="button" class="single-reaction-arrow '+(r.incoming?"incoming":"outgoing")+'" data-neighbor="'+esc(r.neighbor.id)+'" title="'+esc(direction+"｜"+(edge.condition||"条件未登録"))+'">'+
    '<span class="arrow-glyph" aria-hidden="true">'+arrow+'</span><span class="arrow-reaction-name">'+esc(edge.name||edge.label||"反応")+'</span>'+
    '<span class="arrow-neighbor-name">'+esc(r.neighbor.name)+'</span></button>';
  });
  const center='<article class="single-center-compound"><span class="single-center-kicker">CURRENT COMPOUND</span><div class="single-center-family">'+esc(c.family||"分類未登録")+'</div><h2>'+esc(c.name)+'</h2><div class="single-center-formula">'+formula(c.formula)+'</div><p>'+esc(c.desc||c.hint||"登録済み化合物")+'</p><a href="compounds.html?compound='+encodeURIComponent(c.id)+'">化合物の詳細を見る ↗</a></article>';
- const slot=(pos)=>{const ix=["nw","n","ne","w","center","e","sw","s","se"].indexOf(pos);return pos==="center"?center:(slots[ix]||'<div class="single-empty-slot" aria-hidden="true"></div>');};
+ const slot=pos=>neighborSlots[pos]||'<div class="single-empty-slot" aria-hidden="true"></div>';
  layer.innerHTML='<div class="single-reaction-grid">'+
  '<div class="single-slot nw">'+slot("nw")+'</div><div class="single-slot n">'+slot("n")+'</div><div class="single-slot ne">'+slot("ne")+'</div>'+
  '<div class="single-slot w">'+slot("w")+'</div><div class="single-slot center">'+center+'</div><div class="single-slot e">'+slot("e")+'</div>'+
  '<div class="single-slot sw">'+slot("sw")+'</div><div class="single-slot s">'+slot("s")+'</div><div class="single-slot se">'+slot("se")+'</div></div>'+
- (related.length>8?'<section class="single-overflow"><h3>ほかの反応（'+(related.length-8)+'件）</h3><div>'+related.slice(8).map(r=>'<button type="button" class="single-overflow-link '+(r.incoming?"incoming":"outgoing")+'" data-neighbor="'+esc(r.neighbor.id)+'"><span aria-hidden="true">'+(r.incoming?"←":"→")+'</span><strong>'+esc(r.edge.name||r.edge.label||"反応")+'</strong><small>'+esc(r.neighbor.name)+'</small></button>').join("")+'</div></section>':"");
+ (related.length>8?'<section class="single-overflow"><h3>ほかの反応（'+(related.length-8)+'件）</h3><div>'+related.slice(8).map(r=>'<button type="button" class="single-overflow-link '+(r.incoming?"incoming":"outgoing")+'" data-neighbor="'+esc(r.neighbor.id)+'"><span aria-hidden="true">'+(r.incoming?"→ 現在の化合物":"現在の化合物 →")+'</span><strong>'+esc(r.edge.name||r.edge.label||"反応")+'</strong><small>'+esc(r.neighbor.name)+'</small></button>').join("")+'</div></section>':"");
  canvas.hidden=false;loading.hidden=true;count.textContent=c.name+" · "+related.length+"件の反応";
  layer.querySelectorAll("[data-neighbor]").forEach(b=>b.addEventListener("click",()=>render(b.dataset.neighbor)));
 }
