@@ -8,11 +8,11 @@
 <title>化合物map — Organic Atlas</title>
 <link rel="preconnect" href="https://unpkg.com">
 <link rel="stylesheet" href="styles.css?v=20261026-navigation1">
-<link rel="stylesheet" href="map.css?v=20261026-areas4">
+<link rel="stylesheet" href="map.css?v=20261026-single-compound1">
 <link rel="stylesheet" href="site-nav.css?v=20261026-navigation1">
 <script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js" defer></script>
 <script src="chemistry-data.js?v=20261026-large1" defer></script>
-<script src="map.js?v=20261026-areas2" defer></script>
+<script src="map.js?v=20261026-single-compound1" defer></script>
 </head>
 <body>
 <header class="site-header">
@@ -33,24 +33,22 @@
 
 <main class="map-page">
   <section class="map-heading">
-    <div><span class="section-eyebrow">REACTION ATLAS</span><h1>化合物map</h1><p>反応系統をエリアごとに切り替えて探索。矢印を選ぶと試薬・条件・反応式を確認できます。</p></div>
+    <div><span class="section-eyebrow">REACTION ATLAS</span><h1>化合物map</h1><p>一度に一つの化合物を表示し、周囲の反応矢印から反応物・生成物へ移動します。</p></div>
     <div class="map-count" id="map-count" aria-live="polite">反応データを読み込んでいます…</div>
   </section>
-  <section class="map-tools" aria-label="化合物の検索と地図の凡例">
+  <section class="map-tools" aria-label="化合物の検索">
     <div class="map-search-wrap"><label for="map-search">化合物からエリアへ移動</label><div class="map-search-line"><input id="map-search" type="search" list="map-compound-options" placeholder="例：ベンゼン、エタノール" autocomplete="off"><datalist id="map-compound-options"></datalist><button id="map-search-button" type="button">移動</button></div><div class="map-search-status" id="map-search-status" role="status" aria-live="polite"></div></div>
-    <div class="map-legend" aria-label="反応の色分け"><span class="legend-arrow" aria-hidden="true">→</span><span>反応の向き</span><span class="legend-key legend-substitution">置換</span><span class="legend-key legend-addition">付加</span><span class="legend-key legend-oxidation">酸化</span><span class="legend-key legend-reduction">還元</span><span class="legend-key legend-elimination">脱離</span><span class="legend-key legend-polymerization">重合</span><span class="legend-key legend-other">その他</span></div>
+
   </section>
-  <section class="map-area-panel" aria-label="表示するエリア">
-    <h2>反応mapのエリア</h2><div class="map-area-tabs" id="map-area-tabs" role="group" aria-label="表示する反応エリア"></div><p class="map-area-description" id="map-area-description"></p>
-  </section>
-  <section class="map-viewport" id="map-viewport" aria-label="選択したエリアの反応系統図">
+
+  <section class="map-viewport single-compound-viewport" id="map-viewport" aria-label="中心化合物と周囲の反応">
     <div class="map-loading" id="map-loading">反応エリアを準備しています…</div>
-    <div class="map-canvas" id="map-canvas" hidden><svg class="map-lines" id="map-lines" aria-label="反応の矢印"></svg><div class="map-node-layer" id="map-node-layer"></div></div>
+    <div class="map-canvas single-compound-canvas" id="map-canvas" hidden><div class="map-node-layer single-compound-layer" id="map-node-layer"></div></div>
   </section>
-  <p class="map-hint">化合物カードから詳細ページへ移動できます。矢印または反応名をクリックすると反応詳細が開きます。反応数が多いエリアはスクロールして閲覧できます。</p>
+  <p class="map-hint">矢印の向きは反応の向きです。現在の化合物が反応物なら外向き、生成物なら中心へ向かう矢印になります。反応名を押すと隣接する化合物へ移動します。反応が9件以上ある場合は、8方向に優先表示し、残りを下の一覧に表示します。</p>
   <details class="reaction-registry"><summary><span>登録済み反応を一覧から探す</span><span class="reaction-registry-count" id="reaction-registry-count">読み込み中</span></summary><p class="reaction-registry-intro">反応名または化合物名から探し、該当する反応の条件を直接確認できます。</p><div id="reaction-registry-list" class="reaction-registry-list"></div></details>
   <footer class="site-update-footer map-update-footer" aria-label="更新日時と更新履歴"><div class="site-update-heading"><strong>更新情報</strong><span>最終更新：2026-10-26</span></div><details class="site-update-history"><summary>更新履歴</summary><ul>
-      <li><time datetime="2026-10-26">2026-10-26</time> アゾ化合物としてメチルオレンジ、メチルレッド、オレンジIIを追加。PubChemの構造・分子式・化合物IDを登録</li>
+      <li><time datetime="2026-10-26">2026-10-26</time> 化合物mapを一化合物中心・8方向の反応矢印方式へ変更<br>2026-10-26</time> アゾ化合物としてメチルオレンジ、メチルレッド、オレンジIIを追加。PubChemの構造・分子式・化合物IDを登録</li>
 <li><time datetime="2026-10-26">2026-10-26</time> 反応条件を総点検。新しいトップページとナビゲーションを整備</li><li><time datetime="2026-10-26">2026-10-26</time> 化合物mapをエリア切替方式に再構成し、描画と矢印の詳細表示を改善</li></ul></details></footer>
 </main>
 
