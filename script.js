@@ -931,7 +931,7 @@ function init(){
  document.getElementById("clear-search").addEventListener("click",function(){
   input.value="";suggestionSequence++;activeCandidates=[];suggestions.hidden=true;input.setAttribute("aria-expanded","false");window.clearTimeout(suggestionTimer);setStatus("","");input.focus();
  });
- document.getElementById("home-link").addEventListener("click",function(ev){
+ if(document.getElementById("home-link"))document.getElementById("home-link").addEventListener("click",function(ev){
   ev.preventDefault();suggestionSequence++;suggestions.hidden=true;input.setAttribute("aria-expanded","false");input.value="エタノール";renderCompound(byId.ethanol);resolveStructure(byId.ethanol);setStatus("","");
  });
  document.getElementById("starter-compounds").querySelectorAll("[data-preset]").forEach(function(btn){
