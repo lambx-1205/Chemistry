@@ -20,11 +20,11 @@ function render(id){
  currentId=id;search.value=c.name;status.textContent="";
  const related=edges.filter(e=>e.from===id||e.to===id).map(e=>({edge:e,incoming:e.to===id,neighbor:byId[e.to===id?e.from:e.to]})).filter(x=>x.neighbor);
  const chosen=related.slice(0,8);
- const slots=Array(9).fill("");
+ const neighborSlots=Object.create(null);
  chosen.forEach((r,i)=>{
   const d=dirs[i],edge=r.edge,arrow=r.incoming?d.in:d.out;
   const direction=r.incoming?"この化合物が生成物："+r.neighbor.name+"から生成":"この化合物が反応物："+r.neighbor.name+"へ変化";
-  slots[["nw","n","ne","w","e","sw","s","se"].indexOf(d.pos)]=
+  neighborSlots[d.pos]=
    '<button type="button" class="single-reaction-arrow '+(r.incoming?"incoming":"outgoing")+'" data-neighbor="'+esc(r.neighbor.id)+'" title="'+esc(direction+"｜"+(edge.condition||"条件未登録"))+'">'+
    '<span class="arrow-glyph" aria-hidden="true">'+arrow+'</span><span class="arrow-reaction-name">'+esc(edge.name||edge.label||"反応")+'</span>'+
    '<span class="arrow-neighbor-name">'+esc(r.neighbor.name)+'</span></button>';
