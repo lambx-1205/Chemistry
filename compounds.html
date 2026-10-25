@@ -7,26 +7,116 @@
 <meta name="description" content="登録された有機化合物を構造式サムネイルで一覧表示し、分類や分子量で並べ替える。">
 <title>化合物一覧 — Organic Atlas</title>
 <link rel="preconnect" href="https://pubchem.ncbi.nlm.nih.gov">
-<link rel="stylesheet" href="styles.css?v=20261024-carbonyl1">
-<link rel="stylesheet" href="compounds.css?v=20261026-reaction-list1">
+<link rel="stylesheet" href="styles.css?v=20261026-navigation1">
+<link rel="stylesheet" href="compounds.css?v=20261026-compound-page1">
+<link rel="stylesheet" href="site-nav.css?v=20261026-navigation1">
 <script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js" defer></script>
 <script src="chemistry-data.js?v=20261026-reaction-conditions2" defer></script>
-<script src="compounds.js?v=20261026-reaction-list1" defer></script>
+<script src="script.js?v=20261026-compound-page1" defer></script>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"}}</script>
+<script type="module" src="molecule3d.js?v=20261024-unknown-search1"></script>
+<script src="compounds.js?v=20261026-compound-page1" defer></script>
 </head>
 <body>
 <header class="site-header">
-  <a class="brand" href="./" aria-label="Organic Atlas 検索ページへ">
+  <a class="brand" href="./" aria-label="Organic Atlas トップページへ">
     <span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 32 32" width="27" height="27" fill="none"><path d="M6 20.5 13 7l13 5-7 13-13-4.5Z" stroke="currentColor" stroke-width="1.6"/><circle cx="13" cy="7" r="2" fill="currentColor"/><circle cx="26" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="25" r="2" fill="currentColor"/><circle cx="6" cy="20.5" r="2" fill="currentColor"/></svg></span>
     <span class="brand-wordmark"><strong>Organic Atlas</strong><span>HIGH SCHOOL ORGANIC CHEMISTRY</span></span>
   </a>
-  <nav class="header-actions" aria-label="ページ移動"><a class="header-label" href="./"><span class="header-dot"></span>検索ページ ↗</a><a class="header-label" href="map.html"><span class="header-dot"></span>化合物map ↗</a><a class="header-label" href="route.html"><span class="header-dot"></span>経路検索 ↗</a>  <a class="header-label" href="reactions.html"><span class="header-dot"></span>反応一覧 ↗</a>
+  <nav class="header-actions site-nav" aria-label="ページ移動">
+    <a class="header-label" href="./"><span class="header-dot" aria-hidden="true"></span>トップページ</a>
+    <a class="header-label" href="compounds.html" aria-current="page"><span class="header-dot" aria-hidden="true"></span>化合物一覧</a>
+    <a class="header-label" href="map.html"><span class="header-dot" aria-hidden="true"></span>化合物map</a>
+    <a class="header-label" href="route.html"><span class="header-dot" aria-hidden="true"></span>経路検索</a>
+    <a class="header-label" href="reactions.html"><span class="header-dot" aria-hidden="true"></span>反応一覧</a>
   </nav>
 </header>
+<div class="page-shell compound-explorer" id="compound-explorer"><section class="compound-explorer-intro"><span class="section-eyebrow">COMPOUND EXPLORER</span><h2>化合物検索・詳細</h2><p>名前から検索して、構造式・基本情報・一段階前後の反応をまとめて確認できます。</p></section>
+  <div class="search-container" id="search-container">
+    <form class="search-bar" id="search-form" role="search" autocomplete="off">
+      <svg class="search-icon" viewBox="0 0 24 24" width="21" height="21" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <label class="visually-hidden" for="compound-search">化合物名・英語名・化学キーワードで検索</label>
+      <input id="compound-search" name="compound" autocomplete="off" spellcheck="false" aria-autocomplete="list" aria-controls="compound-suggestions-list" aria-expanded="false" placeholder="化合物名・別名・化学キーワードを入力">
+      <button class="clear-search" type="button" id="clear-search" aria-label="検索欄をクリア">×</button>
+      <button class="search-submit" id="search-button" type="submit" aria-label="検索"><span>検索</span><span aria-hidden="true">↵</span></button>
+    </form>
+    <div class="compound-suggestions" id="compound-suggestions-list" role="listbox" aria-label="化合物候補" hidden></div>
+  </div>
+  <div class="search-meta">
+    <span class="search-status" id="search-status" aria-live="polite"></span>
+    <span class="local-index">LOCAL INDEX <b id="local-count">15</b></span>
+  </div>
+  <div class="pubchem-sync-status" id="pubchem-sync-status" aria-live="polite">PubChem照合データを準備しています。</div>
+
+  <section class="compound-main" id="compound-main" aria-live="polite" hidden>
+    <div class="compound-overview">
+      <div class="structure-panel">
+        <div class="panel-kicker"><span>MOLECULAR STRUCTURE</span><span class="structure-source" id="structure-source">STRUCTURE</span></div>
+        <div class="main-structure" id="main-structure" role="img" aria-label="選択した化合物の構造式"></div>
+        <div class="structure-foot"><span class="bond-key" aria-hidden="true"><i></i><i></i><i></i></span><div class="structure-foot-actions"><span>2D STRUCTURE</span><button type="button" class="structure-copy-trigger" id="copy-structure" title="白背景のPNG画像をクリップボードにコピー">白背景でコピー <span aria-hidden="true">▣</span></button><button type="button" class="molecule-3d-trigger" id="open-3d-model">3D分子模型 <span aria-hidden="true">↗</span></button></div></div>
+      </div>
+      <div class="identity-panel">
+        <div class="compound-family" id="compound-family">アルコール</div>
+        <h1 id="compound-name">エタノール</h1>
+        <div class="formula-display" id="compound-formula">C₂H₆O</div>
+        <div class="identity-rule"></div>
+        <div class="facts-grid" id="compound-facts"></div>
+        <a class="pubchem-link" id="pubchem-link" href="https://pubchem.ncbi.nlm.nih.gov/" target="_blank" rel="noopener noreferrer">PubChem <span aria-hidden="true">↗</span></a>
+        <div class="registration-note" id="registration-note" hidden><strong>Organic Atlas 未登録</strong><span>この化合物はPubChemから取得した情報です。登録済みの反応経路には含めていません。</span></div>
+      </div>
+    </div>
+    <section class="isomer-section" id="isomer-section" hidden aria-labelledby="isomer-heading">
+      <div class="section-heading"><div><span class="section-eyebrow">ISOMER COMPARISON</span><h2 id="isomer-heading">異性体を比較</h2></div></div>
+      <div id="isomer-groups"></div>
+    </section>
+    
+    <div class="one-step-toolbar" id="one-step-toolbar">
+      <button type="button" class="swap-one-step-trigger" id="swap-one-step-order" aria-pressed="false"><span aria-hidden="true">↕</span> 上下を入れ替える</button>
+      <span class="one-step-order-status" id="one-step-order-status" aria-live="polite">表示順：一段階前 → 一段階後</span>
+    </div>
+    <section class="one-step-section" aria-labelledby="previous-step-title">
+      <div class="section-heading">
+        <div><span class="section-eyebrow">PREVIOUS REACTIONS</span><h2 id="previous-step-title">一段階前</h2></div>
+        <div class="neighbor-count"><b id="previous-step-count">00</b><span>COMPOUNDS</span></div>
+      </div>
+      <div class="reaction-grid" id="previous-step-results"></div>
+    </section>
+    <section class="one-step-section" aria-labelledby="next-step-title">
+      <div class="section-heading">
+        <div><span class="section-eyebrow">NEXT REACTIONS</span><h2 id="next-step-title">一段階後</h2></div>
+        <div class="neighbor-count"><b id="next-step-count">00</b><span>COMPOUNDS</span></div>
+      </div>
+      <div class="reaction-grid" id="next-step-results"></div>
+    </section>
+    <footer class="page-foot"><span>ORGANIC ATLAS</span><span>STRUCTURE DATA · PUBCHEM</span></footer>
+  </section>
+
+  <section class="empty-compound" id="compound-empty" hidden>
+    <div class="empty-symbol"><svg viewBox="0 0 100 100" width="84" height="84" fill="none" aria-hidden="true"><path d="m20 33 27-16 28 16v33L47 83 20 66V33Z" stroke="currentColor" stroke-width="1.5"/><path d="m20 33 27 17 28-17M47 50v33" stroke="currentColor" stroke-width="1.5"/><circle cx="47" cy="17" r="3" fill="currentColor"/><circle cx="75" cy="33" r="3" fill="currentColor"/><circle cx="20" cy="33" r="3" fill="currentColor"/></svg></div>
+    <span class="empty-overline">COMPOUND NOT FOUND</span>
+    <h1>化合物が見つかりません</h1>
+    <p>名前を確認して、もう一度検索してください。</p>
+  </section>
+
+  <section class="starter-strip" id="starter-compounds">
+    <span class="starter-label">QUICK ACCESS</span>
+    <button type="button" data-preset="ethanol">エタノール</button>
+    <button type="button" data-preset="ethene">エテン</button>
+    <button type="button" data-preset="benzene">ベンゼン</button>
+    <button type="button" data-preset="acetic-acid">酢酸</button>
+    <button type="button" data-preset="aniline">フェニルアミン</button>
+    <button type="button" data-preset="methanol">メタノール</button>
+    <button type="button" data-preset="propene">プロペン</button>
+    <button type="button" data-preset="acetone">アセトン</button>
+    <button type="button" data-preset="glucose">グルコース</button>
+    <button type="button" data-preset="toluene">トルエン</button>
+  </section>
+</div>
 <main class="compound-list-page">
   <div class="list-page-heading">
     <span class="section-eyebrow">COMPOUND LIBRARY</span>
-    <h1>化合物一覧</h1>
-    <p>構造式から化合物を探し、反応経路へ移動できます。</p>
+    <h1>登録済み化合物一覧</h1>
+    <p>登録済みの化合物を分類・分子量で整理し、構造式から詳細へ移動できます。</p>
   </div>
   <section class="list-controls" aria-label="一覧の検索と並べ替え">
     <label class="list-search-label" for="list-search">化合物を検索</label>
@@ -61,6 +151,7 @@
   <details class="site-update-history">
     <summary>更新履歴</summary>
     <ul>
+      <li><time datetime="2026-10-26">2026-10-26</time> トップページを新設し、化合物検索・詳細を化合物一覧へ統合。全ページのナビゲーション順を統一</li>
       <li><time datetime="2026-10-26">2026-10-26</time> 登録済み反応181件の試薬・条件を総点検し、曖昧な条件を明確化。代表的な反応条件と生成物混合の注意を追加</li>
       <li><time datetime="2026-10-26">2026-10-26</time> 反応一覧ページを追加。リスト・拡大表示に対応し、化合物一覧にカード・リスト表示と種別絞り込みを追加</li>
       <li><time datetime="2026-10-24">2026-10-24</time> 教育向けの有機化合物52種を追加し、PubChemのCID・構造情報を照合。反応経路と異性体比較を拡充</li>
