@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#f5f6f2">
 <meta name="description" content="登録された有機化合物を構造式サムネイルで一覧表示し、分類や分子量で並べ替える。">
-<title>化合物一覧 — Organic Atlas</title>
+<title>化合物表示 — Organic Atlas</title>
 <link rel="preconnect" href="https://pubchem.ncbi.nlm.nih.gov">
 <link rel="stylesheet" href="styles.css?v=20261026-navigation1">
 <link rel="stylesheet" href="compounds.css?v=20261026-compound-page1">
 <link rel="stylesheet" href="site-nav.css?v=20261026-navigation1">
 <script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js" defer></script>
-<script src="chemistry-data.js?v=20261026-azo-set1" defer></script>
+<script src="chemistry-data.js?v=20261026-large1" defer></script>
 <script src="script.js?v=20261026-compound-page1" defer></script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"}}</script>
 <script type="module" src="molecule3d.js?v=20261024-unknown-search1"></script>
@@ -25,7 +25,7 @@
   </a>
   <nav class="header-actions site-nav" aria-label="ページ移動">
     <a class="header-label" href="./"><span class="header-dot" aria-hidden="true"></span>トップページ</a>
-    <a class="header-label" href="compounds.html" aria-current="page"><span class="header-dot" aria-hidden="true"></span>化合物一覧</a>
+    <a class="header-label" href="compounds.html" aria-current="page"><span class="header-dot" aria-hidden="true"></span>化合物表示</a>
     <a class="header-label" href="map.html"><span class="header-dot" aria-hidden="true"></span>化合物map</a>
     <a class="header-label" href="route.html"><span class="header-dot" aria-hidden="true"></span>経路検索</a>
     <a class="header-label" href="reactions.html"><span class="header-dot" aria-hidden="true"></span>反応一覧</a>
@@ -113,7 +113,7 @@
     <button type="button" data-preset="toluene">トルエン</button>
   </section>
 </div>
-<main class="compound-list-page">
+<section class="embedded-list-utility"><button type="button" id="open-embedded-compound-list" aria-expanded="false" aria-controls="embedded-compound-list">その他の化合物を検索 <span aria-hidden="true">＋</span></button><details id="embedded-compound-list"><summary>登録済み化合物一覧を開く</summary><div class="compound-list-page">
   <div class="list-page-heading">
     <span class="section-eyebrow">COMPOUND LIBRARY</span>
     <h1>登録済み化合物一覧</h1>
@@ -147,15 +147,15 @@
   <section class="compound-list-grid" id="compound-list" aria-label="化合物一覧"></section>
   <div class="list-empty" id="list-empty" hidden>該当する化合物がありません。</div>
   <footer class="list-page-foot"><span>ORGANIC ATLAS</span><span>構造データ · RDKit.js</span></footer>
-</main>
+</div></details></section>
 <footer class="site-update-footer" aria-label="更新日時と更新履歴">
   <div class="site-update-heading"><strong>更新情報</strong><span>最終更新：2026-10-26</span></div>
   <details class="site-update-history">
     <summary>更新履歴</summary>
     <ul>
-      <li><time datetime="2026-10-26">2026-10-26</time> アゾ化合物としてメチルオレンジ、メチルレッド、オレンジIIを追加。PubChemの構造・分子式・化合物IDを登録</li>
+      <li><time datetime="2026-10-26">2026-10-26</time> 化合物一覧と化合物表示を分離。詳細ページ下部の一覧は折りたたみ式で保持<br>2026-10-26</time> アゾ化合物としてメチルオレンジ、メチルレッド、オレンジIIを追加。PubChemの構造・分子式・化合物IDを登録</li>
 
-      <li><time datetime="2026-10-26">2026-10-26</time> トップページを新設し、化合物検索・詳細を化合物一覧へ統合。全ページのナビゲーション順を統一</li>
+      <li><time datetime="2026-10-26">2026-10-26</time> トップページを新設し、化合物検索・詳細ページと化合物一覧ページを分離。全ページのナビゲーション順を統一</li>
       <li><time datetime="2026-10-26">2026-10-26</time> 登録済み反応181件の試薬・条件を総点検し、曖昧な条件を明確化。代表的な反応条件と生成物混合の注意を追加</li>
       <li><time datetime="2026-10-26">2026-10-26</time> 反応一覧ページを追加。リスト・拡大表示に対応し、化合物一覧にカード・リスト表示と種別絞り込みを追加</li>
       <li><time datetime="2026-10-24">2026-10-24</time> 教育向けの有機化合物52種を追加し、PubChemのCID・構造情報を照合。反応経路と異性体比較を拡充</li>
