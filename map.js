@@ -429,7 +429,7 @@ function createNode(c) {
   const node = document.createElement("a");
   node.className = "map-node";
   if (["benzene","ethene","ethanol","toluene","phenol","aniline","acetic-acid","glucose","propene","cumene","pyridine","sucrose","polyethylene","cellulose"].includes(c.id)) node.classList.add("is-key-compound");
-  node.href = "index.html?compound=" + encodeURIComponent(c.id);
+  node.href = "compounds.html?compound=" + encodeURIComponent(c.id);
   node.dataset.compoundId = c.id;
   node.style.left = pos.x + "px";
   node.style.top = pos.y + "px";
@@ -602,9 +602,9 @@ function openReaction(edge) {
   document.getElementById("reaction-dialog-note").textContent = edge.id === "e59" ? "複数段階の反応経路を示す概念図です。ここでは芳香族ニトロ化の一般式のみを表示し、個別の製造反応式や詳細条件は掲載していません。" : (edge.note || "反応の説明は未登録です。");
   const fromLink = document.getElementById("reaction-from-link");
   const toLink = document.getElementById("reaction-to-link");
-  fromLink.href = "index.html?compound=" + encodeURIComponent(from.id);
+  fromLink.href = "compounds.html?compound=" + encodeURIComponent(from.id);
   fromLink.textContent = "出発物質：" + from.name + " ↗";
-  toLink.href = "index.html?compound=" + encodeURIComponent(to.id);
+  toLink.href = "compounds.html?compound=" + encodeURIComponent(to.id);
   toLink.textContent = "生成物：" + to.name + " ↗";
   if (typeof dialog.showModal === "function") dialog.showModal();
 }
