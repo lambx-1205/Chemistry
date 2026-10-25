@@ -9517,8 +9517,9 @@ var edges = [
     "label": "酸化",
     "condition": "アルデヒドの酸化。",
     "name": "プロパナール：酸化",
-    "note": "CH₃CH₂CHO + [O] → CH₃CH₂COOH",
-    "equation": "oxidation"
+    "note": "アルデヒドの酸化。",
+    "equation": "CH₃CH₂CHO + [O] → CH₃CH₂COOH",
+    "type": "oxidation"
   },
   {
     "id": "e190",
@@ -9527,8 +9528,9 @@ var edges = [
     "label": "酸性加水分解",
     "condition": "希酸存在下で加熱するエステル加水分解。",
     "name": "酢酸メチル：酸性加水分解",
-    "note": "CH₃COOCH₃ + H₂O ⇌ CH₃COOH + CH₃OH",
-    "equation": "hydrolysis"
+    "note": "希酸存在下で加熱するエステル加水分解。",
+    "equation": "CH₃COOCH₃ + H₂O ⇌ CH₃COOH + CH₃OH",
+    "type": "hydrolysis"
   },
   {
     "id": "e191",
@@ -9537,8 +9539,9 @@ var edges = [
     "label": "酸性加水分解",
     "condition": "エステルの加水分解でアルコール部分を得る。",
     "name": "酢酸メチル：酸性加水分解",
-    "note": "CH₃COOCH₃ + H₂O ⇌ CH₃COOH + CH₃OH",
-    "equation": "hydrolysis"
+    "note": "エステルの加水分解でアルコール部分を得る。",
+    "equation": "CH₃COOCH₃ + H₂O ⇌ CH₃COOH + CH₃OH",
+    "type": "hydrolysis"
   },
   {
     "id": "e192",
@@ -9547,8 +9550,9 @@ var edges = [
     "label": "酸性加水分解",
     "condition": "ギ酸エステルの加水分解。",
     "name": "ギ酸メチル：酸性加水分解",
-    "note": "HCOOCH₃ + H₂O ⇌ HCOOH + CH₃OH",
-    "equation": "hydrolysis"
+    "note": "ギ酸エステルの加水分解。",
+    "equation": "HCOOCH₃ + H₂O ⇌ HCOOH + CH₃OH",
+    "type": "hydrolysis"
   },
   {
     "id": "e193",
@@ -9557,8 +9561,9 @@ var edges = [
     "label": "酸性加水分解",
     "condition": "ギ酸エチルの加水分解。",
     "name": "ギ酸エチル：酸性加水分解",
-    "note": "HCOOC₂H₅ + H₂O ⇌ HCOOH + C₂H₅OH",
-    "equation": "hydrolysis"
+    "note": "ギ酸エチルの加水分解。",
+    "equation": "HCOOC₂H₅ + H₂O ⇌ HCOOH + C₂H₅OH",
+    "type": "hydrolysis"
   },
   {
     "id": "e194",
@@ -9567,8 +9572,9 @@ var edges = [
     "label": "酸性加水分解",
     "condition": "エステルの加水分解。",
     "name": "酢酸プロピル：酸性加水分解",
-    "note": "CH₃COOC₃H₇ + H₂O ⇌ CH₃COOH + C₃H₇OH",
-    "equation": "hydrolysis"
+    "note": "酢酸プロピルの加水分解。",
+    "equation": "CH₃COOC₃H₇ + H₂O ⇌ CH₃COOH + C₃H₇OH",
+    "type": "hydrolysis"
   },
   {
     "id": "e195",
@@ -9577,8 +9583,9 @@ var edges = [
     "label": "酸性加水分解",
     "condition": "芳香族エステルの加水分解。",
     "name": "酢酸ベンジル：酸性加水分解",
-    "note": "CH₃COOCH₂C₆H₅ + H₂O ⇌ CH₃COOH + C₆H₅CH₂OH",
-    "equation": "hydrolysis"
+    "note": "酢酸ベンジルの加水分解。",
+    "equation": "CH₃COOCH₂C₆H₅ + H₂O ⇌ CH₃COOH + C₆H₅CH₂OH",
+    "type": "hydrolysis"
   },
   {
     "id": "e196",
@@ -9587,8 +9594,9 @@ var edges = [
     "label": "酸性加水分解",
     "condition": "芳香族エステルの加水分解。",
     "name": "安息香酸メチル：酸性加水分解",
-    "note": "C₆H₅COOCH₃ + H₂O ⇌ C₆H₅COOH + CH₃OH",
-    "equation": "hydrolysis"
+    "note": "安息香酸メチルの加水分解。",
+    "equation": "C₆H₅COOCH₃ + H₂O ⇌ C₆H₅COOH + CH₃OH",
+    "type": "hydrolysis"
   },
   {
     "id": "e197",
@@ -9597,8 +9605,9 @@ var edges = [
     "label": "酸性加水分解",
     "condition": "芳香族エステルの加水分解。",
     "name": "安息香酸エチル：酸性加水分解",
-    "note": "C₆H₅COOC₂H₅ + H₂O ⇌ C₆H₅COOH + C₂H₅OH",
-    "equation": "hydrolysis"
+    "note": "安息香酸エチルの加水分解。",
+    "equation": "C₆H₅COOC₂H₅ + H₂O ⇌ C₆H₅COOH + C₂H₅OH",
+    "type": "hydrolysis"
   },
   {
     "id": "e198",
@@ -9607,8 +9616,9 @@ var edges = [
     "label": "酸性加水分解",
     "condition": "酸性条件下でアミドを加水分解する。",
     "name": "ベンズアミド：酸性加水分解",
-    "note": "C₆H₅CONH₂ + H₂O + H⁺ → C₆H₅COOH + NH₄⁺",
-    "equation": "hydrolysis"
+    "note": "酸性条件下でアミドを加水分解する。",
+    "equation": "C₆H₅CONH₂ + H₂O + H⁺ → C₆H₅COOH + NH₄⁺",
+    "type": "hydrolysis"
   },
   {
     "id": "e199",
@@ -9617,8 +9627,9 @@ var edges = [
     "label": "加水分解",
     "condition": "ニトリルの加水分解は段階的に進み、最終的にカルボン酸に対応する生成物を与える。",
     "name": "ベンゾニトリル：加水分解",
-    "note": "C₆H₅CN + 2H₂O → C₆H₅COOH + NH₃（概略）",
-    "equation": "hydrolysis"
+    "note": "ニトリルの酸性加水分解は段階的に進み、最終的にカルボン酸に対応する生成物を与える。",
+    "equation": "C₆H₅CN + 2H₂O → C₆H₅COOH + NH₃（概略）",
+    "type": "hydrolysis"
   },
   {
     "id": "e200",
@@ -9627,8 +9638,9 @@ var edges = [
     "label": "求核置換",
     "condition": "水性条件でベンジル位の塩素がヒドロキシ基に置換される。",
     "name": "塩化ベンジル：求核置換",
-    "note": "C₆H₅CH₂Cl + OH⁻ → C₆H₅CH₂OH + Cl⁻",
-    "equation": "substitution"
+    "note": "水性条件でベンジル位の塩素がヒドロキシ基に置換される。",
+    "equation": "C₆H₅CH₂Cl + OH⁻ → C₆H₅CH₂OH + Cl⁻",
+    "type": "substitution"
   },
   {
     "id": "e201",
@@ -9637,28 +9649,9 @@ var edges = [
     "label": "酸化",
     "condition": "シンナムアルデヒドのアルデヒド基を酸化。",
     "name": "シンナムアルデヒド：酸化",
-    "note": "C₆H₅CH=CHCHO + [O] → C₆H₅CH=CHCOOH",
-    "equation": "oxidation"
-  },
-  {
-    "id": "e202",
-    "from": "methyl-methacrylate",
-    "to": "polyethylene",
-    "label": "重合（別物質のため接続しない）",
-    "condition": "PMMAとポリエチレンは別種の高分子で、直接変換ではないため登録しない。",
-    "name": "メタクリル酸メチル：重合（別物質のため接続しない）",
-    "note": "—",
-    "equation": "other"
-  },
-  {
-    "id": "e203",
-    "from": "caprolactam",
-    "to": "nylon-66",
-    "label": "重合（別物質のため接続しない）",
-    "condition": "ε-カプロラクタムはナイロン6の原料であり、ナイロン66とは異なるため接続しない。",
-    "name": "ε-カプロラクタム：重合（別物質のため接続しない）",
-    "note": "—",
-    "equation": "other"
+    "note": "シンナムアルデヒドのアルデヒド基を酸化。",
+    "equation": "C₆H₅CH=CHCHO + [O] → C₆H₅CH=CHCOOH",
+    "type": "oxidation"
   },
   {
     "id": "e204",
@@ -9677,8 +9670,9 @@ var edges = [
     "label": "酸性加水分解",
     "condition": "エステルの加水分解。",
     "name": "酢酸イソプロピル：酸性加水分解",
-    "note": "CH₃COOCH(CH₃)₂ + H₂O ⇌ CH₃COOH + (CH₃)₂CHOH",
-    "equation": "hydrolysis"
+    "note": "酢酸イソプロピルの加水分解。",
+    "equation": "CH₃COOCH(CH₃)₂ + H₂O ⇌ CH₃COOH + (CH₃)₂CHOH",
+    "type": "hydrolysis"
   },
   {
     "id": "e206",
@@ -9687,8 +9681,9 @@ var edges = [
     "label": "酸性加水分解",
     "condition": "エステルの加水分解。",
     "name": "プロピオン酸メチル：酸性加水分解",
-    "note": "CH₃CH₂COOCH₃ + H₂O ⇌ CH₃CH₂COOH + CH₃OH",
-    "equation": "hydrolysis"
+    "note": "プロピオン酸メチルの加水分解。",
+    "equation": "CH₃CH₂COOCH₃ + H₂O ⇌ CH₃CH₂COOH + CH₃OH",
+    "type": "hydrolysis"
   },
   {
     "id": "e207",
@@ -9697,8 +9692,9 @@ var edges = [
     "label": "酸性加水分解",
     "condition": "エステルの加水分解。",
     "name": "プロピオン酸エチル：酸性加水分解",
-    "note": "CH₃CH₂COOC₂H₅ + H₂O ⇌ CH₃CH₂COOH + C₂H₅OH",
-    "equation": "hydrolysis"
+    "note": "プロピオン酸エチルの加水分解。",
+    "equation": "CH₃CH₂COOC₂H₅ + H₂O ⇌ CH₃CH₂COOH + C₂H₅OH",
+    "type": "hydrolysis"
   },
   {
     "id": "e208",
@@ -9707,8 +9703,9 @@ var edges = [
     "label": "酸性加水分解",
     "condition": "エステルの加水分解。",
     "name": "酢酸ブチル：酸性加水分解",
-    "note": "CH₃COOC₄H₉ + H₂O ⇌ CH₃COOH + C₄H₉OH",
-    "equation": "hydrolysis"
+    "note": "酢酸ブチルの加水分解。",
+    "equation": "CH₃COOC₄H₉ + H₂O ⇌ CH₃COOH + C₄H₉OH",
+    "type": "hydrolysis"
   },
   {
     "id": "e209",
@@ -9717,8 +9714,9 @@ var edges = [
     "label": "加水分解",
     "condition": "フェニルエステルの加水分解でフェノールを生じる。",
     "name": "酢酸フェニル：加水分解",
-    "note": "CH₃COOC₆H₅ + H₂O → CH₃COOH + C₆H₅OH",
-    "equation": "hydrolysis"
+    "note": "フェニルエステルの加水分解でフェノールを生じる。",
+    "equation": "CH₃COOC₆H₅ + H₂O → CH₃COOH + C₆H₅OH",
+    "type": "hydrolysis"
   },
   {
     "id": "e210",
@@ -9727,8 +9725,9 @@ var edges = [
     "label": "加水分解",
     "condition": "芳香族エステルの加水分解。",
     "name": "安息香酸ベンジル：加水分解",
-    "note": "C₆H₅COOCH₂C₆H₅ + H₂O → C₆H₅COOH + C₆H₅CH₂OH",
-    "equation": "hydrolysis"
+    "note": "安息香酸ベンジルの加水分解。",
+    "equation": "C₆H₅COOCH₂C₆H₅ + H₂O → C₆H₅COOH + C₆H₅CH₂OH",
+    "type": "hydrolysis"
   },
   {
     "id": "e211",
@@ -9737,8 +9736,9 @@ var edges = [
     "label": "加水分解",
     "condition": "芳香族エステルの加水分解。",
     "name": "安息香酸フェニル：加水分解",
-    "note": "C₆H₅COOC₆H₅ + H₂O → C₆H₅COOH + C₆H₅OH",
-    "equation": "hydrolysis"
+    "note": "安息香酸フェニルの加水分解。",
+    "equation": "C₆H₅COOC₆H₅ + H₂O → C₆H₅COOH + C₆H₅OH",
+    "type": "hydrolysis"
   },
   {
     "id": "e212",
@@ -9747,8 +9747,9 @@ var edges = [
     "label": "加水分解",
     "condition": "サリチル酸メチルのエステル結合を加水分解。",
     "name": "サリチル酸メチル：加水分解",
-    "note": "C₆H₄(OH)COOCH₃ + H₂O → C₆H₄(OH)COOH + CH₃OH",
-    "equation": "hydrolysis"
+    "note": "サリチル酸メチルのエステル結合を加水分解。",
+    "equation": "C₆H₄(OH)COOCH₃ + H₂O → C₆H₄(OH)COOH + CH₃OH",
+    "type": "hydrolysis"
   },
   {
     "id": "e213",
@@ -9757,8 +9758,9 @@ var edges = [
     "label": "酸化",
     "condition": "アルデヒド基を酸化してカルボキシ基へ変換する。",
     "name": "サリチルアルデヒド：酸化",
-    "note": "o-HOC₆H₄CHO + [O] → o-HOC₆H₄COOH",
-    "equation": "oxidation"
+    "note": "アルデヒド基を酸化してカルボキシ基へ変換する。",
+    "equation": "o-HOC₆H₄CHO + [O] → o-HOC₆H₄COOH",
+    "type": "oxidation"
   },
   {
     "id": "e214",
@@ -9767,8 +9769,9 @@ var edges = [
     "label": "還元",
     "condition": "ケトンの還元で第二級アルコールを得る。",
     "name": "シクロペンタノン：還元",
-    "note": "C₅H₈O + H₂ → C₅H₁₀O",
-    "equation": "reduction"
+    "note": "ケトンの還元で第二級アルコールを得る。",
+    "equation": "C₅H₈O + H₂ → C₅H₁₀O",
+    "type": "reduction"
   },
   {
     "id": "e215",
@@ -9777,18 +9780,9 @@ var edges = [
     "label": "酸化",
     "condition": "第二級アルコールの酸化でケトンを得る。",
     "name": "シクロペンタノール：酸化",
-    "note": "C₅H₁₀O + [O] → C₅H₈O + H₂O",
-    "equation": "oxidation"
-  },
-  {
-    "id": "e216",
-    "from": "2-butanol",
-    "to": "acetone",
-    "label": "酸化",
-    "condition": "第二級アルコールの酸化でケトンを得る。",
-    "name": "2-ブタノール：酸化",
-    "note": "CH₃CH(OH)CH₂CH₃ + [O] → CH₃COCH₂CH₃ + H₂O",
-    "equation": "oxidation"
+    "note": "第二級アルコールの酸化でケトンを得る。",
+    "equation": "C₅H₁₀O + [O] → C₅H₈O + H₂O",
+    "type": "oxidation"
   },
   {
     "id": "e217",
@@ -9797,8 +9791,64 @@ var edges = [
     "label": "酸化",
     "condition": "第一級アルコールの穏やかな酸化でアルデヒドを得る。",
     "name": "1-ペンタノール：酸化",
-    "note": "CH₃(CH₂)₄OH + [O] → CH₃(CH₂)₃CHO + H₂O",
-    "equation": "oxidation"
+    "note": "第一級アルコールの穏やかな酸化でアルデヒドを得る。",
+    "equation": "CH₃(CH₂)₄OH + [O] → CH₃(CH₂)₃CHO + H₂O",
+    "type": "oxidation"
+  },
+  {
+    "id": "e218",
+    "from": "benzene",
+    "to": "bromobenzene",
+    "type": "substitution",
+    "label": "臭素化",
+    "condition": "Br₂／FeBr₃を用いる芳香族求電子置換の代表例。",
+    "name": "ベンゼン：臭素化",
+    "note": "ベンゼン環の水素が臭素に置換される。",
+    "equation": "C₆H₆ + Br₂ → C₆H₅Br + HBr"
+  },
+  {
+    "id": "e219",
+    "from": "benzene",
+    "to": "chlorobenzene",
+    "type": "substitution",
+    "label": "塩素化",
+    "condition": "Cl₂／FeCl₃を用いる芳香族求電子置換の代表例。",
+    "name": "ベンゼン：塩素化",
+    "note": "ベンゼン環の水素が塩素に置換される。",
+    "equation": "C₆H₆ + Cl₂ → C₆H₅Cl + HCl"
+  },
+  {
+    "id": "e220",
+    "from": "glucose",
+    "to": "sorbitol",
+    "type": "reduction",
+    "label": "還元",
+    "condition": "糖のカルボニル基を還元する反応の概念例。",
+    "name": "D-グルコース：還元",
+    "note": "グルコースのアルデヒド基に対応する部分が還元され、糖アルコールになる。",
+    "equation": "C₆H₁₂O₆ + H₂ → C₆H₁₄O₆"
+  },
+  {
+    "id": "e221",
+    "from": "hydroxybenzaldehyde",
+    "to": "p-hydroxybenzoic-acid",
+    "type": "oxidation",
+    "label": "酸化",
+    "condition": "アルデヒド基をカルボキシ基へ酸化する。",
+    "name": "p-ヒドロキシベンズアルデヒド：酸化",
+    "note": "p-ヒドロキシベンズアルデヒドのアルデヒド基を酸化する。",
+    "equation": "p-HOC₆H₄CHO + [O] → p-HOC₆H₄COOH"
+  },
+  {
+    "id": "e222",
+    "from": "phenylacetylene",
+    "to": "styrene",
+    "type": "reduction",
+    "label": "部分水素添加",
+    "condition": "アルキンをアルケン段階で止める選択的水素添加の概念例。",
+    "name": "フェニルアセチレン：部分水素添加",
+    "note": "三重結合の一部を還元してスチレンに対応するアルケンを得る。",
+    "equation": "C₆H₅C≡CH + H₂ → C₆H₅CH=CH₂"
   }
 ];
 var isomerGroups = [{"id":"hexose-constitutional","title":"C₆H₁₂O₆の構造異性体","relation":"構造異性体","note":"グルコースはアルドース、フルクトースはケトース。分子式は同じですが、原子の結合様式が異なります。","members":["glucose","fructose"]},{"id":"hexose-stereo","title":"ヘキソースの立体異性体","relation":"立体異性体","note":"グルコース・ガラクトース・マンノースは同じ結合様式をもち、立体配置が異なります。","members":["glucose","galactose","mannose"]},{"id":"lactic-constitutional","title":"C₃H₆O₃の構造異性体","relation":"構造異性体","note":"乳酸・3-ヒドロキシプロピオン酸・グリセルアルデヒドは同じ分子式ですが、官能基の位置や結合様式が異なります。","members":["lactic-acid","3-hydroxypropionic-acid","glyceraldehyde"],"contextIds":["l-lactic-acid","d-lactic-acid"]},{"id":"lactic-enantiomers","title":"乳酸の鏡像異性体","relation":"立体異性体：鏡像異性体","note":"L-乳酸は(S)-配置、D-乳酸は(R)-配置です。分子式と結合様式は同じですが、立体配置が互いに鏡像の関係です。","members":["l-lactic-acid","d-lactic-acid"],"contextIds":["lactic-acid"]}];
