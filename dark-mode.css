@@ -48,7 +48,8 @@ html[data-theme="dark"] :is(.search-submit,.route-search-submit,.exercise-next-b
 html[data-theme="dark"] :is(.search-submit:hover,.route-search-submit:hover,.exercise-next-button:hover:not(:disabled)){background:#528357!important}
 html[data-theme="dark"] :is(.compound-family,.compound-family-tag,.route-option-shortest){background:#2b432e!important;color:#b9dfba!important}
 html[data-theme="dark"] :is(.reaction-arrow,.route-direction-symbol,.route-option-number,.exercise-mode-number,.home-tool-icon,.home-step>span,.exercise-option-letter,.route-empty-icon){background:#2b3f2d!important;color:#b8dbb7!important}
-html[data-theme="dark"] :is(.identity-rule,.page-foot,.list-page-foot,.site-update-footer,.structure-foot,.route-timeline::before){border-color:#3a493d!important;background-color:transparent}
+html[data-theme="dark"] :is(.identity-rule,.page-foot,.list-page-foot,.site-update-footer,.structure-foot){border-color:#3a493d!important;background-color:transparent}
+html[data-theme="dark"] .route-timeline::before{background:#3a493d!important}
 html[data-theme="dark"] .no-reactions{background:#1b271e!important}
 html[data-theme="dark"] .starter-strip button{background:#1a261d!important;border-color:#3b4b3e!important;color:#b2c3b3!important}
 html[data-theme="dark"] .starter-strip button:hover{background:#2b3e2d!important;color:#e1eee1!important}
@@ -102,3 +103,29 @@ html[data-theme="dark"] .site-update-heading strong{color:#c7d6c8!important}
 html[data-theme="dark"] .site-update-history summary{color:#b5c9b6!important}
 html[data-theme="dark"] .site-update-history time{color:#9bc49e!important}
 html[data-theme="dark"] .route-reaction-open:hover{background:#314b33!important}
+
+/* Embedded compound list is also themed, even when collapsed on the detail page. */
+html[data-theme="dark"] #open-embedded-compound-list{background:#1c2b20!important;border-color:#3d5140!important;color:#b8d9ba!important}
+html[data-theme="dark"] #open-embedded-compound-list:hover{background:#283b2b!important}
+html[data-theme="dark"] #embedded-compound-list{background:#17221a!important;border-color:#3b4b3e!important}
+html[data-theme="dark"] #embedded-compound-list>summary{color:#b8d2b9!important}
+html[data-theme="dark"] .compound-explorer-intro h2{color:#e0ebe0!important}
+html[data-theme="dark"] .compound-family{background:#2b432e!important;color:#bce0bd!important}
+html[data-theme="dark"] .formula-display,html[data-theme="dark"] .fact-value{color:#c2d1c3!important}
+html[data-theme="dark"] .starter-strip button{color:#b7c9b8!important}
+html[data-theme="dark"] .pubchem-link{color:#a7cea9!important}
+html[data-theme="dark"] .route-stage-rail{color:#a9cbaa!important}
+html[data-theme="dark"] .route-stage-index{background:#46714b!important;border-color:#1b271e!important;box-shadow:0 0 0 1px #536f56!important}
+html[data-theme="dark"] .route-stage-side-value{color:#c2ddc3!important}
+html[data-theme="dark"] .route-reaction-condition-value{color:#c0d6c1!important}
+html[data-theme="dark"] .route-option-path{color:#adbdaf!important}
+html[data-theme="dark"] .route-options-header h3{color:#e0ece0!important}
+html[data-theme="dark"] .reaction-library-empty{color:#aab9ac!important}
+html[data-theme="dark"] .reaction-meta-field p{color:#b0beb1!important}
+html[data-theme="dark"] .route-dialog-equation{color:#d9e8d9!important}
+html[data-theme="dark"] .route-dialog-note{color:#bfcebf!important}
+html[data-theme="dark"] .exercise-mode small{color:#aabaaa!important}
+html[data-theme="dark"] .exercise-answer-step>strong,html[data-theme="dark"] .exercise-answer-details strong{color:#c9e1ca!important}
+html[data-theme="dark"] .exercise-progress-note{color:#9eae9f!important}
+html[data-theme="dark"] .exercise-next-button:disabled{background:#2a332b!important;border-color:#465246!important;color:#879688!important}
+html[data-theme="dark"] .map-search-status.error,html[data-theme="dark"] .route-search-status.error{color:#f0a68e!important}
