@@ -9660,8 +9660,9 @@ var edges = [
     "label": "酸性加水分解",
     "condition": "酸性条件下でアミドを加水分解する。",
     "name": "アセトアミド：酸性加水分解",
-    "note": "CH₃CONH₂ + H₂O + H⁺ → CH₃COOH + NH₄⁺",
-    "equation": "hydrolysis"
+    "note": "アセトアミドの酸性加水分解で酢酸とアンモニウムイオンに対応する生成物を得る。",
+    "equation": "CH₃CONH₂ + H₂O + H⁺ → CH₃COOH + NH₄⁺",
+    "type": "hydrolysis"
   },
   {
     "id": "e205",
