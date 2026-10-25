@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#f5f6f2">
+<script id="data-theme-bootstrap">(function(){try{var t=localStorage.getItem("organic-atlas-theme");if(t==="dark"||(t!=="light"&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.dataset.theme="dark";}catch(e){}})();</script>
 <meta name="description" content="高校有機化学の反応経路・試薬・反応条件を問題演習で学ぶ。">
 <title>演習 — Organic Atlas</title>
 <link rel="stylesheet" href="styles.css?v=20261026-navigation1">
@@ -11,6 +12,8 @@
 <link rel="stylesheet" href="site-nav.css?v=20261026-navigation1">
 <script src="chemistry-data.js?v=20261026-large4" defer></script>
 <script src="exercise.js?v=20261026-large4" defer></script>
+<link rel="stylesheet" href="dark-mode.css?v=20261026-dark1">
+<script src="theme.js?v=20261026-dark1" defer></script>
 </head>
 <body>
 <header class="site-header">
@@ -26,6 +29,7 @@
     <a class="header-label" href="route.html"><span class="header-dot" aria-hidden="true"></span>経路検索</a>
     <a class="header-label" href="reactions.html"><span class="header-dot" aria-hidden="true"></span>反応一覧</a>
     <a class="header-label" href="exercise.html" aria-current="page"><span class="header-dot" aria-hidden="true"></span>演習</a>
+      <button type="button" class="theme-toggle" id="theme-toggle" aria-pressed="false" aria-label="ダークモードに切り替え"><span class="theme-toggle-icon" aria-hidden="true">☾</span><span class="theme-toggle-label">ダークモード</span></button>
   </nav>
 </header>
 <main class="exercise-page">
