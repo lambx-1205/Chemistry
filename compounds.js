@@ -8,9 +8,12 @@ var countLabel=document.getElementById("list-count");
 var status=document.getElementById("list-status");
 var empty=document.getElementById("list-empty");
 var familyFilter=document.getElementById("list-family-filter");
+var majorFilter=document.getElementById("list-major-filter");
+var embeddedButton=document.getElementById("open-embedded-compound-list");
+var embeddedDetails=document.getElementById("embedded-compound-list");
 var cardsViewButton=document.getElementById("list-view-cards");
 var rowsViewButton=document.getElementById("list-view-rows");
-var listView="cards";
+var listView="list";
 if(!data||!Array.isArray(data.compounds)){
  status.textContent="化合物データを読み込めませんでした。ページを再読み込みしてください。";
  status.className="list-status error";
@@ -114,11 +117,25 @@ function rowHtml(c){
   '<span class="compound-row-arrow" aria-hidden="true">↗</span>'+
  '</a>';
 }
+function majorCategory(c){
+ var t=[c.kind,c.family,c.mapGroup,c.name,c.id].filter(Boolean).join(" ").toLocaleLowerCase();
+ if(/糖|アミノ酸|ペプチド|タンパク|核酸|生体|ビタミン|sugar|amino/.test(t))return "生体関連化合物";
+ if(/高分子|ポリ|polymer|nylon|cellulose|starch|天然ゴム/.test(t))return "高分子";
+ if(/芳香族|ベンゼン|フェニル|ナフタレン|アゾ|染料|アニリン|ニトロベンゼン|pyridine|pyrrole|indole|furan|thiophene|aromatic/.test(t))return "芳香族・複素環化合物";
+ if(/カルボン酸|エステル|アルデヒド|ケトン|カルボニル|酸無水物|アミド|ニトリル|carbox|ester|aldehyde|ketone/.test(t))return "カルボニル・カルボン酸系";
+ if(/アルコール|フェノール|エーテル|糖|ヒドロキシ|alcohol|ether|phenol/.test(t))return "酸素を含む化合物";
+ if(/ハロゲン|塩化|臭化|フッ化|ヨウ化|halogen/.test(t))return "ハロゲン化合物";
+ if(/アミン|アミノ|窒素|ニトロ|ジアゾ|尿素|含窒素|amine|nitro|nitrogen/.test(t))return "窒素を含む化合物";
+ if(/炭化水素|アルカン|アルケン|アルキン|脂環|aliphatic|hydrocarbon/.test(t))return "炭化水素";
+ return "その他";
+}
 function populateFamilyFilter(){
- var current=familyFilter.value;
- var families=Array.from(new Set(compounds.map(function(c){return c.family||"分類なし";}))).sort(function(a,b){return a.localeCompare(b,"ja");});
- familyFilter.innerHTML='<option value="">すべての種別</option>'+families.map(function(f){return '<option value="'+esc(f)+'">'+esc(f)+'</option>';}).join("");
- familyFilter.value=current;
+ var current=familyFilter.value,major=majorFilter?majorFilter.value:"";
+ var majors=Array.from(new Set(compounds.map(majorCategory))).sort(function(a,b){return a.localeCompare(b,"ja");});
+ if(majorFilter){majorFilter.innerHTML='<option value="">すべての種別</option>'+majors.map(function(f){return '<option value="'+esc(f)+'">'+esc(f)+'</option>';}).join("");majorFilter.value=major;}
+ var families=Array.from(new Set(compounds.filter(function(c){return !major||(majorCategory(c)===major);}).map(function(c){return c.family||"分類なし";}))).sort(function(a,b){return a.localeCompare(b,"ja");});
+ familyFilter.innerHTML='<option value="">すべての詳しい種別</option>'+families.map(function(f){return '<option value="'+esc(f)+'">'+esc(f)+'</option>';}).join("");
+ if(families.indexOf(current)>=0)familyFilter.value=current;else familyFilter.value="";
 }
 function sortCompounds(list){
  var method=sort.value;
@@ -140,10 +157,12 @@ function sortCompounds(list){
 function renderList(){
  var query=String(search.value||"").trim().toLocaleLowerCase();
  var selectedFamily=familyFilter.value;
+ var selectedMajor=majorFilter?majorFilter.value:"";
  var filtered=compounds.filter(function(c){
   var matchesQuery=!query||[c.name,c.pubchemName,c.formula,c.family,c.desc,c.feature].concat(c.aliases||[]).some(function(v){return String(v||"").toLocaleLowerCase().indexOf(query)>=0;});
   var matchesFamily=!selectedFamily||(c.family||"分類なし")===selectedFamily;
-  return matchesQuery&&matchesFamily;
+  var matchesMajor=!selectedMajor||majorCategory(c)===selectedMajor;
+  return matchesQuery&&matchesFamily&&matchesMajor;
  });
  var ordered=sortCompounds(filtered);
  root.classList.toggle("is-list",listView==="list");
@@ -164,6 +183,8 @@ populateFamilyFilter();
 search.addEventListener("input",renderList);
 sort.addEventListener("change",renderList);
 familyFilter.addEventListener("change",renderList);
+if(majorFilter)majorFilter.addEventListener("change",function(){populateFamilyFilter();renderList();});
+if(embeddedButton&&embeddedDetails){embeddedButton.addEventListener("click",function(){embeddedDetails.open=!embeddedDetails.open;embeddedButton.setAttribute("aria-expanded",String(embeddedDetails.open));embeddedButton.querySelector("span").textContent=embeddedDetails.open?"−":"＋";if(embeddedDetails.open)embeddedDetails.scrollIntoView({behavior:"smooth",block:"start"});});embeddedDetails.addEventListener("toggle",function(){embeddedButton.setAttribute("aria-expanded",String(embeddedDetails.open));embeddedButton.querySelector("span").textContent=embeddedDetails.open?"−":"＋";});}
 cardsViewButton.addEventListener("click",function(){listView="cards";renderList();});
 rowsViewButton.addEventListener("click",function(){listView="list";renderList();});
 renderList();
