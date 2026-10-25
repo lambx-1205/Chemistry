@@ -4,8 +4,8 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f5f6f2">
 <meta name="description" content="登録された有機化合物を大分類・詳細分類で検索し、構造式から詳細へ移動する。">
 <title>化合物一覧 — Organic Atlas</title>
-<link rel="stylesheet" href="styles.css?v=20261026-large1"><link rel="stylesheet" href="compounds.css?v=20261026-large1"><link rel="stylesheet" href="site-nav.css?v=20261026-large1">
-<script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js" defer></script><script src="chemistry-data.js?v=20261026-large1" defer></script><script src="compounds.js?v=20261026-large1" defer></script>
+<link rel="stylesheet" href="styles.css?v=20261026-large1"><link rel="stylesheet" href="compounds.css?v=20261026-atlas-v2"><link rel="stylesheet" href="site-nav.css?v=20261026-large1">
+<script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js" defer></script><script src="chemistry-data.js?v=20261026-atlas-v2" defer></script><script src="compounds.js?v=20261026-atlas-v2" defer></script>
 </head><body>
 <header class="site-header">
   <a class="brand" href="./" aria-label="Organic Atlas トップページへ">
@@ -15,6 +15,7 @@
   <nav class="header-actions site-nav" aria-label="ページ移動">
     <a class="header-label" href="./"><span class="header-dot" aria-hidden="true"></span>トップページ</a>
     <a class="header-label" href="compounds-list.html" aria-current="page"><span class="header-dot" aria-hidden="true"></span>化合物一覧</a>
+    <a class="header-label" href="compounds.html"><span class="header-dot" aria-hidden="true"></span>化合物表示</a>
     <a class="header-label" href="map.html"><span class="header-dot" aria-hidden="true"></span>化合物map</a>
     <a class="header-label" href="route.html"><span class="header-dot" aria-hidden="true"></span>経路検索</a>
     <a class="header-label" href="reactions.html"><span class="header-dot" aria-hidden="true"></span>反応一覧</a>
@@ -24,7 +25,7 @@
 <main class="compound-list-page">
   <div class="list-page-heading">
     <span class="section-eyebrow">COMPOUND LIBRARY</span>
-    <h1>登録済み化合物一覧</h1>
+    <h1>化合物一覧</h1>
     <p>登録済みの化合物を分類・分子量で整理し、構造式から詳細へ移動できます。</p>
   </div>
   <section class="list-controls" aria-label="一覧の検索と並べ替え">
@@ -48,8 +49,8 @@
         <label for="list-family-filter">詳しい種別</label><select id="list-family-filter"><option value="">すべての詳しい種別</option></select>
       </div>
       <div class="list-view-switch" role="group" aria-label="表示形式">
-        <button type="button" id="list-view-cards" aria-pressed="true">カード</button>
-        <button type="button" id="list-view-rows" aria-pressed="false">リスト</button>
+        <button type="button" id="list-view-cards" aria-pressed="false">カード</button>
+        <button type="button" id="list-view-rows" aria-pressed="true">リスト</button>
       </div>
     </div>
   </section>
