@@ -92,7 +92,7 @@ function renderThumbnail(host,compound){
 function cardHtml(c){
  var weight=molecularWeight(c);
  var weightText=weight===null?"分子量 —":weight.toFixed(2)+" g/mol";
- return '<a class="compound-list-card" href="index.html?compound='+encodeURIComponent(c.id)+'" aria-label="'+esc(c.name)+'の詳細を開く">'+
+ return '<a class="compound-list-card" href="compounds.html?compound='+encodeURIComponent(c.id)+'" aria-label="'+esc(c.name)+'の詳細を開く">'+
   '<div class="compound-thumb" data-thumb-id="'+esc(c.id)+'" role="img" aria-label="'+esc(c.name)+'の構造式"><span class="structure-loading">構造式</span></div>'+
   '<div class="compound-card-copy">'+
    '<div class="compound-card-meta"><span class="compound-family-tag">'+esc(c.family||"分類なし")+'</span><span class="compound-card-arrow" aria-hidden="true">↗</span></div>'+
@@ -106,7 +106,7 @@ function cardHtml(c){
 function rowHtml(c){
  var weight=molecularWeight(c);
  var weightText=weight===null?"—":weight.toFixed(2)+" g/mol";
- return '<a class="compound-list-row" href="index.html?compound='+encodeURIComponent(c.id)+'" aria-label="'+esc(c.name)+'の詳細を開く">'+
+ return '<a class="compound-list-row" href="compounds.html?compound='+encodeURIComponent(c.id)+'" aria-label="'+esc(c.name)+'の詳細を開く">'+
   '<span class="compound-row-name">'+esc(c.name)+'</span>'+
   '<span class="compound-row-formula">'+formulaHtml(c.formula)+'</span>'+
   '<span class="compound-row-family">'+esc(c.family||"分類なし")+'</span>'+
