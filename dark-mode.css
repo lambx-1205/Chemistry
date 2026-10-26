@@ -130,3 +130,31 @@ html[data-theme="dark"] .exercise-answer-step>strong,html[data-theme="dark"] .ex
 html[data-theme="dark"] .exercise-progress-note{color:#9eae9f!important}
 html[data-theme="dark"] .exercise-next-button:disabled{background:#2a332b!important;border-color:#465246!important;color:#879688!important}
 html[data-theme="dark"] .map-search-status.error,html[data-theme="dark"] .route-search-status.error{color:#f0a68e!important}
+
+
+/* Dark theme for the 3D structure mini-game. */
+html[data-theme="dark"] .exercise-3d-game{background:#1d2921!important;border-color:#39483c!important;box-shadow:0 10px 35px rgba(0,0,0,.18)!important}
+html[data-theme="dark"] .exercise-3d-heading h2{color:#e3ece3!important}
+html[data-theme="dark"] .exercise-3d-heading p,html[data-theme="dark"] .structure-game-toolbar-label,html[data-theme="dark"] .structure-game-status,html[data-theme="dark"] .structure-game-progress{color:#a4b2a5!important}
+html[data-theme="dark"] .structure-game-score{background:#18231b!important;border-color:#39483c!important;color:#b8cbb9!important}
+html[data-theme="dark"] .structure-game-view-mode{background:#18231b!important;border-color:#39483c!important;color:#b6c5b7!important}
+html[data-theme="dark"] .structure-game-view-mode.is-active{background:#315f46!important;border-color:#528357!important;color:#f2f8f1!important}
+html[data-theme="dark"] .structure-game-answer-column{background:#18231b!important;border-color:#39483c!important}
+html[data-theme="dark"] .structure-game-answer-column>h3,html[data-theme="dark"] .structure-game-answer h3{color:#c5dfc7!important}
+html[data-theme="dark"] .structure-game-answer-instruction{color:#a4b2a5!important}
+html[data-theme="dark"] .structure-game-option{background:#202d24!important;border-color:#39483c!important;color:#dce7dd!important}
+html[data-theme="dark"] .structure-game-option:hover:not(:disabled){background:#26382a!important;border-color:#638969!important}
+html[data-theme="dark"] .structure-game-option-letter{background:#2b3f2d!important;color:#b8dbb7!important}
+html[data-theme="dark"] .structure-game-option.is-correct{background:#1f3525!important;border-color:#528357!important}
+html[data-theme="dark"] .structure-game-option.is-correct .structure-game-option-letter{background:#39734a!important;color:#fff!important}
+html[data-theme="dark"] .structure-game-option.is-wrong{background:#382721!important;border-color:#a9684e!important}
+html[data-theme="dark"] .structure-game-option.is-wrong .structure-game-option-letter{background:#9b543d!important;color:#fff!important}
+html[data-theme="dark"] .structure-game-feedback{background:#1f3525!important;color:#c2dfc4!important;border-left-color:#63976a!important}
+html[data-theme="dark"] .structure-game-feedback.is-wrong{background:#382721!important;color:#efc0a9!important;border-left-color:#c77b4e!important}
+html[data-theme="dark"] .structure-game-answer{background:#202d24!important;border-color:#39483c!important;color:#c1cfc2!important}
+html[data-theme="dark"] .structure-game-answer .structure-game-answer-meta{color:#bdd6bf!important}
+html[data-theme="dark"] .structure-game-answer .structure-game-answer-hint{background:#293a2c!important;color:#c1d5c2!important}
+html[data-theme="dark"] .structure-game-source,html[data-theme="dark"] .structure-game-model-footer a{color:#a8d2aa!important}
+html[data-theme="dark"] .structure-game-model-footer{border-top-color:#39483c!important;color:#a4b2a5!important}
+html[data-theme="dark"] .structure-game-actions{border-top-color:#39483c!important}
+html[data-theme="dark"] .structure-game-next:disabled{background:#29352b!important;border-color:#39483c!important;color:#79897b!important}
