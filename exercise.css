@@ -61,3 +61,56 @@
 .exercise-update-footer{width:min(1050px,calc(100% - 48px))}
 @media(max-width:700px){.exercise-page{width:calc(100% - 24px);padding-top:25px}.exercise-mode{padding:12px 10px;gap:8px}.exercise-mode-number{width:29px;height:29px}.exercise-mode small{font-size:8px}.exercise-question{padding:20px 15px 16px}.exercise-question h2{font-size:21px}.exercise-route-endpoints{gap:6px}.exercise-endpoint{padding:11px 9px}.exercise-endpoint strong{font-size:12px}.exercise-endpoint-arrow{width:20px}.exercise-options{grid-template-columns:1fr}.exercise-option{min-height:50px}.exercise-guide{padding-top:26px}.exercise-guide-grid{grid-template-columns:1fr}.exercise-guide-grid article{padding:13px}.exercise-update-footer{width:calc(100% - 24px)}}
 @media(max-width:380px){.exercise-mode{align-items:flex-start}.exercise-mode-number{width:26px;height:26px}.exercise-mode strong{font-size:10px}.exercise-mode small{max-width:100px}.exercise-question-top{align-items:flex-start}.exercise-score{font-size:9px}.exercise-question h2{font-size:19px}.exercise-endpoint strong{font-size:11px}}
+
+
+/* Mini-game: identify a compound from its 3D structure. */
+.exercise-3d-game{margin-top:24px;padding:25px;border:1px solid #dfe7dc;border-radius:17px;background:#fff;box-shadow:0 10px 35px rgba(32,49,36,.04)}
+.exercise-3d-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin:0 0 20px}
+.exercise-3d-heading h2{margin:7px 0 7px;color:#24372a;font-size:clamp(22px,3vw,29px);line-height:1.3;letter-spacing:-.8px}
+.exercise-3d-heading p{max-width:650px;margin:0;color:#7f8c81;font-size:12px;line-height:1.85}
+.structure-game-score{flex:none;padding:8px 10px;border:1px solid #e3e9e0;border-radius:8px;background:#fafbf8;color:#647867;font-size:10px;font-weight:850;white-space:nowrap;font-variant-numeric:tabular-nums}
+.structure-game-layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(285px,.9fr);gap:20px;align-items:start}
+.structure-game-visual,.structure-game-answer-column{min-width:0}
+.structure-game-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin-bottom:9px}
+.structure-game-toolbar-label{margin-right:3px;color:#89958a;font-size:10px;font-weight:800}
+.structure-game-view-mode{min-height:32px;padding:0 11px;border:1px solid #dfe7dc;border-radius:7px;background:#f7f9f5;color:#68796b;font-size:10px;font-weight:800}
+.structure-game-view-mode:hover{border-color:#a9c5a8}
+.structure-game-view-mode.is-active{border-color:#315f46;background:#315f46;color:#fff}
+.structure-game-stage{width:100%;height:365px;overflow:hidden;border:1px solid #202832;border-radius:11px;background:#05080c}
+.structure-game-stage canvas{display:block;width:100%;height:100%}
+.structure-game-fallback{display:block;width:100%;height:365px;object-fit:contain;border:1px solid #202832;border-radius:11px;background:#05080c}
+.structure-game-status{min-height:36px;margin:9px 1px 7px;color:#829085;font-size:10px;line-height:1.8}
+.structure-game-status.is-error{color:#b85f42}
+.structure-game-model-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:10px;border-top:1px solid #edf0ea;color:#94a095;font-size:9px}
+.structure-game-model-footer a{color:#537b59;text-decoration:none;font-weight:850}
+.structure-game-model-footer a:hover{text-decoration:underline}
+.structure-game-answer-column{padding:17px;border:1px solid #e2e9df;border-radius:12px;background:#fbfcf9}
+.structure-game-answer-column>h3{margin:0 0 5px;color:#35513b;font-size:13px;font-weight:900}
+.structure-game-answer-instruction{margin:0 0 13px;color:#8a968c;font-size:10px;line-height:1.7}
+.structure-game-options{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.structure-game-option{display:flex;align-items:flex-start;gap:8px;min-width:0;min-height:61px;padding:10px;border:1px solid #e0e7dd;border-radius:9px;background:#fff;color:#405245;text-align:left}
+.structure-game-option:hover:not(:disabled){border-color:#a9c5a8;background:#f7faf5}
+.structure-game-option:focus-visible{outline:3px solid #a8c8ad;outline-offset:2px}
+.structure-game-option:disabled{cursor:default;opacity:.84}
+.structure-game-option-letter{display:grid;place-items:center;flex:none;width:24px;height:24px;border-radius:7px;background:#eff3ec;color:#6d806f;font-size:10px;font-weight:900}
+.structure-game-option-name{display:block;min-width:0;padding-top:3px;font-size:11px;line-height:1.65;font-weight:800;overflow-wrap:anywhere}
+.structure-game-option.is-correct{border-color:#77a880;background:#eff7ef}
+.structure-game-option.is-correct .structure-game-option-letter{background:#39734a;color:#fff}
+.structure-game-option.is-wrong{border-color:#d49a83;background:#fff4ee}
+.structure-game-option.is-wrong .structure-game-option-letter{background:#b95f42;color:#fff}
+.structure-game-feedback{margin-top:12px;padding:11px 12px;border-left:3px solid #6f9b74;border-radius:0 8px 8px 0;background:#f3f8f1;color:#456249;font-size:11px;line-height:1.8;font-weight:800}
+.structure-game-feedback.is-wrong{border-left-color:#c77b4e;background:#fff6ef;color:#8e5038}
+.structure-game-answer{margin-top:11px;padding:13px;border:1px solid #e2e9df;border-radius:9px;background:#fff;color:#647467}
+.structure-game-answer h3{margin:0 0 7px;color:#35523b;font-size:13px;font-weight:900;line-height:1.6}
+.structure-game-answer p{margin:6px 0;font-size:10px;line-height:1.85;overflow-wrap:anywhere}
+.structure-game-answer .structure-game-answer-meta{color:#58735d;font-weight:850}
+.structure-game-answer .structure-game-answer-hint{padding:8px 9px;border-radius:7px;background:#f4f7f1;color:#526c56}
+.structure-game-source{display:inline-block;margin-top:6px;color:#537b59;font-size:10px;font-weight:850;text-decoration:none}
+.structure-game-source:hover{text-decoration:underline}
+.structure-game-actions{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-top:15px;padding-top:13px;border-top:1px solid #e8ede5}
+.structure-game-progress{flex:1;color:#8b978d;font-size:9px;line-height:1.8}
+.structure-game-next{display:inline-flex;align-items:center;justify-content:center;flex:none;min-height:39px;padding:0 13px;border:1px solid #315f46;border-radius:8px;background:#315f46;color:#fff;font-size:10px;font-weight:850}
+.structure-game-next:hover:not(:disabled){background:#244a35}
+.structure-game-next:disabled{border-color:#d9e1d6;background:#edf1ea;color:#9aa49a;cursor:not-allowed}
+@media(max-width:850px){.exercise-3d-game{padding:20px}.structure-game-layout{grid-template-columns:1fr}.structure-game-stage,.structure-game-fallback{height:350px}.structure-game-answer-column{padding:15px}}
+@media(max-width:520px){.exercise-3d-game{margin-top:18px;padding:15px;border-radius:13px}.exercise-3d-heading{display:block;margin-bottom:16px}.structure-game-score{display:inline-block;margin-top:12px}.structure-game-stage,.structure-game-fallback{height:300px}.structure-game-options{grid-template-columns:1fr}.structure-game-option{min-height:49px}.structure-game-actions{align-items:stretch;flex-direction:column}.structure-game-next{width:100%}.structure-game-model-footer{font-size:8px}}
