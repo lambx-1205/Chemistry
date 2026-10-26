@@ -114,3 +114,5 @@
 .structure-game-next:disabled{border-color:#d9e1d6;background:#edf1ea;color:#9aa49a;cursor:not-allowed}
 @media(max-width:850px){.exercise-3d-game{padding:20px}.structure-game-layout{grid-template-columns:1fr}.structure-game-stage,.structure-game-fallback{height:350px}.structure-game-answer-column{padding:15px}}
 @media(max-width:520px){.exercise-3d-game{margin-top:18px;padding:15px;border-radius:13px}.exercise-3d-heading{display:block;margin-bottom:16px}.structure-game-score{display:inline-block;margin-top:12px}.structure-game-stage,.structure-game-fallback{height:300px}.structure-game-options{grid-template-columns:1fr}.structure-game-option{min-height:49px}.structure-game-actions{align-items:stretch;flex-direction:column}.structure-game-next{width:100%}.structure-game-model-footer{font-size:8px}}
+
+.structure-game-fallback[hidden],.structure-game-stage[hidden],.structure-game-answer[hidden],.structure-game-feedback[hidden]{display:none!important}
