@@ -5,14 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#f5f6f2">
 <script id="data-theme-bootstrap">(function(){try{var t=localStorage.getItem("organic-atlas-theme");if(t==="dark"||(t!=="light"&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.dataset.theme="dark";}catch(e){}})();</script>
-<meta name="description" content="高校有機化学の反応経路・試薬・反応条件を問題演習で学ぶ。">
+<meta name="description" content="反応経路・試薬条件に加え、ランダムな3D分子模型から化合物を特定する演習に挑戦。">
 <title>演習 — Organic Atlas</title>
 <link rel="stylesheet" href="styles.css?v=20261026-navigation1">
-<link rel="stylesheet" href="exercise.css?v=20261026-atlas-v2">
+<link rel="stylesheet" href="exercise.css?v=20261026-minigame1">
 <link rel="stylesheet" href="site-nav.css?v=20261026-navigation1">
 <script src="chemistry-data.js?v=20261026-large4" defer></script>
 <script src="exercise.js?v=20261026-large4" defer></script>
-<link rel="stylesheet" href="dark-mode.css?v=20261026-dark1">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"}}</script>
+<script type="module" src="exercise-3d.js?v=20261026-minigame1"></script>
+<link rel="stylesheet" href="dark-mode.css?v=20261026-dark2">
 <script src="theme.js?v=20261026-dark1" defer></script>
 </head>
 <body>
@@ -55,6 +57,43 @@
       <div class="exercise-actions"><span class="exercise-progress-note" id="exercise-progress-note">反応データからランダムに出題します。</span><button type="button" id="next-question" class="exercise-next-button" disabled>次の問題へ <span aria-hidden="true">→</span></button></div>
     </section>
   </section>
+  <section class="exercise-3d-game" id="structure-game" aria-labelledby="structure-game-title">
+    <div class="exercise-3d-heading">
+      <div>
+        <span class="section-eyebrow">MINI GAME 01 · STRUCTURE IDENTIFICATION</span>
+        <h2 id="structure-game-title">この3D構造は何？</h2>
+        <p>ランダムに現れる分子模型を回転させ、正しい化合物名を4択から選んでください。名前・分子式は解答するまで表示されません。</p>
+      </div>
+      <div class="structure-game-score" id="structure-game-score" aria-live="polite">正解 0 / 解答 0</div>
+    </div>
+    <div class="structure-game-layout">
+      <div class="structure-game-visual">
+        <div class="structure-game-toolbar" role="group" aria-label="3D模型の表示形式">
+          <span class="structure-game-toolbar-label">表示形式</span>
+          <button type="button" class="structure-game-view-mode is-active" id="structure-game-spacefill" aria-pressed="true">空間充填</button>
+          <button type="button" class="structure-game-view-mode" id="structure-game-ballstick" aria-pressed="false">球棒モデル</button>
+        </div>
+        <div class="structure-game-stage" id="structure-game-stage" role="img" aria-label="化合物名を当てるための3D分子模型"></div>
+        <img class="structure-game-fallback" id="structure-game-fallback" alt="PubChemが提供する3D分子構造画像" hidden>
+        <p class="structure-game-status" id="structure-game-status" role="status" aria-live="polite">3D構造を準備しています…</p>
+        <div class="structure-game-model-footer">
+          <span id="structure-game-source">PubChem 3Dデータ</span>
+          <a id="structure-game-pubchem-link" href="https://pubchem.ncbi.nlm.nih.gov/" target="_blank" rel="noopener noreferrer">PubChemで確認 ↗</a>
+        </div>
+      </div>
+      <div class="structure-game-answer-column">
+        <h3>化合物名を選べ</h3>
+        <p class="structure-game-answer-instruction">原子の種類・結合・立体配置を観察しよう。模型はドラッグで回転できます。</p>
+        <div class="structure-game-options" id="structure-game-options" role="group" aria-label="化合物名の選択肢"></div>
+        <div class="structure-game-feedback" id="structure-game-feedback" role="status" aria-live="polite" hidden></div>
+        <div class="structure-game-answer" id="structure-game-answer" hidden></div>
+        <div class="structure-game-actions">
+          <span class="structure-game-progress" id="structure-game-progress">問題を読み込んでいます。</span>
+          <button type="button" class="structure-game-next" id="structure-game-next" disabled>次の問題へ →</button>
+        </div>
+      </div>
+    </div>
+  </section>
   <section class="exercise-guide">
     <div><span class="section-eyebrow">HOW TO PRACTICE</span><h2>解いたあとが大切</h2></div>
     <div class="exercise-guide-grid">
@@ -67,7 +106,8 @@
 <footer class="site-update-footer exercise-update-footer" aria-label="更新日時と更新履歴">
   <div class="site-update-heading"><strong>更新情報</strong><span>最終更新：2026-10-26</span></div>
   <details class="site-update-history"><summary>更新履歴</summary><ul>
-      <li><time datetime="2026-10-26">2026-10-26</time> アゾ化合物としてメチルオレンジ、メチルレッド、オレンジIIを追加。PubChemの構造・分子式・化合物IDを登録</li>
+      <li><time datetime="2026-10-26">2026-10-26</time> ランダムな3D分子模型から化合物を特定する4択ミニゲームを追加</li>
+<li><time datetime="2026-10-26">2026-10-26</time> アゾ化合物としてメチルオレンジ、メチルレッド、オレンジIIを追加。PubChemの構造・分子式・化合物IDを登録</li>
 <li><time datetime="2026-10-26">2026-10-26</time> 反応経路・試薬条件の演習モードを追加</li></ul></details>
 </footer>
 </body>
