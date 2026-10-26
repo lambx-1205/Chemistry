@@ -24,6 +24,7 @@ import "./molecule3d.js";
   let activeViewer = null;
   let modelMode = "spacefill";
   let requestToken = 0;
+  let consecutiveLoadFailures = 0;
   let correct = 0;
   let answered = 0;
   let locked = true;
@@ -64,7 +65,9 @@ import "./molecule3d.js";
   function setMode(nextMode) {
     modelMode = nextMode;
     $("structure-game-spacefill").classList.toggle("is-active", modelMode === "spacefill");
+    $("structure-game-spacefill").setAttribute("aria-pressed", String(modelMode === "spacefill"));
     $("structure-game-ballstick").classList.toggle("is-active", modelMode === "ballstick");
+    $("structure-game-ballstick").setAttribute("aria-pressed", String(modelMode === "ballstick"));
     if (activeViewer && typeof activeViewer.setMode === "function") {
       activeViewer.setMode(modelMode);
     }
@@ -89,7 +92,13 @@ import "./molecule3d.js";
   }
 
   function makeOptions(answer) {
-    const others = shuffle(candidates.filter(compound => compound.id !== answer.id)).slice(0, 3);
+    const distinctNames = new Set([answer.name]);
+    const others = shuffle(candidates.filter(compound => compound.id !== answer.id && compound.name !== answer.name))
+      .filter(compound => {
+        if (distinctNames.has(compound.name)) return false;
+        distinctNames.add(compound.name);
+        return true;
+      }).slice(0, 3);
     if (others.length < 3) return [];
     return shuffle([answer, ...others]).map(compound => ({
       id: compound.id,
@@ -203,6 +212,8 @@ import "./molecule3d.js";
       if (token !== requestToken) return;
       image.hidden = false;
       stage.hidden = true;
+      consecutiveLoadFailures = 0;
+      locked = false;
       setStatus("対話式3D表示が使えないため、PubChemの3D画像を表示しています。画像を観察して解答してください。");
       [...$("structure-game-options").querySelectorAll("button")].forEach(button => {
         button.disabled = false;
@@ -212,6 +223,12 @@ import "./molecule3d.js";
     image.onerror = () => {
       if (token !== requestToken) return;
       image.hidden = true;
+      consecutiveLoadFailures++;
+      if (consecutiveLoadFailures < 7) {
+        $("structure-game-progress").textContent = "3D座標が利用できない化合物を飛ばし、別の構造を読み込んでいます…";
+        newQuestion();
+        return;
+      }
       setUnavailable((reason || "3D構造を表示できませんでした。") + " PubChemに表示可能な3D座標がないか、通信に失敗しました。");
     };
     image.src = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" +
@@ -241,6 +258,8 @@ import "./molecule3d.js";
       stage.hidden = false;
       image.hidden = true;
       $("structure-game-pubchem-link").href = record.url;
+      consecutiveLoadFailures = 0;
+      locked = false;
       setStatus("3D模型を回転して観察してください。ドラッグで回転、ホイールで拡大できます。");
       [...$("structure-game-options").querySelectorAll("button")].forEach(button => {
         button.disabled = false;
@@ -292,7 +311,10 @@ import "./molecule3d.js";
 
   $("structure-game-spacefill").addEventListener("click", () => setMode("spacefill"));
   $("structure-game-ballstick").addEventListener("click", () => setMode("ballstick"));
-  $("structure-game-next").addEventListener("click", newQuestion);
+  $("structure-game-next").addEventListener("click", () => {
+    consecutiveLoadFailures = 0;
+    newQuestion();
+  });
 
   if (candidates.length < 4) {
     setUnavailable("3D構造の出題に必要な化合物データが不足しています。");
