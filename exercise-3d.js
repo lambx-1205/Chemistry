@@ -1,6 +1,6 @@
 import "./molecule3d.js";
 
-(() => {
+const initialize = () => {
   "use strict";
 
   const data = window.OrganicAtlasData;
@@ -322,4 +322,10 @@ import "./molecule3d.js";
     scoreText();
     newQuestion();
   }
-})();
+};
+
+if (document.readyState === "complete") {
+  initialize();
+} else {
+  document.addEventListener("DOMContentLoaded", initialize, { once: true });
+}
