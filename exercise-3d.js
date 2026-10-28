@@ -91,14 +91,98 @@ const initialize = () => {
     return { sdf, url: pubchemUrl(compound) };
   }
 
+  function formulaCounts(compound) {
+    const raw = String(compound.formula || compound.pubchemFormula || "")
+      .replace(/[₀₁₂₃₄₅₆₇₈₉]/g, digit => "₀₁₂₃₄₅₆₇₈₉".indexOf(digit))
+      .replace(/\s+/g, "");
+    const counts = {};
+    const pattern = /([A-Z][a-z]?)(\d*)/g;
+    let match;
+    let consumed = "";
+    while ((match = pattern.exec(raw)) !== null) {
+      counts[match[1]] = (counts[match[1]] || 0) + Number(match[2] || 1);
+      consumed += match[0];
+    }
+    return consumed === raw && raw.length > 0 ? counts : null;
+  }
+
+  function formulaSimilarity(a, b) {
+    const ca = formulaCounts(a);
+    const cb = formulaCounts(b);
+    if (!ca || !cb) return 0;
+    const keys = new Set([...Object.keys(ca), ...Object.keys(cb)]);
+    let distance = 0;
+    let total = 0;
+    let sharedElements = 0;
+    keys.forEach(key => {
+      const av = ca[key] || 0;
+      const bv = cb[key] || 0;
+      distance += Math.abs(av - bv);
+      total += Math.max(av, bv);
+      if (av > 0 && bv > 0) sharedElements++;
+    });
+    const composition = total ? 1 - distance / total : 0;
+    const elementOverlap = keys.size ? sharedElements / keys.size : 0;
+    const exact = distance === 0;
+    return (exact ? 60 : 0) + composition * 24 + elementOverlap * 12;
+  }
+
+  function structureTokens(compound) {
+    const smiles = String(compound.smiles || "");
+    return {
+      atoms: (smiles.match(/Cl|Br|Na|Mg|Ca|Fe|[BCNOPSFIbcnops]/g) || []).length,
+      rings: (smiles.match(/[1-9]/g) || []).length,
+      doubleBonds: (smiles.match(/=/g) || []).length,
+      tripleBonds: (smiles.match(/#/g) || []).length,
+      branches: (smiles.match(/[()]/g) || []).length,
+      aromatic: /[bcnops]/.test(smiles),
+      stereocentres: (smiles.match(/@/g) || []).length,
+      elements: new Set(smiles.match(/Cl|Br|Na|Mg|Ca|Fe|[BCNOPSFIbcnops]/g) || [])
+    };
+  }
+
+  function similarityScore(answer, candidate) {
+    let score = 0;
+    if (answer.family && candidate.family === answer.family) score += 52;
+    else if (answer.family && candidate.family && (
+      answer.family.includes(candidate.family) || candidate.family.includes(answer.family)
+    )) score += 22;
+
+    score += formulaSimilarity(answer, candidate);
+    if (answer.formula && candidate.formula && answer.formula === candidate.formula) score += 22;
+
+    const answerTokens = structureTokens(answer);
+    const candidateTokens = structureTokens(candidate);
+    const tokenKeys = ["rings", "doubleBonds", "tripleBonds", "aromatic", "stereocentres"];
+    tokenKeys.forEach(key => {
+      if (answerTokens[key] === candidateTokens[key]) score += key === "rings" ? 5 : 4;
+    });
+    const elementUnion = new Set([...answerTokens.elements, ...candidateTokens.elements]);
+    const commonElements = [...answerTokens.elements].filter(element => candidateTokens.elements.has(element)).length;
+    if (elementUnion.size) score += 8 * commonElements / elementUnion.size;
+
+    const aWeight = Number(answer.molecularWeight);
+    const bWeight = Number(candidate.molecularWeight);
+    if (Number.isFinite(aWeight) && Number.isFinite(bWeight)) {
+      score += 18 * Math.exp(-Math.abs(aWeight - bWeight) / Math.max(18, aWeight * 0.22));
+    }
+    return score;
+  }
+
   function makeOptions(answer) {
-    const distinctNames = new Set([answer.name]);
-    const others = shuffle(candidates.filter(compound => compound.id !== answer.id && compound.name !== answer.name))
-      .filter(compound => {
-        if (distinctNames.has(compound.name)) return false;
-        distinctNames.add(compound.name);
-        return true;
-      }).slice(0, 3);
+    const pool = candidates.filter(compound =>
+      compound.id !== answer.id &&
+      compound.name !== answer.name
+    );
+    const ranked = pool.map(compound => ({
+      compound,
+      score: similarityScore(answer, compound) + Math.random() * 13
+    })).sort((a, b) => b.score - a.score);
+
+    // Sample from the most chemically similar pool so that wrong answers are plausible,
+    // while allowing variety between rounds instead of always showing the same trio.
+    const shortlist = ranked.slice(0, Math.min(14, ranked.length));
+    const others = shuffle(shortlist).slice(0, 3).map(item => item.compound);
     if (others.length < 3) return [];
     return shuffle([answer, ...others]).map(compound => ({
       id: compound.id,
@@ -132,37 +216,119 @@ const initialize = () => {
     });
   }
 
-  function revealAnswer(compound) {
+  function createElement(tag, className, text) {
+    const element = document.createElement(tag);
+    if (className) element.className = className;
+    if (text !== undefined && text !== null) element.textContent = text;
+    return element;
+  }
+
+  function structureImageUrl(compound, size) {
+    return "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" +
+      encodeURIComponent(compound.pubchemCid) + "/PNG?image_size=" + (size || "500x400");
+  }
+
+  function compareExplanation(answer, candidate) {
+    if (answer.formula && candidate.formula && answer.formula === candidate.formula) {
+      return "分子式は同じ。異性体どうしなので、結合の位置・官能基の位置・立体配置を見分ける。";
+    }
+    if (answer.family && answer.family === candidate.family) {
+      return "同じ分類の仲間。炭素鎖の長さ、分岐、二重結合や官能基の位置に注目する。";
+    }
+    const aCounts = formulaCounts(answer);
+    const bCounts = formulaCounts(candidate);
+    if (aCounts && bCounts) {
+      const elements = new Set([...Object.keys(aCounts), ...Object.keys(bCounts)]);
+      const changed = [...elements].filter(element => (aCounts[element] || 0) !== (bCounts[element] || 0));
+      if (changed.length) {
+        return "元素の種類・個数が異なる（" + changed.join("・") + "）。原子の色と数、官能基を照合する。";
+      }
+    }
+    return "骨格や官能基の組み合わせが異なる。環構造と特徴的な結合を順に確認する。";
+  }
+
+  function revealAnswer(compound, selected) {
     const panel = $("structure-game-answer");
     panel.replaceChildren();
     panel.hidden = false;
 
-    const heading = document.createElement("h3");
-    heading.textContent = "正解：" + compound.name;
+    const heading = createElement("h3", "structure-game-answer-title", "正解：" + compound.name);
+    const metadata = createElement(
+      "p",
+      "structure-game-answer-meta",
+      "分子式 " + (compound.formula || "未登録") +
+        "　／　分類 " + (compound.family || "未分類") +
+        (compound.molecularWeight ? "　／　分子量 " + compound.molecularWeight : "")
+    );
+    panel.append(heading, metadata);
 
-    const metadata = document.createElement("p");
-    metadata.className = "structure-game-answer-meta";
-    metadata.textContent = "分子式 " + (compound.formula || "未登録") +
-      "　／　分類 " + (compound.family || "未分類");
-
-    const explanation = document.createElement("p");
-    explanation.textContent = compound.desc || compound.hint || "この化合物の詳しい説明は登録されていません。";
-
-    const hint = compound.hint ? document.createElement("p") : null;
-    if (hint) {
-      hint.className = "structure-game-answer-hint";
-      hint.textContent = "構造の目印：" + compound.hint;
+    if (selected && !selected.correct) {
+      const selectedNote = createElement(
+        "p",
+        "structure-game-selected-note",
+        "選んだ答え：" + selected.name + "。下の構造図を見比べて、どこが違うか確認しよう。"
+      );
+      panel.appendChild(selectedNote);
     }
 
-    const source = document.createElement("a");
+    const visual = createElement("div", "structure-game-answer-visual");
+    const figure = createElement("figure", "structure-game-structure-figure");
+    const image = createElement("img", "structure-game-structure-image");
+    image.src = structureImageUrl(compound, "500x400");
+    image.alt = compound.name + " の2D構造式";
+    image.loading = "lazy";
+    image.referrerPolicy = "no-referrer";
+    image.onerror = () => {
+      image.hidden = true;
+      const fallback = createElement("p", "structure-game-image-fallback",
+        "構造図を読み込めませんでした。PubChemのリンクから構造を確認できます。");
+      figure.appendChild(fallback);
+    };
+    const caption = createElement("figcaption", "", "正解の2D構造式（PubChem）");
+    figure.append(image, caption);
+    visual.appendChild(figure);
+
+    const keyPoints = createElement("div", "structure-game-key-points");
+    keyPoints.appendChild(createElement("h4", "", "構造を読むポイント"));
+    const feature = compound.hint || compound.feature || "官能基、結合の種類、炭素骨格を確認する。";
+    keyPoints.appendChild(createElement("p", "structure-game-key-feature", feature));
+    keyPoints.appendChild(createElement("p", "structure-game-key-description",
+      compound.desc || "構造式の結合と原子の種類を確認し、同じ分類の化合物と比較しよう。"));
+    keyPoints.appendChild(createElement("p", "structure-game-key-method",
+      "① 骨格（鎖状・環状・芳香環） → ② 特徴的な官能基 → ③ 結合位置・分岐・立体配置の順に見る。"));
+    visual.appendChild(keyPoints);
+    panel.appendChild(visual);
+
+    const comparisonHeading = createElement("h4", "structure-game-comparison-title", "まぎらわしい選択肢との違い");
+    panel.appendChild(comparisonHeading);
+    const comparisons = createElement("div", "structure-game-comparisons");
+    (current ? current.options : [])
+      .filter(option => !option.correct)
+      .forEach(option => {
+        const candidate = option.compound;
+        const card = createElement("article", "structure-game-comparison-card");
+        const title = createElement("h5", "", option.name);
+        const formula = createElement("p", "structure-game-comparison-formula",
+          "分子式 " + (candidate.formula || "未登録") + " ／ " + (candidate.family || "未分類"));
+        const miniFigure = createElement("figure", "structure-game-mini-figure");
+        const miniImage = createElement("img", "structure-game-mini-image");
+        miniImage.src = structureImageUrl(candidate, "240x180");
+        miniImage.alt = option.name + " の2D構造式";
+        miniImage.loading = "lazy";
+        miniImage.referrerPolicy = "no-referrer";
+        miniImage.onerror = () => { miniImage.hidden = true; };
+        miniFigure.appendChild(miniImage);
+        const explanation = createElement("p", "structure-game-comparison-note",
+          compareExplanation(compound, candidate));
+        card.append(title, formula, miniFigure, explanation);
+        comparisons.appendChild(card);
+      });
+    panel.appendChild(comparisons);
+
+    const source = createElement("a", "structure-game-source", "PubChemで構造情報を確認 ↗");
     source.href = pubchemUrl(compound);
     source.target = "_blank";
     source.rel = "noopener noreferrer";
-    source.className = "structure-game-source";
-    source.textContent = "PubChemで構造情報を確認 ↗";
-
-    panel.append(heading, metadata, explanation);
-    if (hint) panel.appendChild(hint);
     panel.appendChild(source);
   }
 
@@ -188,7 +354,7 @@ const initialize = () => {
       ? "正解！ 原子の配置と官能基を手掛かりにできた。"
       : "不正解。正解の構造と、見分ける手掛かりを確認しよう。";
 
-    revealAnswer(current.answer);
+    revealAnswer(current.answer, selected);
     $("structure-game-next").disabled = false;
     $("structure-game-next").textContent = "次の問題へ →";
     $("structure-game-progress").textContent = selected.correct
