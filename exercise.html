@@ -8,13 +8,15 @@
 <meta name="description" content="反応経路・試薬条件に加え、ランダムな3D分子模型から化合物を特定する演習に挑戦。">
 <title>演習 — Organic Atlas</title>
 <link rel="stylesheet" href="styles.css?v=20261026-navigation1">
-<link rel="stylesheet" href="exercise.css?v=20261028-reaction-structures-layout">
+<link rel="stylesheet" href="exercise.css?v=20261028-rdkit-svg-v1">
 <link rel="stylesheet" href="site-nav.css?v=20261026-navigation1">
+<script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js" defer></script>
+<script src="structure-renderer.js?v=20261028-rdkit-svg-v1" defer></script>
 <script src="chemistry-data.js?v=20261026-large4" defer></script>
-<script src="exercise.js?v=20261028-reaction-structures-layout" defer></script>
+<script src="exercise.js?v=20261028-rdkit-svg-v1" defer></script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"}}</script>
-<script type="module" src="exercise-3d.js?v=20261028-structure-large-layout"></script>
-<link rel="stylesheet" href="dark-mode.css?v=20261028-reaction-structures-layout">
+<script type="module" src="exercise-3d.js?v=20261028-rdkit-svg-v1"></script>
+<link rel="stylesheet" href="dark-mode.css?v=20261028-rdkit-svg-v1">
 <script src="theme.js?v=20261026-dark1" defer></script>
 </head>
 <body>
@@ -86,13 +88,13 @@
         <p class="structure-game-answer-instruction">原子の種類・結合・立体配置を観察しよう。模型はドラッグで回転できます。</p>
         <div class="structure-game-options" id="structure-game-options" role="group" aria-label="化合物名の選択肢"></div>
         <div class="structure-game-feedback" id="structure-game-feedback" role="status" aria-live="polite" hidden></div>
-        <div class="structure-game-answer" id="structure-game-answer" hidden></div>
         <div class="structure-game-actions">
           <span class="structure-game-progress" id="structure-game-progress">問題を読み込んでいます。</span>
           <button type="button" class="structure-game-next" id="structure-game-next" disabled>次の問題へ →</button>
         </div>
       </div>
     </div>
+    <div class="structure-game-answer" id="structure-game-answer" hidden></div>
   </section>
   <section class="exercise-guide">
     <div><span class="section-eyebrow">HOW TO PRACTICE</span><h2>解いたあとが大切</h2></div>
