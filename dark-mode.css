@@ -158,3 +158,18 @@ html[data-theme="dark"] .structure-game-source,html[data-theme="dark"] .structur
 html[data-theme="dark"] .structure-game-model-footer{border-top-color:#39483c!important;color:#a4b2a5!important}
 html[data-theme="dark"] .structure-game-actions{border-top-color:#39483c!important}
 html[data-theme="dark"] .structure-game-next:disabled{background:#29352b!important;border-color:#39483c!important;color:#79897b!important}
+
+
+/* Dark theme for the structure-based game explanation. */
+html[data-theme="dark"] .structure-game-answer-title{color:#c5dfc7!important}
+html[data-theme="dark"] .structure-game-selected-note{background:#382721!important;border-left-color:#c77b4e!important;color:#efc0a9!important}
+html[data-theme="dark"] .structure-game-structure-figure,html[data-theme="dark"] .structure-game-comparison-card{background:#202d24!important;border-color:#39483c!important}
+html[data-theme="dark"] .structure-game-structure-figure figcaption{border-top-color:#39483c!important;color:#a4b2a5!important}
+html[data-theme="dark"] .structure-game-key-points{background:#18231b!important;border-color:#39483c!important}
+html[data-theme="dark"] .structure-game-key-points h4,html[data-theme="dark"] .structure-game-comparison-title{color:#c5dfc7!important}
+html[data-theme="dark"] .structure-game-key-points p,html[data-theme="dark"] .structure-game-comparison-note{color:#b4c5b6!important}
+html[data-theme="dark"] .structure-game-key-points .structure-game-key-feature{background:#293e2c!important;color:#c6e0c7!important}
+html[data-theme="dark"] .structure-game-key-points .structure-game-key-method{border-top-color:#39483c!important}
+html[data-theme="dark"] .structure-game-comparison-card h5{color:#d6e3d7!important}
+html[data-theme="dark"] .structure-game-comparison-formula{color:#a4b2a5!important}
+html[data-theme="dark"] .structure-game-mini-figure{background:#202d24!important;border-color:#39483c!important}
