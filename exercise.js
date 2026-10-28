@@ -64,17 +64,24 @@ function structureImageUrl(compound,size){
 }
 function structureFigure(compound,size,className){
  const figure=document.createElement("figure");figure.className=className||"exercise-structure-figure";
- const image=document.createElement("img");image.className="exercise-structure-image";
- image.alt=(compound?.name||"化合物")+"の2D構造式";image.loading="lazy";image.referrerPolicy="no-referrer";
- const fallback=document.createElement("p");fallback.className="exercise-structure-fallback";fallback.hidden=true;
- fallback.textContent="構造式画像を取得できません。分子式："+(compound?.formula||"未登録");
- const url=structureImageUrl(compound,size);
- if(url){
-  image.src=url;
-  image.onerror=()=>{image.hidden=true;fallback.hidden=false;};
- }else{image.hidden=true;fallback.hidden=false;}
- const caption=document.createElement("figcaption");caption.textContent=(compound?.name||"化合物")+(compound?.formula?" · "+compound.formula:"");
- figure.append(image,fallback,caption);return figure;
+ const visual=document.createElement("div");visual.className="exercise-structure-svg";visual.setAttribute("role","img");
+ visual.setAttribute("aria-label",(compound?.name||"化合物")+"の構造式");
+ const loading=document.createElement("span");loading.className="structure-loading";loading.textContent="構造式を描画中…";visual.appendChild(loading);
+ const fallback=function(){
+  visual.replaceChildren();
+  const url=structureImageUrl(compound,size);
+  if(url){
+   const image=document.createElement("img");image.className="exercise-structure-fallback-image";
+   image.src=url;image.alt=(compound?.name||"化合物")+"の構造式";image.loading="lazy";image.referrerPolicy="no-referrer";
+   image.onerror=function(){visual.textContent="構造式を描画できません。分子式："+(compound?.formula||"未登録");};
+   visual.appendChild(image);
+  }else visual.textContent="構造式を描画できません。分子式："+(compound?.formula||"未登録");
+ };
+ const renderer=window.OrganicAtlasStructureRenderer;
+ if(renderer&&typeof renderer.mount==="function")renderer.mount(compound,visual).catch(fallback);else fallback();
+ const caption=document.createElement("figcaption");
+ caption.textContent=(compound?.name||"化合物")+(compound?.formula?" · "+compound.formula:"");
+ figure.append(visual,caption);return figure;
 }
 function endpoint(label,compound){
  const box=document.createElement("div");box.className="exercise-endpoint";
