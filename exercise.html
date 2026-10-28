@@ -8,15 +8,15 @@
 <meta name="description" content="反応経路・試薬条件に加え、ランダムな3D分子模型から化合物を特定する演習に挑戦。">
 <title>演習 — Organic Atlas</title>
 <link rel="stylesheet" href="styles.css?v=20261026-navigation1">
-<link rel="stylesheet" href="exercise.css?v=20261028-layout-fix-v1">
+<link rel="stylesheet" href="exercise.css?v=20261028-product-choice-v1">
 <link rel="stylesheet" href="site-nav.css?v=20261026-navigation1">
 <script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js" defer></script>
 <script src="structure-renderer.js?v=20261028-rdkit-svg-v2" defer></script>
 <script src="chemistry-data.js?v=20261026-large4" defer></script>
-<script src="exercise.js?v=20261028-rdkit-svg-v2" defer></script>
+<script src="exercise.js?v=20261028-product-choice-v1" defer></script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"}}</script>
 <script type="module" src="exercise-3d.js?v=20261028-distractors-v1"></script>
-<link rel="stylesheet" href="dark-mode.css?v=20261028-rdkit-svg-v2">
+<link rel="stylesheet" href="dark-mode.css?v=20261028-product-choice-v1">
 <script src="theme.js?v=20261026-dark1" defer></script>
 </head>
 <body>
@@ -40,12 +40,13 @@
   <section class="exercise-intro">
     <span class="section-eyebrow">PRACTICE LAB</span>
     <h1>知識を使って、反応を解く。</h1>
-    <p>登録済みの反応データから出題します。経路を組み立てる問題と、試薬・反応条件を考える問題に挑戦できます。</p>
+    <p>登録済みの反応データから出題します。反応経路・試薬と条件・生成物の構造を選ぶ3種類の演習に挑戦できます。</p>
   </section>
   <section class="exercise-workspace">
     <div class="exercise-mode-bar" role="group" aria-label="演習モード">
       <button type="button" class="exercise-mode is-active" id="mode-route" aria-pressed="true"><span class="exercise-mode-number">01</span><span><strong>反応経路</strong><small>始点から終点をつなぐ</small></span></button>
       <button type="button" class="exercise-mode" id="mode-reagent" aria-pressed="false"><span class="exercise-mode-number">02</span><span><strong>試薬・条件</strong><small>反応に必要な条件を考える</small></span></button>
+      <button type="button" class="exercise-mode" id="mode-product" aria-pressed="false"><span class="exercise-mode-number">03</span><span><strong>生成物を選ぶ</strong><small>反応物と試薬から予測</small></span></button>
     </div>
     <section class="exercise-question" aria-live="polite">
       <div class="exercise-question-top"><span class="exercise-question-kicker" id="question-kicker">ROUTE CHALLENGE</span><span class="exercise-score" id="exercise-score">正解 0 / 解答 0</span></div>
