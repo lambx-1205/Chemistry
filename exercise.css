@@ -281,3 +281,70 @@
  .exercise-reaction-scheme{grid-template-columns:minmax(0,1fr) 58px minmax(0,1fr);gap:7px}
  .exercise-reaction-compound .exercise-structure-svg{height:155px;padding:4px}
 }
+
+
+/* Layout regression repair: answer steps must stack vertically, and 3D choices need room in the right column. */
+.exercise-answer-details .exercise-answer-step {
+  display:block;
+  min-width:0;
+  grid-template-columns:none;
+  padding:16px;
+  border:1px solid #e1e8df;
+  border-radius:11px;
+  background:#fff;
+}
+.exercise-answer-details .exercise-answer-step h4 {
+  display:block;
+  margin:0 0 12px;
+}
+.exercise-answer-details .exercise-answer-step .exercise-reaction-scheme {
+  width:100%;
+  min-width:0;
+}
+.exercise-answer-details .exercise-detail-line {
+  display:block;
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+.structure-game-answer-column {
+  min-width:0;
+}
+.structure-game-options {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  min-width:0;
+}
+.structure-game-option {
+  width:100%;
+  min-width:0;
+  box-sizing:border-box;
+}
+.structure-game-option-name {
+  min-width:0;
+  overflow-wrap:anywhere;
+  word-break:normal;
+}
+.structure-game-answer {
+  min-width:0;
+  box-sizing:border-box;
+}
+@media(max-width:850px) {
+  .exercise-answer-details .exercise-answer-step {
+    padding:13px;
+  }
+  .structure-game-layout {
+    grid-template-columns:minmax(0,1fr);
+  }
+  .structure-game-options {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media(max-width:520px) {
+  .structure-game-options {
+    grid-template-columns:minmax(0,1fr);
+  }
+  .exercise-answer-details .exercise-answer-step {
+    padding:10px;
+  }
+}
