@@ -55,38 +55,82 @@ function makeReagentQuestion(){
  }
  return null;
 }
-function endpoint(label,name){
+function structureImageUrl(compound,size){
+ if(!compound)return "";
+ const imageSize=size||"500x320";
+ if(compound.pubchemCid)return "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/"+encodeURIComponent(compound.pubchemCid)+"/PNG?image_size="+encodeURIComponent(imageSize);
+ if(compound.smiles&&!/[＊*]/.test(compound.smiles))return "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/"+encodeURIComponent(compound.smiles)+"/PNG?image_size="+encodeURIComponent(imageSize);
+ return "";
+}
+function structureFigure(compound,size,className){
+ const figure=document.createElement("figure");figure.className=className||"exercise-structure-figure";
+ const image=document.createElement("img");image.className="exercise-structure-image";
+ image.alt=(compound?.name||"化合物")+"の2D構造式";image.loading="lazy";image.referrerPolicy="no-referrer";
+ const fallback=document.createElement("p");fallback.className="exercise-structure-fallback";fallback.hidden=true;
+ fallback.textContent="構造式画像を取得できません。分子式："+(compound?.formula||"未登録");
+ const url=structureImageUrl(compound,size);
+ if(url){
+  image.src=url;
+  image.onerror=()=>{image.hidden=true;fallback.hidden=false;};
+ }else{image.hidden=true;fallback.hidden=false;}
+ const caption=document.createElement("figcaption");caption.textContent=(compound?.name||"化合物")+(compound?.formula?" · "+compound.formula:"");
+ figure.append(image,fallback,caption);return figure;
+}
+function endpoint(label,compound){
  const box=document.createElement("div");box.className="exercise-endpoint";
  const small=document.createElement("span");small.textContent=label;
- const strong=document.createElement("strong");strong.textContent=name;
- box.append(small,strong);return box;
+ const structure=structureFigure(compound,"500x320","exercise-endpoint-structure");
+ const strong=document.createElement("strong");strong.textContent=compound?.name||"不明な化合物";
+ box.append(small,structure,strong);return box;
 }
 function showEndpoints(items){
  const host=el("question-endpoints");host.replaceChildren();
- items.forEach((item,i)=>{if(i){const arrow=document.createElement("span");arrow.className="exercise-endpoint-arrow";arrow.textContent="→";host.appendChild(arrow);}host.appendChild(endpoint(item.label,item.name));});
+ items.forEach((item,i)=>{if(i){const arrow=document.createElement("span");arrow.className="exercise-endpoint-arrow";arrow.textContent="→";host.appendChild(arrow);}host.appendChild(endpoint(item.label,item.compound));});
 }
 function edgeForPath(path,i){return edgeByPair[path[i]+"|"+path[i+1]]||null;}
 function pathValid(path){for(let i=0;i<path.length-1;i++)if(!edgeByPair[path[i]+"|"+path[i+1]])return false;return true;}
+function reactionScheme(edge,className){
+ const scheme=document.createElement("div");scheme.className=className||"exercise-reaction-scheme";
+ const from=byId[edge.from],to=byId[edge.to];
+ scheme.appendChild(structureFigure(from,"500x320","exercise-reaction-compound"));
+ const arrow=document.createElement("div");arrow.className="exercise-reaction-arrow";
+ const symbol=document.createElement("strong");symbol.textContent="→";
+ const condition=document.createElement("span");condition.textContent=edge.condition||"条件未登録";
+ arrow.append(symbol,condition);scheme.appendChild(arrow);
+ scheme.appendChild(structureFigure(to,"500x320","exercise-reaction-compound"));
+ return scheme;
+}
+function addDetailLine(host,label,value){
+ const line=document.createElement("p");line.className="exercise-detail-line";
+ const strong=document.createElement("strong");strong.textContent=label+"：";
+ line.append(strong,document.createTextNode(value||"未登録"));host.appendChild(line);
+}
 function renderDetails(q){
  const host=el("exercise-answer-details");host.replaceChildren();host.hidden=false;
- const title=document.createElement("h3");title.textContent=q.mode==="route"?"経路の解説":"反応条件の解説";host.appendChild(title);
+ const title=document.createElement("h3");title.textContent=q.mode==="route"?"構造式でたどる反応経路":"構造式で理解する反応条件";host.appendChild(title);
  if(q.mode==="route"){
-  const intro=document.createElement("p");intro.textContent="正しい経路："+q.path.map(id=>byId[id]?.name||id).join(" → ");host.appendChild(intro);
+  const intro=document.createElement("p");intro.className="exercise-answer-intro";
+  intro.textContent="正しい経路："+q.path.map(id=>byId[id]?.name||id).join(" → ");host.appendChild(intro);
   for(let i=0;i<q.path.length-1;i++){
    const edge=edgeForPath(q.path,i);if(!edge)continue;
-   const row=document.createElement("div");row.className="exercise-answer-step";
-   const from=document.createElement("span");from.textContent=byId[edge.from].name+" → "+byId[edge.to].name;
-   const arrow=document.createElement("span");arrow.textContent="→";
-   const detail=document.createElement("strong");detail.textContent=(edge.name||edge.label||"反応")+"｜"+(edge.condition||"条件未登録");
-   row.append(from,arrow,detail);host.appendChild(row);
-   if(edge.note){const note=document.createElement("p");note.textContent=edge.note;host.appendChild(note);}
+   const row=document.createElement("article");row.className="exercise-answer-step";
+   const heading=document.createElement("h4");heading.textContent="第"+(i+1)+"段階："+(edge.name||edge.label||"反応");
+   row.appendChild(heading);row.appendChild(reactionScheme(edge));
+   addDetailLine(row,"試薬・条件",edge.condition);
+   addDetailLine(row,"反応式",edge.equation||(byId[edge.from].formula+" → "+byId[edge.to].formula));
+   if(edge.note)addDetailLine(row,"構造変化",edge.note);
+   host.appendChild(row);
   }
  }else{
   const edge=q.edge;
-  const equation=document.createElement("p");equation.innerHTML="<strong>反応式：</strong>";equation.append(document.createTextNode(edge.equation||(byId[edge.from].formula+" → "+byId[edge.to].formula)));host.appendChild(equation);
-  const condition=document.createElement("p");condition.innerHTML="<strong>試薬・条件：</strong>";condition.append(document.createTextNode(edge.condition));host.appendChild(condition);
-  const note=document.createElement("p");note.textContent=edge.note||"反応の説明は登録されていません。";host.appendChild(note);
- }
+  const row=document.createElement("div");row.className="exercise-answer-reagent";
+  row.appendChild(reactionScheme(edge));
+  addDetailLine(row,"反応の種類",edge.name||edge.label||"反応");
+  addDetailLine(row,"反応式",edge.equation||(byId[edge.from].formula+" → "+byId[edge.to].formula));
+  addDetailLine(row,"試薬・条件",edge.condition);
+  addDetailLine(row,"構造変化",edge.note||"反応物と生成物の構造式を見比べ、変化した官能基や結合に注目しましょう。");
+  host.appendChild(row);
+}
 }
 function answer(selected,q,button){
  if(locked)return;locked=true;answered++;if(selected.correct)correct++;score();
@@ -104,10 +148,10 @@ function renderQuestion(){
  if(!q){el("question-title").textContent="問題を準備できませんでした";el("question-prompt").textContent="登録データに十分な反応経路がないようです。ページを再読み込みしてください。";el("exercise-options").replaceChildren();return;}
  if(mode==="route"){
   el("question-kicker").textContent="ROUTE CHALLENGE";el("question-title").textContent="反応経路を組み立てよう";el("question-prompt").textContent="始点から終点までをつなぐ正しい化合物の並びを選んでください。反応の向きも考慮します。";
-  showEndpoints([{label:"START · 始点",name:byId[q.path[0]].name},{label:"GOAL · 終点",name:byId[q.path[q.path.length-1]].name}]);
+  showEndpoints([{label:"START · 始点",compound:byId[q.path[0]]},{label:"GOAL · 終点",compound:byId[q.path[q.path.length-1]]}]);
  }else{
   const edge=q.edge;el("question-kicker").textContent="REAGENT & CONDITIONS";el("question-title").textContent="必要な試薬・条件は？";el("question-prompt").textContent="この反応を進めるために必要な試薬・反応条件を選んでください。";
-  showEndpoints([{label:"出発物質",name:byId[edge.from].name},{label:"生成物",name:byId[edge.to].name}]);
+  showEndpoints([{label:"出発物質",compound:byId[edge.from]},{label:"生成物",compound:byId[edge.to]}]);
   const eq=el("question-equation");eq.hidden=false;eq.textContent=(edge.name||edge.label||"反応")+"｜"+(edge.equation||byId[edge.from].formula+" → "+byId[edge.to].formula);
  }
  q.options.forEach((option,index)=>{
