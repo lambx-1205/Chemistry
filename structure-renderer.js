@@ -13,26 +13,27 @@ function getRDKit(){
  }).catch(function(error){rdkitPromise=null;throw error;});
  return rdkitPromise;
 }
-function atomCount(compound){
- var formula=String(compound&&compound.formula||"")
-  .replace(/[₀₁₂₃₄₅₆₇₈₉]/g,function(d){return "₀₁₂₃₄₅₆₇₈₉".indexOf(d);})
-  .replace(/\s/g,"");
- if(!formula||/[()n]/.test(formula))return null;
- var tokens=formula.match(/[A-Z][a-z]?\d*/g)||[];
- if(tokens.join("")!==formula)return null;
- var atoms=0;
+var atomicMass={H:1.008,C:12.011,N:14.007,O:15.999,F:18.998,Na:22.990,Mg:24.305,P:30.974,S:32.06,Cl:35.45,K:39.098,Ca:40.078,Fe:55.845,Br:79.904,I:126.904};
+function parseFormula(formula){
+ var normalized=String(formula||"").replace(/[₀₁₂₃₄₅₆₇₈₉]/g,function(d){return "₀₁₂₃₄₅₆₇₈₉".indexOf(d);}).replace(/\s/g,"");
+ if(!normalized||/[()n]/.test(normalized))return null;
+ var tokens=normalized.match(/[A-Z][a-z]?\d*/g)||[];
+ if(tokens.join("")!==normalized)return null;
+ var mass=0,atoms=0;
  for(var i=0;i<tokens.length;i++){
-  var match=tokens[i].match(/^([A-Z][a-z]?)(\d*)$/);
-  if(!match)return null;
-  atoms+=match[2]?Number(match[2]):1;
+  var m=tokens[i].match(/^([A-Z][a-z]?)(\d*)$/);
+  if(!m||!Object.prototype.hasOwnProperty.call(atomicMass,m[1]))return null;
+  var quantity=m[2]?Number(m[2]):1;
+  mass+=atomicMass[m[1]]*quantity;
+  atoms+=quantity;
  }
- return atoms;
+ return {mass:mass,atoms:atoms};
 }
 function drawOptions(compound){
- var count=atomCount(compound);
- if(count===null)return {bondLineWidth:1.4,scaleBondWidth:true,multipleBondOffset:0.15,padding:0.035,annotationFontScale:0.62};
- if(count<=18)return {bondLineWidth:1.65,scaleBondWidth:true,multipleBondOffset:0.17,padding:0.055,minFontSize:8,maxFontSize:18,annotationFontScale:0.62};
- if(count<=35)return {bondLineWidth:1.45,scaleBondWidth:true,multipleBondOffset:0.14,padding:0.035,minFontSize:7,maxFontSize:14,annotationFontScale:0.56};
+ var parsed=parseFormula(compound.formula),atomCount=parsed?parsed.atoms:null;
+ if(atomCount===null)return {bondLineWidth:1.4,scaleBondWidth:true,multipleBondOffset:0.15,padding:0.035,annotationFontScale:0.62};
+ if(atomCount<=18)return {bondLineWidth:1.65,scaleBondWidth:true,multipleBondOffset:0.17,padding:0.055,minFontSize:8,maxFontSize:18,annotationFontScale:0.62};
+ if(atomCount<=35)return {bondLineWidth:1.45,scaleBondWidth:true,multipleBondOffset:0.14,padding:0.035,minFontSize:7,maxFontSize:14,annotationFontScale:0.56};
  return {bondLineWidth:1.2,scaleBondWidth:true,multipleBondOffset:0.1,padding:0.02,minFontSize:6,maxFontSize:10,annotationFontScale:0.5};
 }
 function renderSvg(compound){
