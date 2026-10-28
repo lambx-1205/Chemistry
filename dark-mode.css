@@ -173,3 +173,17 @@ html[data-theme="dark"] .structure-game-key-points .structure-game-key-method{bo
 html[data-theme="dark"] .structure-game-comparison-card h5{color:#d6e3d7!important}
 html[data-theme="dark"] .structure-game-comparison-formula{color:#a4b2a5!important}
 html[data-theme="dark"] .structure-game-mini-figure{background:#202d24!important;border-color:#39483c!important}
+
+
+/* Dark theme for reaction structures in answer explanations. */
+html[data-theme="dark"] .exercise-endpoint-structure,
+html[data-theme="dark"] .exercise-reaction-compound{background:#fff!important;border-color:#526255!important}
+html[data-theme="dark"] .exercise-endpoint-structure figcaption,
+html[data-theme="dark"] .exercise-reaction-compound figcaption{background:#fff!important;color:#526255!important;border-top-color:#dfe7dc!important}
+html[data-theme="dark"] .exercise-structure-fallback{background:#17221a!important;color:#a4b2a5!important}
+html[data-theme="dark"] .exercise-answer-step,
+html[data-theme="dark"] .exercise-answer-reagent{background:#202d24!important;border-color:#3b4b3e!important}
+html[data-theme="dark"] .exercise-answer-step h4,
+html[data-theme="dark"] .exercise-answer-details .exercise-detail-line strong{color:#c9e1ca!important}
+html[data-theme="dark"] .exercise-reaction-arrow{color:#a8d2aa!important}
+html[data-theme="dark"] .exercise-detail-line{border-top-color:#3b4b3e!important}
