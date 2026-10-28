@@ -141,3 +141,76 @@
 .structure-game-comparison-note{margin:8px 0 0;color:#69796c;font-size:9px;line-height:1.8;overflow-wrap:anywhere}
 .structure-game-structure-image[hidden],.structure-game-mini-image[hidden]{display:none!important}
 @media(max-width:520px){.structure-game-answer-visual{grid-template-columns:1fr}.structure-game-structure-image{height:210px}.structure-game-comparisons{grid-template-columns:1fr}.structure-game-comparison-card{display:grid;grid-template-columns:minmax(0,1fr) 88px;column-gap:10px;align-items:start}.structure-game-comparison-card h5,.structure-game-comparison-formula,.structure-game-comparison-note{grid-column:1}.structure-game-mini-figure{grid-column:2;grid-row:1/4;min-height:85px}.structure-game-mini-image{height:95px}.structure-game-comparison-note{margin-top:5px}}
+
+
+/* Reaction exercises: make the reactant/product structures part of the question and answer. */
+.exercise-endpoint{display:flex;flex-direction:column;align-items:stretch;gap:8px;padding:14px 13px}
+.exercise-endpoint>span{margin-bottom:0}
+.exercise-endpoint>strong{text-align:center;font-size:14px}
+.exercise-endpoint-structure,.exercise-reaction-compound{display:flex;flex-direction:column;justify-content:center;min-width:0;margin:0;overflow:hidden;border:1px solid #e5ebe2;border-radius:9px;background:#fff}
+.exercise-structure-image{display:block;width:100%;height:125px;object-fit:contain;background:#fff}
+.exercise-structure-fallback{margin:0;padding:12px;color:#8a958b;font-size:10px;line-height:1.7;text-align:center}
+.exercise-structure-figure figcaption,.exercise-endpoint-structure figcaption,.exercise-reaction-compound figcaption{padding:6px 8px;border-top:1px solid #edf0ea;color:#758477;font-size:9px;line-height:1.5;text-align:center;overflow-wrap:anywhere}
+.exercise-endpoint-structure figcaption{font-size:9px}
+.exercise-answer-details{padding:18px}
+.exercise-answer-intro{margin-bottom:14px!important;font-weight:800}
+.exercise-answer-step,.exercise-answer-reagent{margin-top:13px;padding:14px;border:1px solid #e1e8df;border-radius:11px;background:#fff}
+.exercise-answer-step h4{margin:0 0 10px;color:#35523b;font-size:13px;line-height:1.6}
+.exercise-reaction-scheme{display:grid;grid-template-columns:minmax(0,1fr) minmax(100px,.28fr) minmax(0,1fr);gap:12px;align-items:center;margin:9px 0 12px}
+.exercise-reaction-compound .exercise-structure-image{height:170px}
+.exercise-reaction-compound figcaption{font-size:10px}
+.exercise-reaction-arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-width:0;color:#315f46;text-align:center}
+.exercise-reaction-arrow>strong{font-size:25px;line-height:1}
+.exercise-reaction-arrow>span{font-size:10px;line-height:1.7;font-weight:800;overflow-wrap:anywhere}
+.exercise-detail-line{margin:7px 0!important;padding-top:7px;border-top:1px solid #edf0ea;font-size:11px!important}
+.exercise-detail-line strong{color:#3c5f43}
+.exercise-answer-step .exercise-detail-line:first-of-type,.exercise-answer-reagent .exercise-detail-line:first-of-type{margin-top:10px!important}
+.exercise-structure-image[hidden],.exercise-structure-fallback[hidden]{display:none!important}
+@media(max-width:700px){
+ .exercise-endpoint{padding:10px 8px;gap:6px}
+ .exercise-structure-image{height:100px}
+ .exercise-endpoint>strong{font-size:12px}
+ .exercise-reaction-scheme{grid-template-columns:minmax(0,1fr) 58px minmax(0,1fr);gap:7px}
+ .exercise-reaction-compound .exercise-structure-image{height:125px}
+ .exercise-reaction-arrow>strong{font-size:21px}
+ .exercise-reaction-arrow>span{font-size:8px}
+ .exercise-answer-step,.exercise-answer-reagent{padding:9px}
+}
+
+
+/* Larger 3D structure canvas first; answer choices and detailed explanation below it. */
+.structure-game-layout{grid-template-columns:minmax(0,1fr);gap:20px}
+.structure-game-stage,.structure-game-fallback{height:520px}
+.structure-game-answer-column{padding:20px}
+.structure-game-options{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.structure-game-option{min-height:64px;padding:12px}
+.structure-game-option-name{font-size:12px;line-height:1.7}
+.structure-game-answer{padding:18px}
+.structure-game-answer-visual{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:18px}
+.structure-game-structure-image{height:330px}
+.structure-game-key-points{padding:18px}
+.structure-game-key-points p{font-size:12px}
+.structure-game-comparisons{gap:12px}
+.structure-game-comparison-card{padding:12px}
+.structure-game-mini-figure{min-height:145px}
+.structure-game-mini-image{height:150px}
+.structure-game-comparison-card h5{font-size:12px}
+.structure-game-comparison-formula{font-size:10px}
+.structure-game-comparison-note{font-size:10px}
+@media(max-width:850px){
+ .structure-game-layout{grid-template-columns:minmax(0,1fr)}
+ .structure-game-stage,.structure-game-fallback{height:430px}
+ .structure-game-options{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .structure-game-structure-image{height:280px}
+}
+@media(max-width:520px){
+ .structure-game-stage,.structure-game-fallback{height:350px}
+ .structure-game-answer-column{padding:12px}
+ .structure-game-options{grid-template-columns:1fr}
+ .structure-game-answer-visual{grid-template-columns:1fr}
+ .structure-game-structure-image{height:260px}
+ .structure-game-comparison-card{padding:9px}
+ .structure-game-comparison-formula{font-size:9px}
+ .structure-game-mini-figure{min-height:115px}
+ .structure-game-mini-image{height:120px}
+}
