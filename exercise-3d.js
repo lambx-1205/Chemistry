@@ -181,7 +181,7 @@ const initialize = () => {
 
     // Sample from the most chemically similar pool so that wrong answers are plausible,
     // while allowing variety between rounds instead of always showing the same trio.
-    const shortlist = ranked.slice(0, Math.min(14, ranked.length));
+    const shortlist = ranked.slice(0, Math.min(8, ranked.length));
     const others = shuffle(shortlist).slice(0, 3).map(item => item.compound);
     if (others.length < 3) return [];
     return shuffle([answer, ...others]).map(compound => ({
