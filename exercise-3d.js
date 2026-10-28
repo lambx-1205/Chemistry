@@ -127,44 +127,76 @@ const initialize = () => {
     return (exact ? 60 : 0) + composition * 24 + elementOverlap * 12;
   }
 
-  function structureTokens(compound) {
-    const smiles = String(compound.smiles || "");
-    return {
-      atoms: (smiles.match(/Cl|Br|Na|Mg|Ca|Fe|[BCNOPSFIbcnops]/g) || []).length,
-      rings: (smiles.match(/[1-9]/g) || []).length,
-      doubleBonds: (smiles.match(/=/g) || []).length,
-      tripleBonds: (smiles.match(/#/g) || []).length,
-      branches: (smiles.match(/[()]/g) || []).length,
-      aromatic: /[bcnops]/.test(smiles),
-      stereocentres: (smiles.match(/@/g) || []).length,
-      elements: new Set(smiles.match(/Cl|Br|Na|Mg|Ca|Fe|[BCNOPSFIbcnops]/g) || [])
-    };
+  function sameFormula(a, b) {
+    const ca = formulaCounts(a);
+    const cb = formulaCounts(b);
+    if (!ca || !cb) return false;
+    const keys = new Set([...Object.keys(ca), ...Object.keys(cb)]);
+    return [...keys].every(key => (ca[key] || 0) === (cb[key] || 0));
+  }
+
+  function isomerPeers(answer, pool) {
+    const peerIds = new Set();
+    (data.isomerGroups || []).forEach(group => {
+      const members = [...(group.members || []), ...(group.contextIds || [])];
+      if (!members.includes(answer.id)) return;
+      members.forEach(id => {
+        if (id !== answer.id) peerIds.add(id);
+      });
+    });
+    return pool.filter(compound => peerIds.has(compound.id) && sameFormula(answer, compound));
+  }
+
+  function reactionNeighbors(answer, pool) {
+    const neighborIds = new Set();
+    (data.edges || []).forEach(edge => {
+      if (edge.from === answer.id && edge.to) neighborIds.add(edge.to);
+      if (edge.to === answer.id && edge.from) neighborIds.add(edge.from);
+    });
+    return pool.filter(compound => neighborIds.has(compound.id));
   }
 
   function similarityScore(answer, candidate) {
-    let score = 0;
-    if (answer.family && candidate.family === answer.family) score += 52;
+    let score = formulaSimilarity(answer, candidate);
+    if (sameFormula(answer, candidate)) score += 48;
+
+    // Broad family labels help, but must not outweigh the actual molecular structure.
+    if (answer.family && candidate.family === answer.family) score += 17;
     else if (answer.family && candidate.family && (
       answer.family.includes(candidate.family) || candidate.family.includes(answer.family)
-    )) score += 22;
-
-    score += formulaSimilarity(answer, candidate);
-    if (answer.formula && candidate.formula && answer.formula === candidate.formula) score += 22;
+    )) score += 7;
 
     const answerTokens = structureTokens(answer);
     const candidateTokens = structureTokens(candidate);
     const tokenKeys = ["rings", "doubleBonds", "tripleBonds", "aromatic", "stereocentres"];
     tokenKeys.forEach(key => {
-      if (answerTokens[key] === candidateTokens[key]) score += key === "rings" ? 5 : 4;
+      if (answerTokens[key] === candidateTokens[key]) score += key === "rings" ? 7 : 5;
     });
+
+    // Give extra credit to matching functional patterns, which make choices visually confusable.
+    const aSmiles = String(answer.smiles || "");
+    const bSmiles = String(candidate.smiles || "");
+    const motifs = [
+      /C\(=O\)O|C\(=O\)\[O-\]/,
+      /C\(=O\)O[CNc]|C\(=O\)OC/,
+      /C=O(?!O)/,
+      /C#N/,
+      /\[N\+\]\(=O\)\[O-\]/,
+      /c[0-9].*c[0-9]/,
+      /Cl|Br|I|F/
+    ];
+    motifs.forEach(pattern => {
+      if (pattern.test(aSmiles) === pattern.test(bSmiles)) score += 3;
+    });
+
     const elementUnion = new Set([...answerTokens.elements, ...candidateTokens.elements]);
     const commonElements = [...answerTokens.elements].filter(element => candidateTokens.elements.has(element)).length;
-    if (elementUnion.size) score += 8 * commonElements / elementUnion.size;
+    if (elementUnion.size) score += 10 * commonElements / elementUnion.size;
 
     const aWeight = Number(answer.molecularWeight);
     const bWeight = Number(candidate.molecularWeight);
     if (Number.isFinite(aWeight) && Number.isFinite(bWeight)) {
-      score += 18 * Math.exp(-Math.abs(aWeight - bWeight) / Math.max(18, aWeight * 0.22));
+      score += 16 * Math.exp(-Math.abs(aWeight - bWeight) / Math.max(14, aWeight * 0.18));
     }
     return score;
   }
@@ -172,17 +204,53 @@ const initialize = () => {
   function makeOptions(answer) {
     const pool = candidates.filter(compound =>
       compound.id !== answer.id &&
-      compound.name !== answer.name
+      compound.name !== answer.name &&
+      !(answer.inchiKey && compound.inchiKey && answer.inchiKey === compound.inchiKey)
     );
-    const ranked = pool.map(compound => ({
-      compound,
-      score: similarityScore(answer, compound) + Math.random() * 13
-    })).sort((a, b) => b.score - a.score);
+    if (pool.length < 3) return [];
 
-    // Sample from the most chemically similar pool so that wrong answers are plausible,
-    // while allowing variety between rounds instead of always showing the same trio.
-    const shortlist = ranked.slice(0, Math.min(8, ranked.length));
-    const others = shuffle(shortlist).slice(0, 3).map(item => item.compound);
+    const used = new Set();
+    const others = [];
+    const ranked = list => list
+      .filter(compound => !used.has(compound.id))
+      .map(compound => ({
+        compound,
+        score: similarityScore(answer, compound) + Math.random() * 3
+      }))
+      .sort((a, b) => b.score - a.score);
+
+    function addBest(list) {
+      if (others.length >= 3) return;
+      const ranking = ranked(list);
+      if (!ranking.length) return;
+      // Vary only among the strongest candidates, rather than drawing from a broad, weak shortlist.
+      const shortlist = ranking.slice(0, Math.min(3, ranking.length));
+      const selected = sample(shortlist).compound;
+      used.add(selected.id);
+      others.push(selected);
+    }
+
+    // 1) Prefer a known constitutional, positional, or stereoisomer with the same formula.
+    addBest(isomerPeers(answer, pool));
+
+    // 2) Add at most two same-formula distractors, keeping the full set varied.
+    const exactFormula = pool.filter(compound => sameFormula(answer, compound));
+    while (others.length < 2 && exactFormula.some(compound => !used.has(compound.id))) {
+      addBest(exactFormula);
+    }
+
+    // 3) Prefer the same compound family, then immediate reaction neighbors.
+    const sameFamily = pool.filter(compound =>
+      answer.family && compound.family === answer.family
+    );
+    addBest(sameFamily);
+    addBest(reactionNeighbors(answer, pool));
+
+    // 4) Fill remaining slots with the closest structures, not random global picks.
+    addBest(pool.slice().sort((a, b) =>
+      similarityScore(answer, b) - similarityScore(answer, a)
+    ));
+
     if (others.length < 3) return [];
     return shuffle([answer, ...others]).map(compound => ({
       id: compound.id,
