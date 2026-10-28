@@ -203,3 +203,11 @@ html[data-theme="dark"] .structure-game-mini-svg .structure-loading{color:#53645
 html[data-theme="dark"] .structure-game-answer{background:#202d24!important;border-color:#39483c!important}
 html[data-theme="dark"] .structure-game-structure-figure figcaption{background:#202d24!important;border-top-color:#39483c!important;color:#b4c5b6!important}
 html[data-theme="dark"] .structure-game-image-fallback{color:#536456!important}
+
+/* Contrast adjustments for the product-structure choices in dark mode. */
+html[data-theme="dark"] .exercise-mode {
+  border-bottom-color:#3c4a3d!important;
+}
+html[data-theme="dark"] .exercise-product-option-formula {
+  color:#b1c4b2!important;
+}
