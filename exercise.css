@@ -348,3 +348,74 @@
     padding:10px;
   }
 }
+
+/* Product-prediction mode: structural formulas are the primary choice labels. */
+.exercise-mode-bar {
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+.exercise-mode {
+  padding:15px 13px;
+}
+.exercise-product-option {
+  display:grid;
+  grid-template-columns:25px minmax(0,1fr);
+  align-items:start;
+  gap:9px;
+  min-height:0;
+  padding:11px;
+}
+.exercise-product-option-content {
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:8px;
+  width:100%;
+  min-width:0;
+}
+.exercise-product-option-visual {
+  width:100%;
+  height:150px;
+  box-sizing:border-box;
+  padding:4px;
+  overflow:hidden;
+  border:1px solid #edf0ea;
+  border-radius:7px;
+  background:#fff;
+}
+.exercise-product-option-formula {
+  display:block;
+  min-width:0;
+  color:#7f8c81;
+  font-size:10px;
+  line-height:1.5;
+  text-align:center;
+  overflow-wrap:anywhere;
+}
+.exercise-product-condition {
+  white-space:pre-line;
+  text-align:left;
+  font-family:inherit;
+  font-size:12px;
+  line-height:1.85;
+}
+@media(max-width:700px) {
+  .exercise-mode-bar {
+    grid-template-columns:minmax(0,1fr);
+  }
+  .exercise-mode {
+    padding:12px 14px;
+    border-right:0;
+    border-bottom:1px solid #e6ebe3;
+  }
+  .exercise-mode:last-child {
+    border-bottom:0;
+  }
+  .exercise-product-option-visual {
+    height:190px;
+  }
+}
+@media(max-width:380px) {
+  .exercise-product-option-visual {
+    height:155px;
+  }
+}
