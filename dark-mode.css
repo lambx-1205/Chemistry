@@ -187,3 +187,19 @@ html[data-theme="dark"] .exercise-answer-step h4,
 html[data-theme="dark"] .exercise-answer-details .exercise-detail-line strong{color:#c9e1ca!important}
 html[data-theme="dark"] .exercise-reaction-arrow{color:#a8d2aa!important}
 html[data-theme="dark"] .exercise-detail-line{border-top-color:#3b4b3e!important}
+
+
+/* RDKit structural formulas retain their white drawing canvas in dark mode for legibility. */
+html[data-theme="dark"] .exercise-structure-svg,
+html[data-theme="dark"] .exercise-endpoint-structure .exercise-structure-svg,
+html[data-theme="dark"] .exercise-reaction-compound .exercise-structure-svg,
+html[data-theme="dark"] .structure-game-structure-svg,
+html[data-theme="dark"] .structure-game-mini-svg,
+html[data-theme="dark"] .structure-game-structure-figure,
+html[data-theme="dark"] .structure-game-mini-figure{background:#fff!important}
+html[data-theme="dark"] .exercise-structure-svg .structure-loading,
+html[data-theme="dark"] .structure-game-structure-svg .structure-loading,
+html[data-theme="dark"] .structure-game-mini-svg .structure-loading{color:#536456!important}
+html[data-theme="dark"] .structure-game-answer{background:#202d24!important;border-color:#39483c!important}
+html[data-theme="dark"] .structure-game-structure-figure figcaption{background:#202d24!important;border-top-color:#39483c!important;color:#b4c5b6!important}
+html[data-theme="dark"] .structure-game-image-fallback{color:#536456!important}
