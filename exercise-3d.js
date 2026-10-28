@@ -228,6 +228,35 @@ const initialize = () => {
       encodeURIComponent(compound.pubchemCid) + "/PNG?image_size=" + (size || "500x400");
   }
 
+  function mountStructure(compound, host, fallbackSize, fallbackClass) {
+    const useFallback = () => {
+      host.replaceChildren();
+      const url = structureImageUrl(compound, fallbackSize);
+      if (!url) {
+        host.appendChild(createElement("p", "structure-game-image-fallback",
+          "構造式を描画できませんでした。分子式：" + (compound.formula || "未登録")));
+        return;
+      }
+      const image = createElement("img", fallbackClass || "structure-game-structure-image");
+      image.src = url;
+      image.alt = compound.name + " の構造式";
+      image.loading = "lazy";
+      image.referrerPolicy = "no-referrer";
+      image.onerror = () => {
+        image.hidden = true;
+        host.appendChild(createElement("p", "structure-game-image-fallback",
+          "構造式を読み込めませんでした。分子式：" + (compound.formula || "未登録")));
+      };
+      host.appendChild(image);
+    };
+    const renderer = window.OrganicAtlasStructureRenderer;
+    if (renderer && typeof renderer.mount === "function") {
+      renderer.mount(compound, host).catch(useFallback);
+    } else {
+      useFallback();
+    }
+  }
+
   function compareExplanation(answer, candidate) {
     if (answer.formula && candidate.formula && answer.formula === candidate.formula) {
       return "分子式は同じ。異性体どうしなので、結合の位置・官能基の位置・立体配置を見分ける。";
@@ -273,20 +302,14 @@ const initialize = () => {
 
     const visual = createElement("div", "structure-game-answer-visual");
     const figure = createElement("figure", "structure-game-structure-figure");
-    const image = createElement("img", "structure-game-structure-image");
-    image.src = structureImageUrl(compound, "500x400");
-    image.alt = compound.name + " の2D構造式";
-    image.loading = "lazy";
-    image.referrerPolicy = "no-referrer";
-    image.onerror = () => {
-      image.hidden = true;
-      const fallback = createElement("p", "structure-game-image-fallback",
-        "構造図を読み込めませんでした。PubChemのリンクから構造を確認できます。");
-      figure.appendChild(fallback);
-    };
-    const caption = createElement("figcaption", "", "正解の2D構造式（PubChem）");
-    figure.append(image, caption);
+    const structureHost = createElement("div", "structure-game-structure-svg");
+    structureHost.setAttribute("role", "img");
+    structureHost.setAttribute("aria-label", compound.name + " の2D構造式");
+    structureHost.appendChild(createElement("span", "structure-loading", "構造式を描画中…"));
+    const caption = createElement("figcaption", "", "正解の2D構造式");
+    figure.append(structureHost, caption);
     visual.appendChild(figure);
+    mountStructure(compound, structureHost, "500x400", "structure-game-structure-image");
 
     const keyPoints = createElement("div", "structure-game-key-points");
     keyPoints.appendChild(createElement("h4", "", "構造を読むポイント"));
@@ -311,13 +334,12 @@ const initialize = () => {
         const formula = createElement("p", "structure-game-comparison-formula",
           "分子式 " + (candidate.formula || "未登録") + " ／ " + (candidate.family || "未分類"));
         const miniFigure = createElement("figure", "structure-game-mini-figure");
-        const miniImage = createElement("img", "structure-game-mini-image");
-        miniImage.src = structureImageUrl(candidate, "240x180");
-        miniImage.alt = option.name + " の2D構造式";
-        miniImage.loading = "lazy";
-        miniImage.referrerPolicy = "no-referrer";
-        miniImage.onerror = () => { miniImage.hidden = true; };
-        miniFigure.appendChild(miniImage);
+        const miniHost = createElement("div", "structure-game-mini-svg");
+        miniHost.setAttribute("role", "img");
+        miniHost.setAttribute("aria-label", option.name + " の2D構造式");
+        miniHost.appendChild(createElement("span", "structure-loading", "描画中…"));
+        miniFigure.appendChild(miniHost);
+        mountStructure(candidate, miniHost, "240x180", "structure-game-mini-image");
         const explanation = createElement("p", "structure-game-comparison-note",
           compareExplanation(compound, candidate));
         card.append(title, formula, miniFigure, explanation);
