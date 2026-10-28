@@ -116,3 +116,28 @@
 @media(max-width:520px){.exercise-3d-game{margin-top:18px;padding:15px;border-radius:13px}.exercise-3d-heading{display:block;margin-bottom:16px}.structure-game-score{display:inline-block;margin-top:12px}.structure-game-stage,.structure-game-fallback{height:300px}.structure-game-options{grid-template-columns:1fr}.structure-game-option{min-height:49px}.structure-game-actions{align-items:stretch;flex-direction:column}.structure-game-next{width:100%}.structure-game-model-footer{font-size:8px}}
 
 .structure-game-fallback[hidden],.structure-game-stage[hidden],.structure-game-answer[hidden],.structure-game-feedback[hidden]{display:none!important}
+
+
+/* Detailed structure-based answer and chemically plausible distractor comparison. */
+.structure-game-answer-title{margin:0 0 8px;color:#315f46;font-size:16px;font-weight:950;line-height:1.5}
+.structure-game-selected-note{padding:9px 11px;border-left:3px solid #c77b4e;border-radius:0 7px 7px 0;background:#fff5ed;color:#8d5239;font-size:10px;line-height:1.8;font-weight:800}
+.structure-game-answer-visual{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:13px;align-items:stretch;margin-top:13px}
+.structure-game-structure-figure{display:flex;flex-direction:column;justify-content:center;min-width:0;margin:0;overflow:hidden;border:1px solid #e1e8df;border-radius:10px;background:#fff}
+.structure-game-structure-image{display:block;width:100%;height:190px;object-fit:contain;background:#fff}
+.structure-game-structure-figure figcaption{padding:7px 9px;border-top:1px solid #edf0ea;color:#879387;font-size:9px;line-height:1.6;text-align:center}
+.structure-game-image-fallback{padding:12px;color:#8b7569;font-size:10px;line-height:1.8}
+.structure-game-key-points{padding:12px;border:1px solid #e1e8df;border-radius:10px;background:#f7faf5}
+.structure-game-key-points h4,.structure-game-comparison-title{margin:0 0 8px;color:#35523b;font-size:11px;font-weight:950}
+.structure-game-key-points p{margin:7px 0;color:#687a6a;font-size:10px;line-height:1.85;overflow-wrap:anywhere}
+.structure-game-key-points .structure-game-key-feature{padding:9px 10px;border-radius:7px;background:#eaf3e8;color:#315f46;font-size:11px;font-weight:900}
+.structure-game-key-points .structure-game-key-method{padding-top:8px;border-top:1px solid #e0e9dd;color:#526c56}
+.structure-game-comparison-title{margin-top:17px}
+.structure-game-comparisons{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.structure-game-comparison-card{min-width:0;padding:9px;border:1px solid #e0e7dd;border-radius:9px;background:#fff}
+.structure-game-comparison-card h5{margin:0 0 5px;color:#405745;font-size:10px;font-weight:900;line-height:1.65;overflow-wrap:anywhere}
+.structure-game-comparison-formula{min-height:30px;margin:0 0 6px;color:#879287;font-size:8px;line-height:1.65;overflow-wrap:anywhere}
+.structure-game-mini-figure{display:grid;place-items:center;min-height:94px;margin:0;overflow:hidden;border:1px solid #edf0ea;border-radius:7px;background:#fff}
+.structure-game-mini-image{display:block;width:100%;height:100px;object-fit:contain;background:#fff}
+.structure-game-comparison-note{margin:8px 0 0;color:#69796c;font-size:9px;line-height:1.8;overflow-wrap:anywhere}
+.structure-game-structure-image[hidden],.structure-game-mini-image[hidden]{display:none!important}
+@media(max-width:520px){.structure-game-answer-visual{grid-template-columns:1fr}.structure-game-structure-image{height:210px}.structure-game-comparisons{grid-template-columns:1fr}.structure-game-comparison-card{display:grid;grid-template-columns:minmax(0,1fr) 88px;column-gap:10px;align-items:start}.structure-game-comparison-card h5,.structure-game-comparison-formula,.structure-game-comparison-note{grid-column:1}.structure-game-mini-figure{grid-column:2;grid-row:1/4;min-height:85px}.structure-game-mini-image{height:95px}.structure-game-comparison-note{margin-top:5px}}
